@@ -12,7 +12,48 @@
 
 O **App CJnet** é o aplicativo móvel oficial de autoatendimento da CJnet para clientes residenciais e comerciais de Coqueiral/MG e região. O aplicativo resolve a sobrecarga do atendimento telefônico e presencial ao permitir consulta de faturas/2ª via de boletos, abertura de chamadas/Ordens de Serviço (OS) com anexação de fotos de equipamentos (roteadores/ONUs), acompanhamento em tempo real do suporte e verificação de cobertura via geolocalização. Por ser voltado para uma região com conectividade por vezes instável, o aplicativo adota arquitetura **Offline-First**, permitindo consulta de dados em cache local e filas de sincronização resilientes.
 
-### 1.1 Tabela de Requisitos Funcionais (RF)
+### 1.1 Árvore de Ideias do Projeto (Mapa Mental de Visão Geral)
+
+A **Árvore de Ideias** sintetiza a visão macro do **App CJnet**, organizando os pilares estratégicos da aplicação e desdobrando suas funcionalidades principais e requisitos estruturais:
+
+```mermaid
+graph TD
+    Root["<b>App CJnet</b><br/>Canal Digital de Autoatendimento & Suporte"]
+
+    Root --> P1["💰 <b>Autoatendimento & Financeiro</b>"]
+    P1 --> P1_1["Consultar Boletos<br/>(Em aberto, Pagos, Vencidos)"]
+    P1 --> P1_2["Gerar 2ª Via em PDF<br/>& Visualização"]
+    P1 --> P1_3["Cópia Rápida de Linha Digitável"]
+
+    Root --> P2["🛠️ <b>Suporte Técnico & OS</b>"]
+    P2 --> P2_1["Abertura de Chamados<br/>(Sem Sinal, Queda, Lentidão)"]
+    P2 --> P2_2["Anexo de Fotos dos Equipamentos<br/>(Câmera / Galeria)"]
+    P2 --> P2_3["Acompanhamento do Status da OS<br/>em Tempo Real"]
+
+    Root --> P3["⚡ <b>Resiliência & Offline-First</b>"]
+    P3 --> P3_1["Cache Local SQLite<br/>(Leitura 100% Offline)"]
+    P3 --> P3_2["Fila Assíncrona sync_queue<br/>(UUIDs temporários)"]
+    P3 --> P3_3["Sincronização Automática<br/>(Backoff Exponencial)"]
+
+    Root --> P4["🗺️ <b>Geolocalização & Rede</b>"]
+    P4 --> P4_1["Mapa Interativo da Região<br/>(Coqueiral/MG e Arredores)"]
+    P4 --> P4_2["Verificação de Cobertura GeoJSON"]
+    P4 --> P4_3["Atualização do Ponto de Atendimento<br/>/ Endereço do Cliente"]
+
+    Root --> P5["🔒 <b>Segurança & UX Regional</b>"]
+    P5 --> P5_1["Autenticação via CPF/CNPJ ou E-mail"]
+    P5 --> P5_2["Segurança Supabase RLS<br/>(Row Level Security)"]
+    P5 --> P5_3["UI Intuitiva & Acessível<br/>(Botões Grandes & Alto Contraste)"]
+```
+
+#### Descrição dos Pilares da Árvore de Ideias:
+1. **Autoatendimento & Financeiro**: Desafoga o atendimento presencial/telefônico, permitindo a gestão autônoma de pagamentos e boletos pelo cliente.
+2. **Suporte Técnico & OS**: Agiliza o diagnóstico técnico e reduz visitas desnecessárias com o envio prévio de fotos das luzes/LEDs dos equipamentos.
+3. **Resiliência & Offline-First**: Assegura a operabilidade completa do app mesmo em locais com sinal de internet oscilante ou indisponível.
+4. **Geolocalização & Rede**: Permite consultar disponibilidade técnica de fibra óptica e validações de endereço em tempo real no mapa.
+5. **Segurança & UX Regional**: Proporciona proteção rigorosa aos dados do assinante com uma interface desenhada para facilidade de uso em todas as faixas etárias.
+
+### 1.2 Tabela de Requisitos Funcionais (RF)
 
 | ID | Descrição | Prioridade | Ator/Origem |
 |----|-----------|-----------|-------------|
@@ -27,7 +68,7 @@ O **App CJnet** é o aplicativo móvel oficial de autoatendimento da CJnet para 
 | **RF09** | O sistema deve permitir que o cliente consulte e atualize seus dados cadastrais e localização da sua residência no mapa. | Média | Cliente |
 | **RF10** | O sistema deve sincronizar automaticamente as ações pendentes (`sync_queue`) em segundo plano assim que a conectividade for restabelecida. | Alta | Sistema (SyncService) |
 
-### 1.2 Tabela de Requisitos Não Funcionais (RNF)
+### 1.3 Tabela de Requisitos Não Funcionais (RNF)
 
 | ID | Categoria | Descrição + Critério Mensurável | Prioridade |
 |----|-----------|----------------------------------|-------------|
@@ -39,6 +80,7 @@ O **App CJnet** é o aplicativo móvel oficial de autoatendimento da CJnet para 
 | **RNF06** | **Confiabilidade** | O serviço de sincronização (`syncService`) deve implementar retentativas com backoff exponencial e garantir idempotência sem duplicação de chamados no backend. | Alta |
 | **RNF07** | **Portabilidade** | O app deve ser construído sobre Expo (React Native) com suporte a navegação por arquivos (Expo Router) e suporte a execução universal Android e iOS. | Alta |
 | **RNF08** | **Eficiência Energética** | A captura de geolocalização e fotos deve ser pontual, proibindo rastreamento de localização em segundo plano (*background location tracking*) para conservar bateria. | Média |
+
 
 ---
 
