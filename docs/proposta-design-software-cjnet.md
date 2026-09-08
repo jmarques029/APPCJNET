@@ -3,7 +3,7 @@
 > **Projeto**: Canal Digital de Autoatendimento e Suporte Offline-First  
 > **Empresa**: CJnet Provedor de Internet  
 > **Localização**: Coqueiral/MG  
-> **Metodologia**: DDD, Clean Architecture, Pattern BCE, Offline-First (SQLite + Supabase)  
+> **Metodologia**: DDD, Clean Architecture, TDD (Test-Driven Development), Offline-First (SQLite + Supabase)  
 > **Padrão de Documentação**: `software-design-doc` (UML / Mermaid)
 
 ---
@@ -98,7 +98,7 @@ graph TD
 | **RNF02** | **Desempenho** | A consulta e gravação local no banco de dados SQLite deve responder em tempo < 100ms no dispositivo móvel. | Alta |
 | **RNF03** | **Segurança** | Toda comunicação com a nuvem deve utilizar HTTPS/TLS e as tabelas no Supabase devem possuir políticas rígidas de **Row Level Security (RLS)** restritas ao `auth.uid()`. | Alta |
 | **RNF04** | **Usabilidade** | A interface deve ser otimizada para telas de dispositivos Android e iOS com botões grandes, alto contraste e linguagem simples, acessível para usuários de diferentes faixas etárias de cidade do interior. | Alta |
-| **RNF05** | **Manutenibilidade** | A arquitetura do código deve seguir **Clean Architecture / BCE**, isolando completamente a camada de banco de dados SQLite (`src/db/`) da camada de API remota Supabase (`src/api/`). | Média |
+| **RNF05** | **Manutenibilidade** | A arquitetura do código deve seguir **Clean Architecture / TDD**, isolando completamente a camada de banco de dados SQLite (`src/db/`) da camada de API remota Supabase (`src/api/`). | Média |
 | **RNF06** | **Confiabilidade** | O serviço de sincronização (`syncService`) deve implementar retentativas com backoff exponencial e garantir idempotência sem duplicação de chamados no backend. | Alta |
 | **RNF07** | **Portabilidade** | O app deve ser construído sobre Expo (React Native) com suporte a navegação por arquivos (Expo Router) e suporte a execução universal Android e iOS. | Alta |
 | **RNF08** | **Eficiência Energética** | A captura de geolocalização e fotos deve ser pontual, proibindo rastreamento de localização em segundo plano (*background location tracking*) para conservar bateria. | Média |
@@ -419,49 +419,37 @@ stateDiagram-v2
 
 ---
 
-### 4.2 Arquitetura Boundary-Control-Entity (BCE)
+### 4.2 Metodologia TDD (Test-Driven Development) e Arquitetura em Camadas
 
-A aplicação mapeia a especificação do projeto em 3 estereótipos bem definidos, direcionando a interface do usuário conforme seu perfil (Cliente, Técnico ou Administrador) ou modo visitante (Tela de Login com Planos):
+A aplicação adota a metodologia **TDD** (*Test-Driven Development*), operando em um ciclo contínuo de **Red-Green-Refactor**. Esse processo garante a confiabilidade do código e o desacoplamento das regras de negócio através de camadas bem definidas na **Clean Architecture**:
 
 ```mermaid
 flowchart TD
-    subgraph Boundary ["Boundary (Fronteira / UI - Expo Router)"]
-        UI_Login["app/(auth)/login.tsx"]
-        UI_Planos["app/(auth)/planos.tsx (Vitrine no Login)"]
-        UI_Cliente["app/(app)/(tabs-cliente)/ (Boletos, Suporte, Perfil)"]
-        UI_Tecnico["app/(app)/(tabs-tecnico)/ (Aba do Técnico: OSs & Rota)"]
-        UI_Admin["app/(app)/(tabs-admin)/ (Aba do Admin: Dashboard & Avisos)"]
+    subgraph TDD ["Ciclo TDD (Test-Driven Development)"]
+        Red["🔴 <b>1. RED</b><br/>Escrever teste que falha<br/>(specs em tests/)"]
+        Green["🟢 <b>2. GREEN</b><br/>Escrever código mínimo<br/>para o teste passar"]
+        Refactor["🔵 <b>3. REFACTOR</b><br/>Refatorar garantindo<br/>arquitetura limpa"]
+
+        Red --> Green --> Refactor --> Red
     end
 
-    subgraph Control ["Control (Lógica / Serviços / Hooks)"]
-        H_Auth["hooks/useSession.ts & AuthContext (Role Guard)"]
-        H_Planos["hooks/usePlanos.ts"]
-        H_Boletos["hooks/useBoletos.ts"]
-        H_OS["hooks/useOrdensServico.ts"]
-        S_Sync["services/syncService.ts"]
-        S_Storage["services/storageService.ts"]
+    subgraph Camadas ["Camadas da Aplicação e Mapeamento de Testes"]
+        UI["<b>Camada de Interface (Expo Router)</b><br/>app/(auth), (tabs-cliente), (tabs-tecnico), (tabs-admin)"]
+        Control["<b>Camada de Lógica & Controle (Hooks & Contexts)</b><br/>hooks/ (useBoletos, useOrdensServico, usePlanos)"]
+        Services["<b>Camada de Serviços & Sincronização</b><br/>services/ (syncService, authService, storageService)"]
+        Entities["<b>Camada de Dados & Entidades</b><br/>db/ (SQLite Schema & Queries) e api/ (Supabase Client)"]
+
+        UI --> Control
+        Control --> Services
+        Services --> Entities
     end
-
-    subgraph Entity ["Entity (Dados & Armazenamento)"]
-        DB_SQLite[("db/schema.ts (SQLite local)")]
-        DB_Supabase[("api/supabaseClient.ts (Supabase Postgres)")]
-    end
-
-    UI_Login --> H_Auth
-    UI_Planos --> H_Planos
-    UI_Cliente --> H_Boletos
-    UI_Cliente --> H_OS
-    UI_Tecnico --> H_OS
-    UI_Admin --> H_OS
-    UI_Admin --> H_Planos
-
-    H_OS --> S_Sync
-    H_Planos --> DB_SQLite
-    H_Planos --> DB_Supabase
-    S_Sync --> DB_SQLite
-    S_Sync --> DB_Supabase
-    H_Auth --> DB_Supabase
 ```
+
+#### Aplicação do TDD no Projeto:
+1. **Fase RED (Falha Inicial)**: Antes de implementar qualquer caso de uso (ex: abertura de OS offline ou consulta de planos), são desenvolvidos os testes unitários (`tests/domain/`, `tests/application/`) definindo o comportamento esperado das entidades e serviços.
+2. **Fase GREEN (Aprovação Mínima)**: Implementa-se a regra de negócio com a quantidade mínima de código necessária para que a suíte de testes do Jest execute com 100% de aprovação.
+3. **Fase REFACTOR (Refatoração Limpa)**: O código é organizado isolando responsabilidades entre `db/` (SQLite) e `api/` (Supabase), mantendo a garantia de que nenhuma regressão é introduzida.
+
 
 ---
 
