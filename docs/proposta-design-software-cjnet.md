@@ -14,16 +14,17 @@ O **App CJnet** é o aplicativo móvel oficial de autoatendimento da CJnet para 
 
 ### 1.1 Árvore de Ideias do Projeto (Mapa Mental de Visão Geral)
 
-A **Árvore de Ideias** sintetiza a visão macro do **App CJnet**, organizando os pilares estratégicos da aplicação e desdobrando suas funcionalidades principais e requisitos estruturais, incluindo os módulos específicos para **Clientes**, **Técnicos**, **Administradores** e **Visitantes (na Tela de Login)**:
+A **Árvore de Ideias** sintetiza a visão macro do **App CJnet**, organizando os pilares estratégicos da aplicação e desdobrando suas funcionalidades principais e requisitos estruturais, incluindo os módulos de **Autoatendimento**, **Técnicos**, **Administradores** e **Visitantes (na Tela de Login)**:
 
 ```mermaid
 graph TD
     Root["<b>App CJnet</b><br/>Canal Digital de Autoatendimento, Suporte & Gestão"]
 
-    Root --> P1["🛠️ <b>Suporte Técnico & OS (Cliente)</b>"]
-    P1 --> P1_1["Abertura de Chamados<br/>(Sem Sinal, Queda, Lentidão)"]
-    P1 --> P1_2["Anexo de Fotos dos Equipamentos<br/>(Câmera / Galeria)"]
+    Root --> P1["📱 <b>Autoatendimento do Cliente</b>"]
+    P1 --> P1_1["Autoatendimento de Chamados<br/>(Sem Sinal, Queda, Lentidão)"]
+    P1 --> P1_2["Autodiagnóstico Visual<br/>(Anexo de Foto da ONU/Roteador)"]
     P1 --> P1_3["Acompanhamento do Status da OS<br/>em Tempo Real"]
+    P1 --> P1_4["Autoatendimento de Cadastro<br/>& Atualização do Endereço"]
 
     Root --> P2["💳 <b>Vitrine de Planos (Tela de Login)</b>"]
     P2 --> P2_1["Acesso Livre sem Autenticação"]
@@ -57,13 +58,14 @@ graph TD
 ```
 
 #### Descrição dos Pilares da Árvore de Ideias:
-1. **Suporte Técnico & OS (Cliente)**: Agiliza o diagnóstico técnico e reduz visitas desnecessárias com o envio prévio de fotos das luzes/LEDs dos equipamentos.
+1. **Autoatendimento do Cliente**: Empodera o assinante para resolver instabilidades de conexão de forma autônoma, abrindo chamados sem passar por filas telefônicas, enviando fotos das luzes do roteador para autodiagnóstico e gerenciando seu perfil e localização.
 2. **Vitrine de Planos (Tela de Login)**: Permite que visitantes e futuros assinantes cliquem na tela inicial/login para explorar os planos de fibra óptica disponíveis (velocidades, valores e vantagens) sem precisar estar autenticado.
 3. **Aba do Técnico de Campo**: Módulo exclusivo com visão em lista/mapa das ordens de serviço atribuídas ao técnico, guiando sua rota de atendimento e registrando o encerramento do chamado com foto do serviço finalizado.
 4. **Aba do Administrador / Gestor**: Painel centralizado para a gerência da CJnet controlar filas de suporte, atribuir chamados para técnicos em campo, cadastrar/alterar planos comercializados e emitir alertas e comunicados gerais para a base de clientes.
 5. **Resiliência & Offline-First**: Assegura a operabilidade completa do app mesmo em locais com sinal de internet oscilante ou indisponível.
 6. **Geolocalização & Rede**: Permite consultar disponibilidade técnica de fibra óptica e validações de endereço em tempo real no mapa.
 7. **Segurança & UX Perfilada**: Garante controle de acesso baseado em papéis (RBAC/RLS) para proteger dados sensíveis de acordo com o perfil do usuário logado.
+
 
 ### 1.2 Tabela de Requisitos Funcionais (RF)
 
