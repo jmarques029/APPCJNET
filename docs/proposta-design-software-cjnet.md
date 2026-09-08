@@ -10,7 +10,7 @@
 
 ## 1. Visão Geral e Levantamento de Requisitos
 
-O **App CJnet** é o aplicativo móvel oficial de autoatendimento da CJnet para clientes residenciais e comerciais de Coqueiral/MG e região. O aplicativo resolve a sobrecarga do atendimento telefônico e presencial ao permitir consulta de faturas/2ª via de boletos, abertura de chamadas/Ordens de Serviço (OS) com anexação de fotos de equipamentos (roteadores/ONUs), acompanhamento em tempo real do suporte e verificação de cobertura via geolocalização. Por ser voltado para uma região com conectividade por vezes instável, o aplicativo adota arquitetura **Offline-First**, permitindo consulta de dados em cache local e filas de sincronização resilientes.
+O **App CJnet** é o aplicativo móvel oficial de autoatendimento da CJnet para clientes residenciais e comerciais de Coqueiral/MG e região. O aplicativo resolve a sobrecarga do atendimento telefônico e presencial ao permitir a abertura de chamadas/Ordens de Serviço (OS) com anexação de fotos de equipamentos (roteadores/ONUs), acompanhamento em tempo real do suporte, verificação de cobertura via geolocalização e consulta aos planos de internet. Por ser voltado para uma região com conectividade por vezes instável, o aplicativo adota arquitetura **Offline-First**, permitindo consulta de dados em cache local e filas de sincronização resilientes.
 
 ### 1.1 Árvore de Ideias do Projeto (Mapa Mental de Visão Geral)
 
@@ -20,64 +20,56 @@ A **Árvore de Ideias** sintetiza a visão macro do **App CJnet**, organizando o
 graph TD
     Root["<b>App CJnet</b><br/>Canal Digital de Autoatendimento, Suporte & Gestão"]
 
-    Root --> P1["💰 <b>Autoatendimento & Financeiro (Cliente)</b>"]
-    P1 --> P1_1["Consultar Boletos<br/>(Em aberto, Pagos, Vencidos)"]
-    P1 --> P1_2["Gerar 2ª Via em PDF<br/>& Visualização"]
-    P1 --> P1_3["Cópia Rápida de Linha Digitável"]
+    Root --> P1["🛠️ <b>Suporte Técnico & OS (Cliente)</b>"]
+    P1 --> P1_1["Abertura de Chamados<br/>(Sem Sinal, Queda, Lentidão)"]
+    P1 --> P1_2["Anexo de Fotos dos Equipamentos<br/>(Câmera / Galeria)"]
+    P1 --> P1_3["Acompanhamento do Status da OS<br/>em Tempo Real"]
 
-    Root --> P2["🛠️ <b>Suporte Técnico & OS (Cliente)</b>"]
-    P2 --> P2_1["Abertura de Chamados<br/>(Sem Sinal, Queda, Lentidão)"]
-    P2 --> P2_2["Anexo de Fotos dos Equipamentos<br/>(Câmera / Galeria)"]
-    P2 --> P2_3["Acompanhamento do Status da OS<br/>em Tempo Real"]
+    Root --> P2["💳 <b>Vitrine de Planos (Tela de Login)</b>"]
+    P2 --> P2_1["Acesso Livre sem Autenticação"]
+    P2 --> P2_2["Consulta de Velocidades & Preços"]
+    P2 --> P2_3["Benefícios do Plano & Solicitação"]
 
-    Root --> P3["💳 <b>Vitrine de Planos (Tela de Login)</b>"]
-    P3 --> P3_1["Acesso Livre sem Autenticação"]
-    P3 --> P3_2["Consulta de Velocidades & Preços"]
-    P3 --> P3_3["Benefícios do Plano & Solicitação"]
+    Root --> P3["👷 <b>Aba do Técnico de Campo</b>"]
+    P3 --> P3_1["Lista de OSs Atribuídas ao Técnico"]
+    P3 --> P3_2["Navegação GPS / Endereço do Cliente"]
+    P3 --> P3_3["Check-in, Resolução & Foto do Reparo"]
 
-    Root --> P4["👷 <b>Aba do Técnico de Campo</b>"]
-    P4 --> P4_1["Lista de OSs Atribuídas ao Técnico"]
-    P4 --> P4_2["Navegação GPS / Endereço do Cliente"]
-    P4 --> P4_3["Check-in, Resolução & Foto do Reparo"]
+    Root --> P4["👑 <b>Aba do Administrador / Gestor</b>"]
+    P4 --> P4_1["Dashboard Geral de Atendimentos & Métricas"]
+    P4 --> P4_2["Distribuição / Atribuição de OSs"]
+    P4 --> P4_3["Gestão de Planos & Disparo de Avisos"]
 
-    Root --> P5["👑 <b>Aba do Administrador / Gestor</b>"]
-    P5 --> P5_1["Dashboard Geral de Atendimentos & Métricas"]
-    P5 --> P5_2["Distribuição / Atribuição de OSs"]
-    P5 --> P5_3["Gestão de Planos & Disparo de Avisos"]
+    Root --> P5["⚡ <b>Resiliência & Offline-First</b>"]
+    P5 --> P5_1["Cache Local SQLite<br/>(Leitura 100% Offline)"]
+    P5 --> P5_2["Fila Assíncrona sync_queue<br/>(UUIDs temporários)"]
+    P5 --> P5_3["Sincronização Automática<br/>(Backoff Exponencial)"]
 
-    Root --> P6["⚡ <b>Resiliência & Offline-First</b>"]
-    P6 --> P6_1["Cache Local SQLite<br/>(Leitura 100% Offline)"]
-    P6 --> P6_2["Fila Assíncrona sync_queue<br/>(UUIDs temporários)"]
-    P6 --> P6_3["Sincronização Automática<br/>(Backoff Exponencial)"]
+    Root --> P6["🗺️ <b>Geolocalização & Rede</b>"]
+    P6 --> P6_1["Mapa Interativo da Região<br/>(Coqueiral/MG e Arredores)"]
+    P6 --> P6_2["Verificação de Cobertura GeoJSON"]
+    P6 --> P6_3["Validação do Ponto de Instalação"]
 
-    Root --> P7["🗺️ <b>Geolocalização & Rede</b>"]
-    P7 --> P7_1["Mapa Interativo da Região<br/>(Coqueiral/MG e Arredores)"]
-    P7 --> P7_2["Verificação de Cobertura GeoJSON"]
-    P7 --> P7_3["Validação do Ponto de Instalação"]
-
-    Root --> P8["🔒 <b>Segurança & UX Perfilada</b>"]
-    P8 --> P8_1["Autenticação por Perfil<br/>(Cliente / Técnico / Admin)"]
-    P8 --> P8_2["Segurança Supabase RLS"]
-    P8 --> P8_3["UI Intuitiva & Acessível"]
+    Root --> P7["🔒 <b>Segurança & UX Perfilada</b>"]
+    P7 --> P7_1["Autenticação por Perfil<br/>(Cliente / Técnico / Admin)"]
+    P7 --> P7_2["Segurança Supabase RLS"]
+    P7 --> P7_3["UI Intuitiva & Acessível"]
 ```
 
 #### Descrição dos Pilares da Árvore de Ideias:
-1. **Autoatendimento & Financeiro (Cliente)**: Desafoga o atendimento presencial/telefônico, permitindo a gestão autônoma de pagamentos e boletos pelo cliente.
-2. **Suporte Técnico & OS (Cliente)**: Agiliza o diagnóstico técnico e reduz visitas desnecessárias com o envio prévio de fotos das luzes/LEDs dos equipamentos.
-3. **Vitrine de Planos (Tela de Login)**: Permite que visitantes e futuros assinantes cliquem na tela inicial/login para explorar os planos de fibra óptica disponíveis (velocidades, valores e vantagens) sem precisar estar autenticado.
-4. **Aba do Técnico de Campo**: Módulo exclusivo com visão em lista/mapa das ordens de serviço atribuídas ao técnico, guiando sua rota de atendimento e registrando o encerramento do chamado com foto do serviço finalizado.
-5. **Aba do Administrador / Gestor**: Painel centralizado para a gerência da CJnet controlar filas de suporte, atribuir chamados para técnicos em campo, cadastrar/alterar planos comercializados e emitir alertas e comunicados gerais para a base de clientes.
-6. **Resiliência & Offline-First**: Assegura a operabilidade completa do app mesmo em locais com sinal de internet oscilante ou indisponível.
-7. **Geolocalização & Rede**: Permite consultar disponibilidade técnica de fibra óptica e validações de endereço em tempo real no mapa.
-8. **Segurança & UX Perfilada**: Garante controle de acesso baseado em papéis (RBAC/RLS) para proteger dados sensíveis de acordo com o perfil do usuário logado.
+1. **Suporte Técnico & OS (Cliente)**: Agiliza o diagnóstico técnico e reduz visitas desnecessárias com o envio prévio de fotos das luzes/LEDs dos equipamentos.
+2. **Vitrine de Planos (Tela de Login)**: Permite que visitantes e futuros assinantes cliquem na tela inicial/login para explorar os planos de fibra óptica disponíveis (velocidades, valores e vantagens) sem precisar estar autenticado.
+3. **Aba do Técnico de Campo**: Módulo exclusivo com visão em lista/mapa das ordens de serviço atribuídas ao técnico, guiando sua rota de atendimento e registrando o encerramento do chamado com foto do serviço finalizado.
+4. **Aba do Administrador / Gestor**: Painel centralizado para a gerência da CJnet controlar filas de suporte, atribuir chamados para técnicos em campo, cadastrar/alterar planos comercializados e emitir alertas e comunicados gerais para a base de clientes.
+5. **Resiliência & Offline-First**: Assegura a operabilidade completa do app mesmo em locais com sinal de internet oscilante ou indisponível.
+6. **Geolocalização & Rede**: Permite consultar disponibilidade técnica de fibra óptica e validações de endereço em tempo real no mapa.
+7. **Segurança & UX Perfilada**: Garante controle de acesso baseado em papéis (RBAC/RLS) para proteger dados sensíveis de acordo com o perfil do usuário logado.
 
 ### 1.2 Tabela de Requisitos Funcionais (RF)
 
 | ID | Descrição | Prioridade | Ator/Origem |
 |----|-----------|-----------|-------------|
 | **RF01** | O sistema deve permitir que o cliente realize login/autenticação vinculando seu CPF/CNPJ ou e-mail ao cadastro ativo na CJnet. | Alta | Cliente |
-| **RF02** | O sistema deve listar boletos (em aberto, pagos e vencidos) sincronizados no dispositivo local. | Alta | Cliente |
-| **RF03** | O sistema deve permitir a visualização de detalhes e a cópia da linha digitável / 2ª via em PDF de boletos quando houver conexão. | Média | Cliente |
 | **RF04** | O sistema deve permitir a abertura de uma nova Ordem de Serviço (OS) informando o tipo de problema (ex: sem sinal, lentidão, queda) e descrição. | Alta | Cliente |
 | **RF05** | O sistema deve permitir tirar foto do roteador/ONU através da câmera do dispositivo e anexá-la à Ordem de Serviço aberta. | Alta | Cliente |
 | **RF06** | O sistema deve gravar a OS e a foto localmente no dispositivo (offline-first) atribuindo um ID temporário (UUID) e enfileirando para sincronização. | Alta | Sistema |
@@ -94,7 +86,7 @@ graph TD
 
 | ID | Categoria | Descrição + Critério Mensurável | Prioridade |
 |----|-----------|----------------------------------|-------------|
-| **RNF01** | **Disponibilidade / Offline** | O aplicativo deve manter funcionalidade de leitura (boletos em cache, OSs existentes, perfil e mapa offline) 100% acessível sem conexão à internet. | Alta |
+| **RNF01** | **Disponibilidade / Offline** | O aplicativo deve manter funcionalidade de leitura (OSs existentes, perfil e mapa offline) 100% acessível sem conexão à internet. | Alta |
 | **RNF02** | **Desempenho** | A consulta e gravação local no banco de dados SQLite deve responder em tempo < 100ms no dispositivo móvel. | Alta |
 | **RNF03** | **Segurança** | Toda comunicação com a nuvem deve utilizar HTTPS/TLS e as tabelas no Supabase devem possuir políticas rígidas de **Row Level Security (RLS)** restritas ao `auth.uid()`. | Alta |
 | **RNF04** | **Usabilidade** | A interface deve ser otimizada para telas de dispositivos Android e iOS com botões grandes, alto contraste e linguagem simples, acessível para usuários de diferentes faixas etárias de cidade do interior. | Alta |
@@ -109,7 +101,7 @@ graph TD
 ## 2. Diagrama de Casos de Uso
 
 ### 2.1 Atores do Sistema
-- **Cliente**: Usuário final cadastrado que utiliza o app para consultar boletos, abrir OS e visualizar seu perfil.
+- **Cliente**: Usuário final cadastrado que utiliza o app para abrir Ordens de Serviço (OS), acompanhar o andamento dos chamados e visualizar seu perfil.
 - **Visitante / Não Logado**: Usuário que acessa o app para consultar a área de cobertura, explorar os **Planos de Internet** disponíveis na tela de login ou realizar pré-cadastro.
 - **Técnico de Campo**: Usuário operacional da CJnet que acessa a **Aba do Técnico** para consultar a lista de OSs atribuídas a ele, navegar até o cliente e registrar o encerramento do chamado com foto do serviço prestado.
 - **Administrador / Gestor**: Usuário gerencial da CJnet que acessa a **Aba do Administrador** para monitorar indicadores de suporte no dashboard, atribuir ordens de serviço para técnicos, gerenciar os planos de internet oferecidos e disparar comunicados em massa para os clientes.
@@ -132,10 +124,10 @@ flowchart LR
     Visitante --> UC14[Consultar Planos de Internet na Tela de Login]
 
     Cliente --> UC03[Fazer Login]
-    Cliente --> UC04[Consultar Boletos e 2ª Via]
     Cliente --> UC05[Abrir Ordem de Serviço]
     Cliente --> UC06[Acompanhar Status da OS]
     Cliente --> UC07[Atualizar Perfil / Endereço]
+
 
     UC05 -.include.-> UC08[Salvar na Fila Offline SQLite]
     UC09[Tirar Foto do Roteador/ONU] -.extend.-> UC05
@@ -224,7 +216,6 @@ classDiagram
         +PapelUsuario papel "CLIENTE, TECNICO, ADMIN"
         +StatusContrato statusContrato
         +Date updatedAt
-        +consultarFaturas() List~Boleto~
         +abrirOS(tipo, descricao) OrdemServico
     }
 
@@ -237,18 +228,6 @@ classDiagram
         +Boolean ativo
         +Boolean destaque
         +consultarVitrinePublica() List~PlanoInternet~
-    }
-
-    class Boleto {
-        +String id
-        +String clienteId
-        +Decimal valor
-        +Date vencimento
-        +StatusBoleto status
-        +String linhaDigitavel
-        +String urlPdf
-        +Date updatedAt
-        +estaVencido() Boolean
     }
 
     class OrdemServico {
@@ -296,7 +275,6 @@ classDiagram
         +Date criadoEm
     }
 
-    Cliente "1" -- "0..*" Boleto : possui
     Cliente "1" -- "0..*" OrdemServico : solicita
     Cliente "1" -- "1" EnderecoCliente : possui
     OrdemServico "1" *-- "0..*" OSFoto : contem
@@ -309,7 +287,6 @@ classDiagram
 |--------|-------------|----------------------------|----------------------------------------|------------|
 | `Cliente` | Sim | Tabela `clientes` | Tabela `public.clientes` | FK `auth_user_id → auth.users`, inclui coluna `papel` |
 | `PlanoInternet` | Sim | Tabela `planos_internet` | Tabela `public.planos_internet` | Exibido na tela de login; gerenciado pelo Admin |
-| `Boleto` | Sim | Tabela `boletos` | Tabela `public.boletos` | Somente leitura no app móvel |
 | `OrdemServico` | Sim | Tabela `ordens_servico` (PK `id_local` UUID) | Tabela `public.ordens_servico` (PK `id` BigInt/UUID) | Inclui `tecnico_id` para atribuição em campo |
 | `OSFoto` | Sim | Guardado em `foto_local_path` | Bucket Supabase Storage `os-fotos` + Tabela `public.os_fotos` | Suporta foto inicial (cliente) e foto final (técnico) |
 | `EnderecoCliente` | Sim | Tabela `enderecos_cliente` | Tabela `public.clientes` / `PostGIS` | Armazena coordenadas (Lat/Lng) |
@@ -323,7 +300,6 @@ classDiagram
 
 ```mermaid
 erDiagram
-    CLIENTES ||--o{ BOLETOS : possui
     CLIENTES ||--o{ ORDENS_SERVICO : solicita
     CLIENTES ||--o| ENDERECOS_CLIENTE : possui
     ORDENS_SERVICO ||--o{ OS_FOTOS : contem
@@ -340,18 +316,8 @@ erDiagram
         timestamp updated_at
     }
 
-    BOLETOS {
-        string id PK
-        string cliente_id FK
-        decimal valor
-        date vencimento
-        string status "ABERTO, PAGO, VENCIDO"
-        string linha_digitavel
-        string url_pdf
-        timestamp updated_at
-    }
-
     ORDENS_SERVICO {
+
         string id_local PK "UUID gerado no mobile"
         string id_remoto "ID atribuído pelo Supabase"
         string cliente_id FK
@@ -535,7 +501,7 @@ componentDiagram
     package "Dispositivo Móvel (Expo React Native)" {
         [Expo Router (Stack & Tabs por Perfil)] as Router
         [Contextos Globais (Auth & Sync)] as Contexts
-        [Custom Hooks (useBoletos, useOS, usePlanos)] as Hooks
+        [Custom Hooks (useOS, usePlanos)] as Hooks
         
         package "Camada de Dados Local" {
             [SQLite Client (expo-sqlite)] as SQLiteDB
@@ -589,29 +555,28 @@ src/
 │   │   ├── cadastro.tsx    # Formulário de pré-cadastro
 │   │   └── esqueci-senha.tsx
 │   ├── (app)/              # Telas Autenticadas (Redirecionamento dinâmico)
-│   │   ├── (tabs-cliente)/ # ABA DO CLIENTE (inicio, boletos, suporte, mapa, perfil)
+│   │   ├── (tabs-cliente)/ # ABA DO CLIENTE (inicio, suporte, mapa, perfil)
 │   │   ├── (tabs-tecnico)/ # ABA DO TÉCNICO (minhas-os, rota-mapa, concluir-os)
 │   │   └── (tabs-admin)/   # ABA DO ADMINISTRADOR (dashboard, gerir-os, planos, avisos)
 │   └── _layout.tsx         # Root Layout (Gerencia Auth Guard e Role Routing)
 ├── db/                     # BANCO LOCAL (SQLite) - Isolar de Supabase!
 │   ├── schema.ts           # Schema das tabelas SQLite (clientes, ordens_servico, planos, etc)
 │   ├── migrations/         # Scripts de criação e alteração de tabelas
-│   └── queries/            # Funções puras de CRUD SQLite (boletos.ts, ordensServico.ts, planos.ts)
+│   └── queries/            # Funções puras de CRUD SQLite (ordensServico.ts, planos.ts, clientes.ts)
 ├── api/                    # COMUNICAÇÃO REMOTA (Supabase) - Isolar de SQLite!
 │   ├── supabaseClient.ts   # Instância inicializada do client Supabase
-│   └── endpoints/          # Funções HTTP/RPC (boletos.ts, ordensServico.ts, planos.ts, auth.ts)
+│   └── endpoints/          # Funções HTTP/RPC (ordensServico.ts, planos.ts, auth.ts)
 ├── services/               # ORQUESTRADORES & SERVIÇOS DE REDE
 │   ├── syncService.ts      # Consome db/ e api/ para sincronização bidirecional
 │   ├── authService.ts      # Gerencia sessão, papéis de usuário (cliente/técnico/admin) e cache
 │   └── storageService.ts   # Upload de fotos dos equipamentos e serviços
 ├── hooks/                  # HOOKS DE INTERFACE
 │   ├── useNetworkStatus.ts # Escuta mudanças de conectividade via NetInfo
-│   ├── useBoletos.ts       # Retorna dados locais de faturas + sync
 │   ├── useOrdensServico.ts # Interface reativa para abertura e gestão de OS
 │   └── usePlanos.ts        # Consulta reativa da vitrine de planos de internet
 ├── components/             # COMPONENTES DE UI PURA
 │   ├── ui/                 # Botões, cards, inputs, badges de status
-│   └── domain/             # ItemBoleto, CardOS, CardPlanoInternet, DashboardAdminCard
+│   └── domain/             # CardOS, CardPlanoInternet, DashboardAdminCard
 ├── context/                # CONTEXTOS DA APLICAÇÃO
 │   ├── AuthContext.tsx     # Estado global de autenticação e papel (Role)
 │   └── SyncContext.tsx     # Estado da fila de sincronização
@@ -631,19 +596,16 @@ src/
 1. **Contexto de Autenticação & Gestão de Acessos**:
    - *Entidades*: `Cliente` (com `PapelUsuario`: Cliente, Técnico, Admin), `EnderecoCliente`.
    - *Regra*: Redirecionamento dinâmico da navegação conforme o papel do usuário logado.
-2. **Contexto Financeiro**:
-   - *Entidades*: `Boleto`.
-   - *Regra*: Leitura offline do histórico de faturas; geração de 2ª via válida apenas online.
-3. **Contexto de Suporte & Ordem de Serviço (Cliente & Técnico)**:
+2. **Contexto de Suporte & Ordem de Serviço (Cliente & Técnico)**:
    - *Entidades*: `OrdemServico`, `OSFoto`.
    - *Agregado*: `OrdemServico` atua como raiz do agregado contendo fotos do cliente (roteador) e do técnico (serviço concluído).
-4. **Contexto Gerencial & Operacional (Administrador)**:
+3. **Contexto Gerencial & Operacional (Administrador)**:
    - *Entidades*: `OrdemServico`, `PlanoInternet`, `ComunicadoAviso`.
    - *Regra*: O Administrador gerencia e distribui chamados para os técnicos e publica avisos para a base de assinantes.
-5. **Contexto de Vitrine Comercial & Planos (Login / Público)**:
+4. **Contexto de Vitrine Comercial & Planos (Login / Público)**:
    - *Entidades*: `PlanoInternet`.
    - *Regra*: Exibição pública dos planos de fibra óptica na tela de login sem necessidade de autenticação.
-6. **Contexto de Geolocalização & Cobertura**:
+5. **Contexto de Geolocalização & Cobertura**:
    - *Entidades*: `AreaCobertura` (GeoJSON / PostGIS).
    - *Regra*: Comparação client-side (offline) das coordenadas do cliente com o polígono delimitador de Coqueiral/MG.
 
@@ -660,4 +622,5 @@ src/
   - Verificar se a foto é enviada primeiro e se seu URL remoto é injetado no registro final da OS.
 - **Testes de Integração de Telas (Expo Router)**:
   - Garantir que a troca de rota de `(auth)` para `(tabs-cliente)`, `(tabs-tecnico)` ou `(tabs-admin)` ocorra automaticamente de acordo com o `AuthContext` e o papel do usuário.
+
 
