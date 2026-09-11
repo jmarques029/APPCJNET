@@ -577,22 +577,278 @@ $$ LANGUAGE sql SECURITY DEFINER STABLE;
 
 
 
-### 4.1 Diagrama de Estados: Ciclo de Vida da Ordem de Serviço (OS)
+
+---
+
+### 3.5 Diagrama de Objetos (Instâncias em Tempo de Execução — UML Object Diagram)
+
+O **Diagrama de Objetos** ilustra uma fotografia instantânea (*runtime snapshot*) do sistema em um momento de pico operacional da **CJnet Telecom**. Ele detalha os valores concretos dos atributos e os vínculos de relacionamento entre as instâncias dos três perfis de usuário (**Cliente**, **Técnico**, **Administrador**), a **Ordem de Serviço**, os **Anexos Fotográficos**, os itens da **Fila de Sincronização**, os **Planos de Internet** e as **Notificações Push**:
+
+```mermaid
+classDiagram
+    class clienteJoao {
+        id = "cli-uuid-101"
+        authUserId = "auth-usr-01"
+        nome = "João da Silva"
+        cpfCnpj = "123.456.789-00"
+        telefone = "(35) 99876-1234"
+        endereco = "Rua Minas Gerais, 100 - Centro, Coqueiral/MG"
+        papel = CLIENTE
+        statusContrato = ATIVO
+        pushToken = "ExponentPushToken[joao_coqueiral_abc123]"
+    }
+
+    class tecnicoCarlos {
+        id = "tec-uuid-202"
+        authUserId = "auth-usr-02"
+        nome = "Carlos Reparo de Campo"
+        cpfCnpj = "987.654.321-99"
+        telefone = "(35) 98811-2233"
+        papel = TECNICO
+        statusContrato = ATIVO
+    }
+
+    class adminMaria {
+        id = "adm-uuid-303"
+        authUserId = "auth-usr-03"
+        nome = "Maria Gestora da Rede"
+        cpfCnpj = "555.444.333-22"
+        telefone = "(35) 99100-4455"
+        papel = ADMIN
+        statusContrato = ATIVO
+    }
+
+    class planoFibra400 {
+        id = "plano-uuid-400"
+        nome = "Fibra Turbo 400 Mega"
+        velocidadeMbps = 400
+        precoMensal = 99.90
+        beneficios = ["Wi-Fi 6 incluso", "Upload 200 Mbps", "Suporte prioritário local"]
+        ativo = true
+        destaque = true
+    }
+
+    class osSemSinal {
+        idLocal = "os-local-uuid-777"
+        idRemoto = "os-remoto-supabase-888"
+        clienteId = "cli-uuid-101"
+        tecnicoId = "tec-uuid-202"
+        tipoProblema = SEM_SINAL
+        descricao = "Roteador com luz LOS vermelha piscando desde ontem à noite"
+        parecerTecnico = "Fibra drop conectorizada novamente no poste; sinal normalizado para -19dBm"
+        status = EM_ATENDIMENTO
+        latitude = -21.1834
+        longitude = -45.4389
+        createdAt = "2026-09-11T14:30:00Z"
+        syncedAt = "2026-09-11T14:31:15Z"
+    }
+
+    class fotoDiagnosticoCliente {
+        id = "foto-local-001"
+        osId = "os-local-uuid-777"
+        fotoLocalPath = "file:///storage/emulated/0/DCIM/cjnet/onu_los_vermelho.jpg"
+        fotoRemotaUrl = "https://supabase.cjnet.com.br/storage/v1/object/public/os-fotos/auth-usr-01/onu_los_vermelho.jpg"
+        tipo = CLIENTE_ROTEADOR
+        tamanhoKb = 450
+        comprimida = true
+        enviada = true
+    }
+
+    class fotoComprovanteTecnico {
+        id = "foto-local-002"
+        osId = "os-local-uuid-777"
+        fotoLocalPath = "file:///storage/emulated/0/DCIM/cjnet/power_meter_normalizado.jpg"
+        fotoRemotaUrl = "https://supabase.cjnet.com.br/storage/v1/object/public/os-fotos/auth-usr-02/power_meter_normalizado.jpg"
+        tipo = TECNICO_REPARO
+        tamanhoKb = 680
+        comprimida = true
+        enviada = false
+    }
+
+    class itemFilaSync {
+        id = "sync-queue-uuid-999"
+        entidade = "ordem_servico"
+        operacao = UPDATE
+        payloadJson = "{\"status\":\"concluida\",\"parecer_tecnico\":\"Fibra drop reconectada...\"}"
+        tentativas = 0
+        status = PENDENTE
+        criadoEm = "2026-09-11T15:45:00Z"
+    }
+
+    class notifPushOS {
+        id = "notif-uuid-555"
+        clienteId = "cli-uuid-101"
+        osId = "os-remoto-supabase-888"
+        titulo = "Técnico a Caminho! 🚗"
+        corpo = "Carlos Reparo está em deslocamento para seu endereço em Coqueiral/MG."
+        tipo = STATUS_OS
+        enviada = true
+        criadaEm = "2026-09-11T15:00:00Z"
+        enviadaEm = "2026-09-11T15:00:05Z"
+    }
+
+    class enderecoJoao {
+        clienteId = "cli-uuid-101"
+        latitude = -21.1834
+        longitude = -45.4389
+        enderecoFormatado = "Rua Minas Gerais, 100 - Centro, Coqueiral/MG"
+        dentroCobertura = true
+    }
+
+    clienteJoao "1" --> "1" enderecoJoao : possui
+    clienteJoao "1" --> "1" osSemSinal : abriu_chamado
+    tecnicoCarlos "1" --> "1" osSemSinal : atende_no_campo
+    adminMaria ..> osSemSinal : distribuiu_e_atribuiu
+    osSemSinal "1" *--> "1" fotoDiagnosticoCliente : anexo_diagnostico_cliente
+    osSemSinal "1" *--> "1" fotoComprovanteTecnico : anexo_reparo_tecnico
+    osSemSinal ..> itemFilaSync : enfileira_encerramento_offline
+    osSemSinal ..> notifPushOS : originou_disparo
+    clienteJoao "1" <-- "1" notifPushOS : recebe_no_smartphone
+    planoFibra400 ..> clienteJoao : plano_contratado
+```
+
+#### Descrição do Cenário Representado no Diagrama de Objetos:
+1. **Cliente (`clienteJoao`)**: Abre a OS `osSemSinal` pelo app de autoatendimento residencial em Coqueiral/MG, anexando a foto do roteador (`fotoDiagnosticoCliente`) com luz LOS vermelha (já comprimida para 450 KB e sincronizada).
+2. **Administrador (`adminMaria`)**: No painel de gestão da **Aba do Administrador**, visualiza o chamado e o atribui ao técnico operacional `tecnicoCarlos`.
+3. **Técnico (`tecnicoCarlos`)**: Na **Aba do Técnico**, assume o chamado, vai até a residência, realiza a troca do conector de fibra óptica, tira a foto de comprovação com o medidor de potência (`fotoComprovanteTecnico`) e registra o encerramento do atendimento.
+4. **Fila Offline (`itemFilaSync`)**: Como o técnico atua em local com oscilação de sinal 4G, a conclusão do atendimento é registrada de imediato no SQLite local e inserida na `sync_queue` para envio em segundo plano assim que a conectividade for restaurada.
+5. **Notificação Push (`notifPushOS`)**: O `SyncService` dispara via `PushService` o alerta no smartphone do cliente João confirmando o status do atendimento.
+6. **Vitrine (`planoFibra400`)**: O plano contratado pelo cliente fica disponível também na vitrine pública da tela de login para qualquer visitante interessado.
+
+---
+
+## 4. Diagramas Comportamentais e Metodologia de Desenvolvimento
+
+### 4.1 Diagramas de Estado do Sistema
+
+Os diagramas de estado a seguir modelam as transições de ciclo de vida das entidades centrais da arquitetura do aplicativo **CJnet**.
+
+#### 4.1.1 Diagrama de Estados: Ciclo de Vida da Ordem de Serviço (OS)
+
+Modela todas as etapas de uma Ordem de Serviço, desde a abertura offline pelo cliente, passagem pelo painel do Administrador, atendimento em campo pelo Técnico até o encerramento e notificação push:
 
 ```mermaid
 stateDiagram-v2
-    [*] --> CriadaLocalmente : Cliente confirma OS no app
-    CriadaLocalmente --> EmFilaSync : Registrada no SQLite + sync_queue
-    EmFilaSync --> UploadingFoto : Conectividade detectada
-    UploadingFoto --> EnviandoDadosSupabase : Binário da foto enviado ao Storage (max 1 MB)
-    EnviandoDadosSupabase --> RegistradaNoBackend : Supabase aceita Insert (RLS OK)
-    RegistradaNoBackend --> EmAtendimento : Técnico assume chamado (Admin atribui)
-    EmAtendimento --> Resolvida : Técnico conclui serviço no local + foto
-    EmAtendimento --> Cancelada : Chamado duplicado ou resolvido remoto
-    Resolvida --> NotificandoCliente : SyncService dispara push (RF14)
-    NotificandoCliente --> [*]
-    Cancelada --> [*]
+    [*] --> CriadaLocalOffline : Cliente confirma abertura de OS no app (UC05)
+    CriadaLocalOffline --> EnfileiradaSync : Salva no SQLite local + sync_queue (UUID local)
+    
+    state "Sincronização com Supabase" as SyncNuvem {
+        EnfileiradaSync --> UploadingFotoCliente : Conectividade restabelecida (NetInfo)
+        UploadingFotoCliente --> TransmitindoSupabase : Foto comprimida (≤ 1 MB) enviada ao Storage
+        TransmitindoSupabase --> SincronizadaPendente : Insert aceito no Supabase (ID Remoto gerado)
+    }
+
+    SincronizadaPendente --> AtribuidaTecnico : Admin atribui técnico responsável no painel (UC15)
+    AtribuidaTecnico --> EmDeslocamento : Técnico inicia rota GPS até a residência (UC12)
+    EmDeslocamento --> EmAtendimento : Técnico faz check-in no local do cliente
+    
+    EmAtendimento --> ConcluidaNoLocal : Reparo finalizado + foto do serviço concluído (UC17)
+    ConcluidaNoLocal --> SincronizandoConclusao : Salvo no SQLite local + sync_queue
+    SincronizandoConclusao --> Resolvida : Status e parecer técnico atualizados no Supabase
+    
+    EmAtendimento --> Cancelada : Chamado duplicado ou resolvido remotamente
+    SincronizadaPendente --> Cancelada : Cliente ou Admin cancela chamado
+    
+    Resolvida --> DisparandoNotificacaoPush : SyncService aciona PushService (UC20 / RF14)
+    DisparandoNotificacaoPush --> ArquivadaNoHistorico : Cliente notificado no smartphone
+    Cancelada --> ArquivadaNoHistorico
+    
+    ArquivadaNoHistorico --> [*]
 ```
+
+#### 4.1.2 Diagrama de Estados: Item da Fila de Sincronização (`SyncQueueItem`)
+
+Modela o processamento de resiliência e retentativas com backoff exponencial para operações offline:
+
+```mermaid
+stateDiagram-v2
+    [*] --> PendenteLocal : Operação efetuada (INSERT/UPDATE gravado no SQLite)
+    PendenteLocal --> AguardandoRede : NetInfo detecta dispositivo sem conexão
+    AguardandoRede --> ProcessandoItem : Conexão restabelecida (Evento NetInfo / Timer)
+    PendenteLocal --> ProcessandoItem : Dispositivo já conectado no momento da ação
+    
+    state "Processamento e Envio" as Proc {
+        ProcessandoItem --> UploadMidiaStorage : Possui foto local associada? (Sim)
+        UploadMidiaStorage --> TransmitindoPayload : Foto salva no Supabase Storage
+        ProcessandoItem --> TransmitindoPayload : Não possui anexo de foto
+        TransmitindoPayload --> ValidandoResposta : Payload enviado via Supabase Client com RLS
+    }
+
+    ValidandoResposta --> Concluido : Resposta HTTP 200/201 (Sucesso)
+    Concluido --> AtualizandoSQLiteLocal : Grava id_remoto e synced_at no banco local
+    AtualizandoSQLiteLocal --> [*] : Item removido/marcado como concluído
+
+    ValidandoResposta --> FalhaTemporaria : Erro 5xx / Timeout / Queda de Rede
+    FalhaTemporaria --> AplicandoBackoff : tentativas < 5 (Incrementa contador)
+    AplicandoBackoff --> AguardandoRede : Aguarda backoff exponencial (2^n segundos)
+    
+    FalhaTemporaria --> ErroDefinitivo : tentativas >= 5 (Payload inválido / Falha crítica)
+    ErroDefinitivo --> NotificandoUsuario : Exibe alerta ao usuário sobre falha de envio
+    NotificandoUsuario --> [*]
+```
+
+#### 4.1.3 Diagrama de Estados: Sessão e Controle de Acesso Baseado em Papéis (`AuthContext & RBAC`)
+
+Modela a autenticação, segurança no `expo-secure-store` e o roteamento para as abas especializadas:
+
+```mermaid
+stateDiagram-v2
+    [*] --> InicializandoApp : App abre (Root Layout _layout.tsx)
+    InicializandoApp --> ChecandoSecureStore : Lê token JWT no expo-secure-store (Keychain / Keystore)
+    
+    ChecandoSecureStore --> SessaoAtivaLocal : Token JWT válido recuperado
+    ChecandoSecureStore --> VisitanteNaoAutenticado : Sem token / Sessão expirada
+    
+    state "Ambiente Público (Visitante)" as Publico {
+        VisitanteNaoAutenticado --> ExplorandoPlanos : Clica "Ver Planos" na tela de login (UC14)
+        VisitanteNaoAutenticado --> PreenchendoPreCadastro : Clica "Quero ser cliente" (UC02)
+        VisitanteNaoAutenticado --> Autenticando : Informa CPF/E-mail + Senha
+        ExplorandoPlanos --> VisitanteNaoAutenticado : Retorna à tela de login
+        PreenchendoPreCadastro --> VisitanteNaoAutenticado : Solicitação enviada
+    }
+
+    Autenticando --> GravandoSecureStore : Supabase Auth valida credenciais (HTTPS/TLS)
+    Autenticando --> VisitanteNaoAutenticado : Credenciais inválidas (Exibe mensagem de erro)
+    GravandoSecureStore --> SessaoAtivaLocal : JWT gravado exclusivamente no expo-secure-store (RNF03)
+    
+    state "Roteamento Dinâmico por Papel (RBAC)" as Roteamento {
+        SessaoAtivaLocal --> RedirecionandoPorPapel : Lê claim papel ('cliente' | 'tecnico' | 'admin')
+        RedirecionandoPorPapel --> AbaClienteAtiva : papel = 'cliente' -> Redireciona para (tabs-cliente)
+        RedirecionandoPorPapel --> AbaTecnicoAtiva : papel = 'tecnico' -> Redireciona para (tabs-tecnico)
+        RedirecionandoPorPapel --> AbaAdminAtiva : papel = 'admin' -> Redireciona para (tabs-admin)
+    }
+
+    AbaClienteAtiva --> Logout : Usuário clica em 'Sair'
+    AbaTecnicoAtiva --> Logout : Usuário clica em 'Sair'
+    AbaAdminAtiva --> Logout : Usuário clica em 'Sair'
+    
+    Logout --> LimpandoSecureStore : Deleta token JWT do expo-secure-store
+    LimpandoSecureStore --> VisitanteNaoAutenticado : Redireciona para a tela de login
+```
+
+#### 4.1.4 Diagrama de Estados: Ciclo de Vida do Pré-Cadastro (`PreCadastro`)
+
+Modela a captação de novos clientes a partir do aplicativo móvel:
+
+```mermaid
+stateDiagram-v2
+    [*] --> FormularioPreenchido : Visitante preenche dados cadastrais e endereço (UC02)
+    FormularioPreenchido --> GravadoLocalmente : Salvo no SQLite local (offline-first)
+    GravadoLocalmente --> EmFilaSync : Registrado na sync_queue com UUID temporário
+    EmFilaSync --> SincronizadoSupabase : Enviado para tabela public.pre_cadastros no Supabase
+    
+    SincronizadoSupabase --> PendenteAnalise : Aguardando análise da equipe comercial da CJnet
+    PendenteAnalise --> EmContato : Vendedor entra em contato via WhatsApp / Telefone
+    
+    EmContato --> ConvertidoEmContrato : Cliente aprova contratação do plano de fibra óptica
+    EmContato --> RecusadoOuSemCobertura : Fora de cobertura ou cliente desiste
+    
+    ConvertidoEmContrato --> UsuarioAtivado : Criada conta de acesso no Supabase Auth + public.clientes
+    UsuarioAtivado --> [*]
+    RecusadoOuSemCobertura --> [*]
+```
+
+---
 
 ---
 
