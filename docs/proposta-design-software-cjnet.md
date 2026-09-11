@@ -109,12 +109,13 @@ graph TD
 ## 2. Diagrama de Casos de Uso
 
 ### 2.1 Atores do Sistema
-- **Cliente**: Usuário final cadastrado que utiliza o app para abrir Ordens de Serviço (OS), acompanhar o andamento dos chamados e visualizar seu perfil.
+- **Cliente**: Usuário final cadastrado que utiliza o app para abrir Ordens de Serviço (OS), acompanhar o andamento e o histórico dos chamados e visualizar seu perfil.
 - **Visitante / Não Logado**: Usuário que acessa o app para consultar a área de cobertura, explorar os **Planos de Internet** disponíveis na tela de login ou realizar pré-cadastro.
 - **Técnico de Campo**: Usuário operacional da CJnet que acessa a **Aba do Técnico** para consultar a lista de OSs atribuídas a ele, navegar até o cliente e registrar o encerramento do chamado com foto do serviço prestado.
-- **Administrador / Gestor**: Usuário gerencial da CJnet que acessa a **Aba do Administrador** para monitorar indicadores de suporte no dashboard, atribuir ordens de serviço para técnicos, gerenciar os planos de internet oferecidos e disparar comunicados em massa para os clientes.
+- **Administrador / Gestor**: Usuário gerencial da CJnet que acessa a **Aba do Administrador** para monitorar indicadores de suporte, atribuir ordens de serviço para técnicos, gerenciar planos de internet, filtrar relatórios e disparar notificações push em massa.
 - **Supabase Auth / Postgres**: Sistema externo remoto de autenticação e banco de dados relacional.
-- **SyncService (Cron/Event)**: Serviço em segundo plano que processa a fila local offline.
+- **SyncService (Cron/Event)**: Serviço em segundo plano que processa a fila local offline e dispara notificações push de status.
+- **PushService**: Serviço de mensageria que entrega notificações push aos dispositivos dos clientes (ex: Expo Notifications / Firebase FCM).
 
 ### 2.2 Diagrama Mermaid de Casos de Uso
 
@@ -126,32 +127,67 @@ flowchart LR
     Admin((Administrador))
     Cliente --|> Visitante
     SyncCron((SyncService))
+    Push((PushService))
 
-    Visitante --> UC01[Ver Cobertura no Mapa]
-    Visitante --> UC02[Realizar Cadastro]
-    Visitante --> UC14[Consultar Planos de Internet na Tela de Login]
+    Visitante --> UC01[UC01: Ver Cobertura no Mapa]
+    Visitante --> UC02[UC02: Realizar Pré-Cadastro]
+    Visitante --> UC14[UC14: Consultar Planos na Tela de Login]
 
-    Cliente --> UC03[Fazer Login]
-    Cliente --> UC05[Abrir Ordem de Serviço]
-    Cliente --> UC06[Acompanhar Status da OS]
-    Cliente --> UC07[Atualizar Perfil / Endereço]
+    Cliente --> UC03[UC03: Fazer Login e Rotear por Perfil]
+    Cliente --> UC05[UC05: Abrir Ordem de Serviço]
+    Cliente --> UC06[UC06: Acompanhar Status e Histórico de OSs]
+    Cliente --> UC07[UC07: Atualizar Perfil / Endereço]
 
+    UC03 -.include.-> UC13[UC13: Validar JWT via expo-secure-store e Rotear por Perfil]
+    UC02 -.extend.-> UC01
+    UC02 -.include.-> UC08[UC08: Salvar na Fila Offline SQLite]
+    UC05 -.include.-> UC08
+    UC09[UC09: Tirar Foto do Roteador/ONU] -.extend.-> UC05
+    UC10[UC10: Marcar Ponto no Mapa] -.extend.-> UC07
 
-    UC05 -.include.-> UC08[Salvar na Fila Offline SQLite]
-    UC09[Tirar Foto do Roteador/ONU] -.extend.-> UC05
-    UC10[Marcar Ponto no Mapa] -.extend.-> UC07
+    Tecnico --> UC12[UC12: Aba do Técnico: Consultar OSs e Concluir Chamado]
+    UC17[UC17: Tirar Foto do Serviço Concluído] -.extend.-> UC12
+    UC12 -.include.-> UC08
 
-    Tecnico --> UC12[Aba do Técnico: Consultar OSs Atribuídas e Concluir Chamado]
-    UC17[Tirar Foto do Serviço Concluído] -.extend.-> UC12
+    Admin --> UC15[UC15: Aba do Administrador: Dashboard e Gestão de OSs]
+    UC16[UC16: Gerenciar Planos de Internet] -.extend.-> UC15
+    UC18[UC18: Filtrar e Exportar Relatórios de Chamados] -.extend.-> UC15
+    UC19[UC19: Enviar Notificação Push em Massa] -.extend.-> UC15
 
-    Admin --> UC15[Aba do Administrador: Dashboard Gerencial e Gestão de OSs]
-    Admin --> UC16[Gerenciar Planos de Internet & Avisos em Massa]
-
-    SyncCron --> UC11[Sincronizar Fila sync_queue com Supabase]
-    UC03 -.include.-> UC13[Validar Sessão / Token Local por Perfil]
+    SyncCron --> UC11[UC11: Sincronizar Fila sync_queue com Supabase]
+    UC11 -.include.-> UC20[UC20: Disparar Push de Status da OS]
+    UC20 --> Push
+    UC19 --> Push
 ```
 
 ### 2.3 Especificação Textual dos Casos de Uso Principais
+
+#### UC02: Realizar Pré-Cadastro
+- **Ator Principal**: Visitante.
+- **Pré-condição**: Nenhuma (acesso público).
+- **Fluxo Principal**:
+  1. O visitante acessa o app e na tela de login seleciona **"Quero ser cliente"**.
+  2. O app exibe o formulário de pré-cadastro solicitando: nome completo, CPF/CNPJ, telefone e endereço.
+  3. (Opcional) O visitante verifica a cobertura do endereço no mapa (`<<extend>> UC01`).
+  4. O visitante confirma o envio. O app grava a solicitação no SQLite local e enfileira para envio ao Supabase (`<<include>> UC08`).
+  5. O app exibe mensagem: **"Solicitação enviada! Nossa equipe entrará em contato."**
+- **Fluxo Alternativo**:
+  - *Offline*: O pré-cadastro fica salvo localmente e sincroniza quando a conexão for restabelecida.
+
+#### UC03: Fazer Login e Rotear por Perfil
+- **Ator Principal**: Cliente / Técnico / Administrador.
+- **Pré-condição**: Nenhuma (tela de login).
+- **Fluxo Principal**:
+  1. O usuário informa e-mail (ou CPF) e senha na tela de login.
+  2. O app autentica via Supabase Auth (HTTPS/TLS).
+  3. Ao receber o token JWT, o app o salva de forma segura via **`expo-secure-store`** (Keychain/Android Keystore) — `<<include>> UC13`.
+  4. O `authService` lê o campo `papel` do usuário (`cliente`, `tecnico` ou `admin`) e redireciona automaticamente:
+     - `cliente` → **Aba do Cliente** `(tabs-cliente)`
+     - `tecnico` → **Aba do Técnico** `(tabs-tecnico)`
+     - `admin` → **Aba do Administrador** `(tabs-admin)`
+- **Fluxo Alternativo**:
+  - *Sessão cached*: Se já existe token válido no `expo-secure-store`, o usuário é redirecionado diretamente sem exibir o formulário de login.
+  - *Credenciais inválidas*: O app exibe mensagem de erro e não salva nenhum dado.
 
 #### UC05: Abrir Ordem de Serviço (OS)
 - **Ator Principal**: Cliente.
@@ -166,7 +202,18 @@ flowchart LR
   7. A interface exibe a mensagem de sucesso otimista com um badge indicativo "Sincronizando...".
 - **Fluxos Alternativos**:
   - *Dispositivo Online*: O `syncService` detecta a conexão e sincroniza imediatamente com o Supabase.
-  - *Dispositivo Offline*: A OS fica em cache local até que a rede retorne.
+  - *Dispositivo Offline*: O OS fica em cache local até que a rede retorne.
+
+#### UC06: Acompanhar Status e Histórico de OSs
+- **Ator Principal**: Cliente.
+- **Pré-condição**: Cliente logado.
+- **Fluxo Principal**:
+  1. O cliente acessa a aba `Meus Chamados`.
+  2. O app exibe a lista de OSs **abertas** com badge de status em tempo real (Pendente, Em Atendimento).
+  3. O cliente pode alternar para a aba **Histórico**, que lista todas as OSs com status `Concluída` ou `Cancelada`, com data de encerramento e observação do técnico.
+  4. O cliente pode tocar em qualquer OS para ver os detalhes completos, incluindo a foto do reparo tirada pelo técnico.
+- **Fluxo Alternativo**:
+  - *Offline*: O app exibe os dados do cache SQLite local sem indicar atualização em tempo real.
 
 #### UC09: Tirar Foto do Roteador/ONU (Ponto de Extensão em UC05)
 - **Ator Principal**: Cliente.
@@ -174,8 +221,20 @@ flowchart LR
 - **Fluxo**:
   1. O app abre a câmera do dispositivo via `expo-image-picker`/`expo-camera`.
   2. O cliente tira a foto demonstrando os leds/luzes de status do equipamento.
-  3. O app salva o arquivo de imagem no armazenamento interno do app (`expo-file-system`) e grava o caminho local em `foto_local_path`.
-  4. O upload binário para o Supabase Storage (`bucket: os-fotos`) é delegado para a fila de sincronização em segundo plano para não travar o envio do formulário textual.
+  3. O app **comprime a imagem para no máximo 1 MB** antes de salvar (RNF09).
+  4. O app salva o arquivo de imagem no armazenamento interno do app (`expo-file-system`) e grava o caminho local em `foto_local_path`.
+  5. O upload binário para o Supabase Storage (`bucket: os-fotos`) é delegado para a fila de sincronização em segundo plano para não travar o envio do formulário textual.
+
+#### UC12: Aba do Técnico — Atendimento e Encerramento de OS
+- **Ator Principal**: Técnico de Campo.
+- **Pré-condição**: Técnico autenticado no perfil `tecnico`.
+- **Fluxo**:
+  1. O técnico acessa a **Aba do Técnico** e visualiza a lista de Ordens de Serviço atribuídas ao seu usuário no dia.
+  2. O técnico seleciona um chamado, abre a localização do cliente no mapa integrado e aciona a navegação GPS.
+  3. Ao chegar no local, o técnico altera o status para `em_atendimento`.
+  4. Após efetuar o reparo ou troca do roteador, o técnico registra a observação técnica, clica em "Concluir Atendimento" e tira a foto comprovando o serviço executado (`<<extend>> UC17`).
+  5. O app salva os dados localmente e enfileira na `sync_queue` para sincronização com o Supabase (`<<include>> UC08`).
+  6. Após a sincronização, o `SyncService` dispara a notificação push para o cliente informando a conclusão (`<<include>> UC20`).
 
 #### UC14: Consultar Planos de Internet na Tela de Login
 - **Ator Principal**: Visitante / Cliente.
@@ -186,24 +245,23 @@ flowchart LR
   3. O usuário visualiza velocidades (ex: 200 Mega, 400 Mega, 600 Mega), preços mensais e benefícios incluídos (Wi-Fi 6, suporte prioritário, etc.).
   4. O usuário pode clicar em **"Contratar / Solicitar Cobertura"**, sendo redirecionado para a checagem no mapa (`UC01`) ou tela de cadastro (`UC02`).
 
-#### UC12: Aba do Técnico — Atendimento e Encerramento de OS
-- **Ator Principal**: Técnico de Campo.
-- **Pré-condição**: Técnico autenticado no perfil `tecnico`.
-- **Fluxo**:
-  1. O técnico acessa a **Aba do Técnico** e visualiza a lista de Ordens de Serviço atribuídas ao seu usuário no dia.
-  2. O técnico seleciona um chamado, abre a localização do cliente no mapa integrado e aciona a navegação GPS.
-  3. Ao chegar no local, o técnico altera o status para `em_atendimento`.
-  4. Após efetuar o reparo ou troca do roteador, o técnico registra a observação técnica, clica em "Concluir Atendimento" e tira a foto comprovando o serviço executado (`<<extend>> UC17`).
-  5. O app salva os dados localmente e enfileira na `sync_queue` para sincronização com o Supabase.
-
 #### UC15: Aba do Administrador — Painel de Gestão e Notificações
 - **Ator Principal**: Administrador / Gestor.
 - **Pré-condição**: Usuário autenticado no perfil `admin`.
 - **Fluxo**:
   1. O gestor acessa a **Aba do Administrador** e visualiza o dashboard com métricas de chamados (total abertos, tempo médio de atendimento, chamados pendentes por bairro de Coqueiral/MG).
   2. O gestor seleciona chamados pendentes e faz a atribuição direta para os técnicos de campo disponíveis.
-  3. O gestor pode cadastrar novos planos de internet ou alterar valores/velocidades existentes (que atualizarão a vitrine da tela de login `UC14`).
-  4. O gestor pode criar e enviar um comunicado/aviso geral (ex: "Manutenção programada na rede da zona rural dia 10/09") para a base de clientes via notificação no app.
+  3. O gestor pode cadastrar novos planos de internet ou alterar valores/velocidades existentes (`<<extend>> UC16`), que atualizarão a vitrine da tela de login (`UC14`).
+  4. O gestor pode criar e enviar um comunicado/aviso geral (ex: "Manutenção programada na rede da zona rural dia 10/09") para a base de clientes via notificação push no app (`<<extend>> UC19`).
+  5. O gestor pode filtrar chamados por período, bairro ou técnico e exportar o relatório (`<<extend>> UC18`).
+
+#### UC20: Disparar Notificação Push de Status da OS
+- **Ator Principal**: Sistema (SyncService / PushService).
+- **Pré-condição**: OS sincronizada com sucesso no Supabase e status alterado (`em_atendimento` ou `concluída`).
+- **Fluxo**:
+  1. Após confirmar o `INSERT`/`UPDATE` da OS no Supabase, o `SyncService` identifica a mudança de status.
+  2. O sistema envia uma notificação push para o dispositivo do cliente vinculado à OS (ex: *"Seu chamado #1234 está Em Atendimento"*) via `PushService`.
+  3. O cliente recebe a notificação no dispositivo, podendo tocar para abrir diretamente os detalhes da OS no app.
 
 
 ---
