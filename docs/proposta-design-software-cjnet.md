@@ -1005,7 +1005,193 @@ componentDiagram
     StorageSvc --> RemoteStorage
     SupabaseSDK --> RemoteAuth
     SupabaseSDK --> RemoteDB
+
+---
+
+### 4.6 Padrão BCE (Boundary-Control-Entity / Diagrama de Robustez)
+
+O padrão **BCE (Boundary-Control-Entity)**, fundamentado na Análise de Robustez de Jacobson, estabelece a separação formal entre as interfaces de interação externa (**Boundary**), as regras de negócio e orquestração de fluxos (**Control**) e as estruturas de dados e regras centrais de domínio (**Entity**). Essa separação viabiliza o desacoplamento preconizado pela **Clean Architecture** e orienta os testes unitários da metodologia **TDD**.
+
+#### 4.6.1 Classificação dos Elementos do Sistema em BCE
+
+```mermaid
+classDiagram
+    class Boundaries {
+        <<boundary>>
+        +LoginScreen (login.tsx)
+        +VitrinePlanosScreen (planos.tsx)
+        +PreCadastroScreen (cadastro.tsx)
+        +NovaOSScreen (nova-os.tsx)
+        +MeusChamadosScreen (chamados.tsx)
+        +MapaCoberturaScreen (mapa.tsx)
+        +DashboardTecnicoScreen (minhas-os.tsx)
+        +ConcluirOSScreen (concluir-os.tsx)
+        +PainelAdminDashboard (dashboard.tsx)
+        +CameraHardware (expo-camera)
+        +LocationSensor (expo-location)
+        +NetInfoListener (@react-native-netinfo)
+        +SecureStoreAdapter (expo-secure-store)
+        +SupabaseGateway (HTTP/REST API)
+        +PushServiceGateway (FCM/Expo Push)
+    }
+
+    class Controls {
+        <<control>>
+        +AuthService (Sessão JWT & RBAC)
+        +OrdemServicoController (useOrdensServico)
+        +SyncService (Fila Assíncrona Offline)
+        +ImageCompressorService (Comprime <= 1MB)
+        +GeoCoverageController (Validação GeoJSON)
+        +PlanoInternetController (usePlanos)
+        +PushNotificationController (useNotificacoes)
+        +PreCadastroController (Triagem Visitante)
+    }
+
+    class Entities {
+        <<entity>>
+        +Cliente (Perfil, AuthUserId, PushToken)
+        +OrdemServico (Problema, Status, Parecer)
+        +OSFoto (PathLocal, URLRemota, Tipo)
+        +PlanoInternet (Velocidade, Preço, Benefícios)
+        +EnderecoCliente (Lat/Lng, Logradouro)
+        +SyncQueueItem (Entidade, Operação, Payload)
+        +PreCadastro (Nome, Telefone, Status)
+        +NotificacaoPush (Título, Mensagem, Tipo)
+        +AreaCobertura (Polígono GeoJSON)
+    }
 ```
+
+#### 4.6.2 Diagrama de Robustez BCE (Interação entre Atores, Fronteiras, Controles e Entidades)
+
+```mermaid
+flowchart LR
+    %% Atores
+    Cliente((Cliente))
+    Tecnico((Técnico))
+    Admin((Administrador))
+    Visitante((Visitante))
+    NetSensor((NetInfo Sensor))
+
+    %% Boundaries (Fronteiras / UI & Hardware)
+    subgraph Boundaries ["<<boundary>> Fronteiras (UI, Sensores & Gateways)"]
+        B_Login[UI: Login & Vitrine]
+        B_Cadastro[UI: Pré-Cadastro]
+        B_OSCliente[UI: Nova OS & Foto]
+        B_HistCliente[UI: Meus Chamados]
+        B_Mapa[UI: Mapa de Cobertura]
+        B_OSTecnico[UI: Aba Técnico & Rota GPS]
+        B_AdminPainel[UI: Aba Admin & Métricas]
+        B_Cam[Sensor: expo-camera]
+        B_GPS[Sensor: expo-location]
+        B_Key[SecureStore: JWT Token]
+        B_CloudDB[Gateway: Supabase Postgres + RLS]
+        B_Storage[Gateway: Supabase Storage]
+        B_PushGW[Gateway: Push Service FCM]
+    end
+
+    %% Controls (Controladores & Serviços)
+    subgraph Controls ["<<control>> Controladores & Orquestradores"]
+        C_Auth[AuthService / AuthContext]
+        C_OS[OrdemServicoController]
+        C_Sync[SyncService / SyncQueue]
+        C_Img[ImageCompressorService]
+        C_Geo[GeoCoverageController]
+        C_Plano[PlanoInternetController]
+        C_Push[PushNotificationController]
+        C_PreCad[PreCadastroController]
+    end
+
+    %% Entities (Entidades de Domínio & Persistência)
+    subgraph Entities ["<<entity>> Entidades de Domínio"]
+        E_Cli[(Cliente)]
+        E_OS[(OrdemServico)]
+        E_Foto[(OSFoto)]
+        E_Plano[(PlanoInternet)]
+        E_End[(EnderecoCliente)]
+        E_Queue[(SyncQueueItem)]
+        E_Pre[(PreCadastro)]
+        E_Push[(NotificacaoPush)]
+        E_Geo[(AreaCobertura)]
+    end
+
+    %% Relações Visitante
+    Visitante --> B_Login
+    Visitante --> B_Cadastro
+    B_Login --> C_Plano
+    B_Login --> C_Auth
+    B_Cadastro --> C_PreCad
+    C_Plano --> E_Plano
+    C_PreCad --> E_Pre
+    C_PreCad --> C_Sync
+
+    %% Relações Cliente
+    Cliente --> B_OSCliente
+    Cliente --> B_HistCliente
+    Cliente --> B_Mapa
+    B_OSCliente --> B_Cam
+    B_OSCliente --> C_OS
+    B_Cam --> C_Img
+    C_Img --> E_Foto
+    C_OS --> E_OS
+    C_OS --> C_Sync
+    B_HistCliente --> C_OS
+    B_Mapa --> B_GPS
+    B_GPS --> C_Geo
+    C_Geo --> E_Geo
+
+    %% Relações Técnico
+    Tecnico --> B_OSTecnico
+    B_OSTecnico --> B_Cam
+    B_OSTecnico --> C_OS
+    B_OSTecnico --> B_GPS
+
+    %% Relações Administrador
+    Admin --> B_AdminPainel
+    B_AdminPainel --> C_OS
+    B_AdminPainel --> C_Plano
+    B_AdminPainel --> C_Push
+
+    %% Relações de Autenticação & Armazenamento Seguro
+    C_Auth --> B_Key
+    C_Auth --> B_CloudDB
+    C_Auth --> E_Cli
+
+    %% Relações do Motor Sync e Gateways Remotos
+    NetSensor --> C_Sync
+    C_Sync --> E_Queue
+    C_Sync --> B_Storage
+    C_Sync --> B_CloudDB
+    C_Sync --> C_Push
+    C_Push --> E_Push
+    C_Push --> B_PushGW
+
+    %% Relações entre Entidades
+    E_Cli -.-> E_OS
+    E_OS -.-> E_Foto
+    E_Cli -.-> E_End
+    E_OS -.-> E_Push
+```
+
+#### 4.6.3 Matriz de Rastreabilidade BCE por Caso de Uso
+
+| Caso de Uso (UC) | Fronteiras Envolvidas (`<<boundary>>`) | Controladores / Serviços (`<<control>>`) | Entidades Afetadas (`<<entity>>`) |
+|---|---|---|---|
+| **UC01: Ver Cobertura** | `MapaCoberturaScreen`, `expo-location` | `GeoCoverageController` | `AreaCobertura`, `EnderecoCliente` |
+| **UC02: Realizar Pré-Cadastro** | `PreCadastroScreen` | `PreCadastroController`, `SyncService` | `PreCadastro`, `SyncQueueItem` |
+| **UC03: Fazer Login e RBAC** | `LoginScreen`, `expo-secure-store`, `Supabase Auth` | `AuthService` | `Cliente` |
+| **UC05: Abrir OS (Offline)** | `NovaOSScreen` | `OrdemServicoController`, `SyncService` | `OrdemServico`, `SyncQueueItem` |
+| **UC06: Histórico de OSs** | `MeusChamadosScreen` | `OrdemServicoController` | `OrdemServico`, `OSFoto` |
+| **UC07: Atualizar Endereço** | `PerfilClienteScreen`, `expo-location` | `GeoCoverageController`, `SyncService` | `EnderecoCliente`, `Cliente` |
+| **UC08: Fila Offline SQLite** | `SQLite Engine (expo-sqlite)` | `SyncService` | `SyncQueueItem` |
+| **UC09: Tirar Foto Roteador** | `expo-camera`, `expo-file-system` | `ImageCompressorService` | `OSFoto` |
+| **UC11: Sincronizar Fila** | `NetInfoListener`, `Supabase REST Gateway` | `SyncService` | `SyncQueueItem`, `OrdemServico`, `OSFoto` |
+| **UC12: Atendimento do Técnico** | `DashboardTecnicoScreen`, `ConcluirOSScreen` | `OrdemServicoController`, `SyncService` | `OrdemServico`, `OSFoto`, `SyncQueueItem` |
+| **UC14: Consultar Planos (Login)**| `VitrinePlanosScreen`, `LoginScreen` | `PlanoInternetController` | `PlanoInternet` |
+| **UC15: Painel Administrador** | `PainelAdminDashboard` | `OrdemServicoController`, `PlanoInternetController` | `OrdemServico`, `PlanoInternet` |
+| **UC16: Gerenciar Planos** | `CadastroPlanosScreen` | `PlanoInternetController`, `Supabase REST` | `PlanoInternet` |
+| **UC17: Foto do Reparo Técnico** | `expo-camera`, `ConcluirOSScreen` | `ImageCompressorService`, `SyncService` | `OSFoto`, `OrdemServico` |
+| **UC19: Push Alerta em Massa** | `DisparoAvisosScreen`, `PushServiceGateway` | `PushNotificationController` | `NotificacaoPush`, `Cliente` |
+| **UC20: Push de Status da OS** | `PushServiceGateway (FCM/Expo)` | `SyncService`, `PushNotificationController` | `NotificacaoPush`, `OrdemServico`, `Cliente` |
 
 ---
 
