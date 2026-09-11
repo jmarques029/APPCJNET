@@ -281,6 +281,7 @@ classDiagram
         +String endereco
         +PapelUsuario papel "CLIENTE, TECNICO, ADMIN"
         +StatusContrato statusContrato
+        +String pushToken
         +Date updatedAt
         +abrirOS(tipo, descricao) OrdemServico
     }
@@ -303,6 +304,7 @@ classDiagram
         +String tecnicoId
         +TipoProblema tipoProblema
         +String descricao
+        +String parecerTecnico
         +StatusOS status "PENDENTE, EM_ATENDIMENTO, CONCLUIDO, CANCELADO"
         +Double latitude
         +Double longitude
@@ -319,6 +321,8 @@ classDiagram
         +String fotoLocalPath
         +String fotoRemotaUrl
         +TipoFoto tipo "CLIENTE_ROTEADOR, TECNICO_REPARO"
+        +Int tamanhoKb
+        +Boolean comprimida
         +Boolean enviada
     }
 
@@ -341,23 +345,62 @@ classDiagram
         +Date criadoEm
     }
 
+    class PreCadastro {
+        +String id
+        +String nome
+        +String cpfCnpj
+        +String telefone
+        +String endereco
+        +Double latitude
+        +Double longitude
+        +StatusPreCadastro status "PENDENTE, CONTATADO, CONVERTIDO"
+        +Date criadoEm
+        +Date syncedAt
+    }
+
+    class NotificacaoPush {
+        +String id
+        +String titulo
+        +String corpo
+        +String clienteId
+        +String osId
+        +TipoNotificacao tipo "STATUS_OS, AVISO_ADMIN"
+        +Boolean enviada
+        +Date criadaEm
+        +Date enviadaEm
+        +enviarParaDispositivo(pushToken) void
+    }
+
+    class AppMeta {
+        +String chave
+        +String valor
+        +Date atualizadoEm
+        +getLastSyncAt() Date
+        +setLastSyncAt(date) void
+    }
+
     Cliente "1" -- "0..*" OrdemServico : solicita
     Cliente "1" -- "1" EnderecoCliente : possui
+    Cliente "1" -- "0..*" NotificacaoPush : recebe
     OrdemServico "1" *-- "0..*" OSFoto : contem
     OrdemServico ..> SyncQueueItem : gera_pendencia
+    OrdemServico "0..*" -- "0..1" NotificacaoPush : dispara
+    PreCadastro ..> SyncQueueItem : gera_pendencia
 ```
 
 ### 3.2 Tabela de Persistência e Estratégia Mapeada
 
 | Classe | Persistente? | Estratégia Local (SQLite) | Estratégia Remota (Supabase Postgres) | Observação |
 |--------|-------------|----------------------------|----------------------------------------|------------|
-| `Cliente` | Sim | Tabela `clientes` | Tabela `public.clientes` | FK `auth_user_id → auth.users`, inclui coluna `papel` |
-| `PlanoInternet` | Sim | Tabela `planos_internet` | Tabela `public.planos_internet` | Exibido na tela de login; gerenciado pelo Admin |
-| `OrdemServico` | Sim | Tabela `ordens_servico` (PK `id_local` UUID) | Tabela `public.ordens_servico` (PK `id` BigInt/UUID) | Inclui `tecnico_id` para atribuição em campo |
-| `OSFoto` | Sim | Guardado em `foto_local_path` | Bucket Supabase Storage `os-fotos` + Tabela `public.os_fotos` | Suporta foto inicial (cliente) e foto final (técnico) |
+| `Cliente` | Sim | Tabela `clientes` | Tabela `public.clientes` | FK `auth_user_id → auth.users`, inclui colunas `papel` e `push_token` |
+| `PlanoInternet` | Sim | Tabela `planos_internet` | Tabela `public.planos_internet` | Exibido na tela de login sem autenticação; gerenciado pelo Admin |
+| `OrdemServico` | Sim | Tabela `ordens_servico` (PK `id_local` UUID) | Tabela `public.ordens_servico` (PK `id` BigInt/UUID) | Inclui `tecnico_id` (FK) e `parecer_tecnico` para encerramento |
+| `OSFoto` | Sim | Guardado em `foto_local_path` + campo `tamanho_kb` e `comprimida` | Bucket Supabase Storage `os-fotos` + Tabela `public.os_fotos` | Comprimida para ≤ 1 MB antes do upload (RNF09); suporta foto do cliente e do técnico |
 | `EnderecoCliente` | Sim | Tabela `enderecos_cliente` | Tabela `public.clientes` / `PostGIS` | Armazena coordenadas (Lat/Lng) |
-| `SyncQueueItem` | Sim (Apenas Local) | Tabela `sync_queue` | N/A (Fila efêmera no mobile) | Controla retentativas offline |
-| `AppMeta` | Sim (Apenas Local) | Tabela `app_meta` | N/A | Guarda `last_sync_at`, tokens e flags |
+| `SyncQueueItem` | Sim (Apenas Local) | Tabela `sync_queue` | N/A (Fila efêmera no mobile) | Controla retentativas com backoff exponencial |
+| `PreCadastro` | Sim | Tabela `pre_cadastros` | Tabela `public.pre_cadastros` | Visitante envia pedido de contrato; sincroniza quando online |
+| `NotificacaoPush` | Sim | Tabela `notificacoes` (cache local) | Tabela `public.notificacoes_push` | Disparada pelo SyncService via PushService (RF14) |
+| `AppMeta` | Sim (Apenas Local) | Tabela `app_meta` | N/A | Guarda `last_sync_at` e flags de configuração. **Tokens JWT ficam exclusivamente no `expo-secure-store`** (RNF03) — nunca nesta tabela. |
 
 
 ---
@@ -370,6 +413,9 @@ erDiagram
     CLIENTES ||--o| ENDERECOS_CLIENTE : possui
     ORDENS_SERVICO ||--o{ OS_FOTOS : contem
     AREA_COBERTURA ||--o{ ENDERECOS_CLIENTE : intercepta
+    ORDENS_SERVICO }o--|| CLIENTES : atribuido_tecnico
+    ORDENS_SERVICO ||--o{ NOTIFICACOES_PUSH : dispara
+    CLIENTES ||--o{ NOTIFICACOES_PUSH : recebe
 
     CLIENTES {
         string id PK
@@ -378,18 +424,32 @@ erDiagram
         string cpf_cnpj
         string telefone
         string endereco
+        string papel "CLIENTE, TECNICO, ADMIN"
         string status_contrato
+        string push_token "Token Expo/FCM para notificações push"
+        timestamp updated_at
+    }
+
+    PLANOS_INTERNET {
+        string id PK
+        string nome
+        int velocidade_mbps
+        decimal preco_mensal
+        text beneficios "JSON array de benefícios"
+        boolean ativo
+        boolean destaque
         timestamp updated_at
     }
 
     ORDENS_SERVICO {
-
         string id_local PK "UUID gerado no mobile"
         string id_remoto "ID atribuído pelo Supabase"
         string cliente_id FK
+        string tecnico_id FK "Técnico responsável pelo atendimento"
         string tipo_problema "SEM_SINAL, LENTIDAO, QUEDA, OUTROS"
         text descricao
-        string status "PENDENTE, EM_ATENDIMENTO, CONCLUIDO"
+        text parecer_tecnico "Observação registrada ao concluir"
+        string status "PENDENTE, EM_ATENDIMENTO, CONCLUIDO, CANCELADO"
         double latitude
         double longitude
         timestamp created_at
@@ -401,7 +461,10 @@ erDiagram
         string os_id_local FK
         string foto_local_path
         string foto_remota_url
-        string tipo "ROTEADOR, ONU, GERAL"
+        string tipo "CLIENTE_ROTEADOR, TECNICO_REPARO"
+        int tamanho_kb
+        boolean comprimida
+        boolean enviada
     }
 
     ENDERECOS_CLIENTE {
@@ -422,10 +485,35 @@ erDiagram
         timestamp criado_em
     }
 
+    PRE_CADASTROS {
+        string id PK
+        string nome
+        string cpf_cnpj
+        string telefone
+        text endereco
+        double latitude
+        double longitude
+        string status "PENDENTE, CONTATADO, CONVERTIDO"
+        timestamp criado_em
+        timestamp synced_at
+    }
+
+    NOTIFICACOES_PUSH {
+        string id PK
+        string cliente_id FK
+        string os_id FK
+        string titulo
+        text corpo
+        string tipo "STATUS_OS, AVISO_ADMIN"
+        boolean enviada
+        timestamp criada_em
+        timestamp enviada_em
+    }
+
     AREA_COBERTURA {
         string id PK
         string nome_zona
-        geometry polígono_postgis "Polígono GeoJSON Coqueiral/MG"
+        geometry poligono_postgis "Polígono GeoJSON Coqueiral/MG"
     }
 ```
 
