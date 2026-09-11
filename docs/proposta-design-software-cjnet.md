@@ -519,7 +519,63 @@ erDiagram
 
 ---
 
-## 4. Diagramas Complementares de Análise e Arquitetura
+### 3.4 Modelo Local/Remoto e Políticas de RLS (Row Level Security)
+
+#### 3.4.1 Mapeamento de Tabelas: SQLite (Local) vs Supabase Postgres (Remoto)
+
+| Tabela Local (SQLite) | Tabela Remota (Supabase) | Sincroniza? | Direção | Observação |
+|-----------------------|--------------------------|-------------|----------|------------|
+| `clientes` | `public.clientes` | Sim | Bidirecional | Leitura local offline; escrita sobe via `sync_queue` |
+| `ordens_servico` | `public.ordens_servico` | Sim | Mobile → Nuvem (INSERT) + Nuvem → Mobile (UPDATE status) | PK local = `id_local` (UUID); PK remota = `id` (UUID) |
+| `os_fotos` | Bucket `os-fotos` + `public.os_fotos` | Sim | Mobile → Nuvem | Binário sobe para o Storage; URL remota gravada no SQLite |
+| `planos_internet` | `public.planos_internet` | Sim | Nuvem → Mobile (somente leitura) | Atualizado pelo Admin; consumido público no login sem auth |
+| `enderecos_cliente` | `public.clientes` (colunas lat/lng) | Sim | Bidirecional | Pode usar coluna geometry PostGIS na nuvem |
+| `notificacoes` | `public.notificacoes_push` | Sim | Nuvem → Mobile | Gravado no SQLite local apenas para exibir histórico no app |
+| `pre_cadastros` | `public.pre_cadastros` | Sim | Mobile → Nuvem | Visitante sem conta; sincroniza quando online |
+| `sync_queue` | N/A | Não | Apenas Local | Fila efêmera — nunca sincronizada com a nuvem |
+| `app_meta` | N/A | Não | Apenas Local | Guarda `last_sync_at` e flags. **Tokens JWT: exclusivamente no `expo-secure-store`** |
+
+#### 3.4.2 Políticas de Row Level Security (RLS) por Tabela
+
+> **Regra base**: Todas as tabelas no Supabase Postgres devem ter `ALTER TABLE ... ENABLE ROW LEVEL SECURITY` ativado. Nenhuma operação é permitida sem política explícita.
+
+| Tabela | Operação | Papel Permitido | Condição RLS |
+|--------|----------|----------------|---------------|
+| `public.clientes` | `SELECT` | `cliente`, `tecnico`, `admin` | `auth.uid() = auth_user_id` (cliente vê só o próprio) / `admin` vê todos |
+| `public.clientes` | `UPDATE` | `cliente`, `admin` | `auth.uid() = auth_user_id` (cliente atualiza só o próprio) |
+| `public.clientes` | `INSERT` | `service_role` (via SyncService) | Apenas via backend autenticado com chave de serviço |
+| `public.ordens_servico` | `SELECT` | `cliente` | `auth.uid() = (SELECT auth_user_id FROM clientes WHERE id = cliente_id)` |
+| `public.ordens_servico` | `SELECT` | `tecnico` | `auth.uid() = (SELECT auth_user_id FROM clientes WHERE id = tecnico_id)` |
+| `public.ordens_servico` | `SELECT` | `admin` | `TRUE` (acesso irrestrito ao painel) |
+| `public.ordens_servico` | `INSERT` | `cliente` | `auth.uid() = (SELECT auth_user_id FROM clientes WHERE id = cliente_id)` |
+| `public.ordens_servico` | `UPDATE` | `tecnico` | Somente campos `status`, `parecer_tecnico`, `synced_at` quando `tecnico_id` bate com `auth.uid()` |
+| `public.ordens_servico` | `UPDATE` | `admin` | `TRUE` (pode reatribuir técnico e cancelar) |
+| `public.os_fotos` | `SELECT` | `cliente`, `tecnico`, `admin` | Herdado pelo `os_id` da OS que o usuário tem acesso |
+| `public.os_fotos` | `INSERT` | `cliente`, `tecnico` | Restrito ao `os_id` de OSs que pertencem ao usuário |
+| `public.planos_internet` | `SELECT` | **público (anon)** | `TRUE` — acessado sem autenticação na tela de login |
+| `public.planos_internet` | `INSERT`, `UPDATE`, `DELETE` | `admin` | `(SELECT papel FROM clientes WHERE auth_user_id = auth.uid()) = 'admin'` |
+| `public.notificacoes_push` | `SELECT` | `cliente` | `auth.uid() = (SELECT auth_user_id FROM clientes WHERE id = cliente_id)` |
+| `public.notificacoes_push` | `INSERT` | `service_role` | Apenas via SyncService com chave de serviço (backend) |
+| `public.pre_cadastros` | `INSERT` | **público (anon)** + `service_role` | `TRUE` — visitante não autenticado pode inserir; sync via `service_role` |
+| `public.pre_cadastros` | `SELECT`, `UPDATE` | `admin` | `(SELECT papel FROM clientes WHERE auth_user_id = auth.uid()) = 'admin'` |
+| `storage.os-fotos` (bucket) | `INSERT` | `cliente`, `tecnico` | Somente no caminho `os-fotos/{auth.uid()}/` |
+| `storage.os-fotos` (bucket) | `SELECT` | `cliente`, `tecnico`, `admin` | Caminho começa com `os-fotos/{auth.uid()}/` ou papel = `admin` |
+
+#### 3.4.3 Helper Function recomendada no Supabase
+
+```sql
+-- Função auxiliar reutilizável nas políticas RLS
+CREATE OR REPLACE FUNCTION public.get_papel_usuario()
+RETURNS TEXT AS $$
+  SELECT papel FROM public.clientes WHERE auth_user_id = auth.uid() LIMIT 1;
+$$ LANGUAGE sql SECURITY DEFINER STABLE;
+
+-- Exemplo de uso em política:
+-- CREATE POLICY "admin_tudo_ordens" ON public.ordens_servico
+--   FOR ALL USING (public.get_papel_usuario() = 'admin');
+```
+
+
 
 ### 4.1 Diagrama de Estados: Ciclo de Vida da Ordem de Serviço (OS)
 
@@ -528,12 +584,13 @@ stateDiagram-v2
     [*] --> CriadaLocalmente : Cliente confirma OS no app
     CriadaLocalmente --> EmFilaSync : Registrada no SQLite + sync_queue
     EmFilaSync --> UploadingFoto : Conectividade detectada
-    UploadingFoto --> EnviandoDadosSupabase : Binário da foto enviado ao Storage
+    UploadingFoto --> EnviandoDadosSupabase : Binário da foto enviado ao Storage (max 1 MB)
     EnviandoDadosSupabase --> RegistradaNoBackend : Supabase aceita Insert (RLS OK)
-    RegistradaNoBackend --> EmAtendimento : Técnico assume chamado no Backoffice
-    EmAtendimento --> Resolvida : Técnico conclui serviço no local
+    RegistradaNoBackend --> EmAtendimento : Técnico assume chamado (Admin atribui)
+    EmAtendimento --> Resolvida : Técnico conclui serviço no local + foto
     EmAtendimento --> Cancelada : Chamado duplicado ou resolvido remoto
-    Resolvida --> [*]
+    Resolvida --> NotificandoCliente : SyncService dispara push (RF14)
+    NotificandoCliente --> [*]
     Cancelada --> [*]
 ```
 
@@ -555,7 +612,7 @@ flowchart TD
 
     subgraph Camadas ["Camadas da Aplicação e Mapeamento de Testes"]
         UI["<b>Camada de Interface (Expo Router)</b><br/>app/(auth), (tabs-cliente), (tabs-tecnico), (tabs-admin)"]
-        Control["<b>Camada de Lógica & Controle (Hooks & Contexts)</b><br/>hooks/ (useBoletos, useOrdensServico, usePlanos)"]
+    Control["<b>Camada de Lógica & Controle (Hooks & Contexts)</b><br/>hooks/ (useOrdensServico, usePlanos, useNotificacoes)"]
         Services["<b>Camada de Serviços & Sincronização</b><br/>services/ (syncService, authService, storageService)"]
         Entities["<b>Camada de Dados & Entidades</b><br/>db/ (SQLite Schema & Queries) e api/ (Supabase Client)"]
 
@@ -754,8 +811,8 @@ src/
    - *Entidades*: `OrdemServico`, `OSFoto`.
    - *Agregado*: `OrdemServico` atua como raiz do agregado contendo fotos do cliente (roteador) e do técnico (serviço concluído).
 3. **Contexto Gerencial & Operacional (Administrador)**:
-   - *Entidades*: `OrdemServico`, `PlanoInternet`, `ComunicadoAviso`.
-   - *Regra*: O Administrador gerencia e distribui chamados para os técnicos e publica avisos para a base de assinantes.
+   - *Entidades*: `OrdemServico`, `PlanoInternet`, `NotificacaoPush`.
+   - *Regra*: O Administrador gerencia e distribui chamados para os técnicos e envia notificações push para a base de assinantes.
 4. **Contexto de Vitrine Comercial & Planos (Login / Público)**:
    - *Entidades*: `PlanoInternet`.
    - *Regra*: Exibição pública dos planos de fibra óptica na tela de login sem necessidade de autenticação.
