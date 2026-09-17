@@ -403,9 +403,14 @@ classDiagram
 | `AppMeta` | Sim (Apenas Local) | Tabela `app_meta` | N/A | Guarda `last_sync_at` e flags de configuração. **Tokens JWT ficam exclusivamente no `expo-secure-store`** (RNF03) — nunca nesta tabela. |
 
 
+
 ---
 
-### 3.3 Diagrama Entidade-Relacionamento (DER Relacional)
+## 4. Diagrama Entidade-Relacionamento (DER Relacional) e Modelo de Dados
+
+### 4.1 Diagrama Entidade-Relacionamento (DER)
+
+O **Diagrama Entidade-Relacionamento (DER)** apresenta o modelo de dados relacional e a modelagem física do banco de dados, estabelecendo chaves primárias (PK), chaves estrangeiras (FK), tipos de dados e cardinalidades exatas entre as tabelas do ecossistema **CJnet**:
 
 ```mermaid
 erDiagram
@@ -419,13 +424,13 @@ erDiagram
 
     CLIENTES {
         string id PK
-        string auth_user_id FK
+        string auth_user_id FK "Vínculo com auth.users no Supabase"
         string nome
         string cpf_cnpj
         string telefone
         string endereco
         string papel "CLIENTE, TECNICO, ADMIN"
-        string status_contrato
+        string status_contrato "ATIVO, SUSPENSO, CANCELADO"
         string push_token "Token Expo/FCM para notificações push"
         timestamp updated_at
     }
@@ -442,13 +447,13 @@ erDiagram
     }
 
     ORDENS_SERVICO {
-        string id_local PK "UUID gerado no mobile"
+        string id_local PK "UUID gerado no mobile (offline-first)"
         string id_remoto "ID atribuído pelo Supabase"
-        string cliente_id FK
+        string cliente_id FK "Cliente solicitante"
         string tecnico_id FK "Técnico responsável pelo atendimento"
         string tipo_problema "SEM_SINAL, LENTIDAO, QUEDA, OUTROS"
-        text descricao
-        text parecer_tecnico "Observação registrada ao concluir"
+        text descricao "Descrição detalhada do problema"
+        text parecer_tecnico "Observação técnica ao concluir chamado"
         string status "PENDENTE, EM_ATENDIMENTO, CONCLUIDO, CANCELADO"
         double latitude
         double longitude
@@ -458,11 +463,11 @@ erDiagram
 
     OS_FOTOS {
         string id PK
-        string os_id_local FK
-        string foto_local_path
-        string foto_remota_url
+        string os_id_local FK "Vínculo com a OS local"
+        string foto_local_path "Caminho no sistema de arquivos local"
+        string foto_remota_url "URL pública no Supabase Storage"
         string tipo "CLIENTE_ROTEADOR, TECNICO_REPARO"
-        int tamanho_kb
+        int tamanho_kb "Tamanho do arquivo comprimido (<= 1024 KB)"
         boolean comprimida
         boolean enviada
     }
@@ -476,17 +481,17 @@ erDiagram
     }
 
     SYNC_QUEUE {
-        string id PK
-        string entidade
+        string id PK "UUID da pendência local"
+        string entidade "ordem_servico, pre_cadastro, cliente"
         string operacao "INSERT, UPDATE"
-        text payload_json
-        int tentativas
+        text payload_json "Dados serializados para sincronização"
+        int tentativas "Contador para backoff exponencial"
         string status "PENDENTE, PROCESSANDO, ERRO, CONCLUIDO"
         timestamp criado_em
     }
 
     PRE_CADASTROS {
-        string id PK
+        string id PK "UUID da solicitação"
         string nome
         string cpf_cnpj
         string telefone
@@ -512,16 +517,14 @@ erDiagram
 
     AREA_COBERTURA {
         string id PK
-        string nome_zona
-        geometry poligono_postgis "Polígono GeoJSON Coqueiral/MG"
+        string nome_zona "Nome do setor atendido em Coqueiral/MG"
+        geometry poligono_postgis "Polígono GeoJSON da cobertura"
     }
 ```
 
----
+### 4.2 Mapeamento Local/Remoto e Políticas de RLS (Row Level Security)
 
-### 3.4 Modelo Local/Remoto e Políticas de RLS (Row Level Security)
-
-#### 3.4.1 Mapeamento de Tabelas: SQLite (Local) vs Supabase Postgres (Remoto)
+#### 4.2.1 Mapeamento de Tabelas: SQLite (Local) vs Supabase Postgres (Remoto)
 
 | Tabela Local (SQLite) | Tabela Remota (Supabase) | Sincroniza? | Direção | Observação |
 |-----------------------|--------------------------|-------------|----------|------------|
@@ -535,7 +538,7 @@ erDiagram
 | `sync_queue` | N/A | Não | Apenas Local | Fila efêmera — nunca sincronizada com a nuvem |
 | `app_meta` | N/A | Não | Apenas Local | Guarda `last_sync_at` e flags. **Tokens JWT: exclusivamente no `expo-secure-store`** |
 
-#### 3.4.2 Políticas de Row Level Security (RLS) por Tabela
+#### 4.2.2 Políticas de Row Level Security (RLS) por Tabela
 
 > **Regra base**: Todas as tabelas no Supabase Postgres devem ter `ALTER TABLE ... ENABLE ROW LEVEL SECURITY` ativado. Nenhuma operação é permitida sem política explícita.
 
@@ -561,641 +564,9 @@ erDiagram
 | `storage.os-fotos` (bucket) | `INSERT` | `cliente`, `tecnico` | Somente no caminho `os-fotos/{auth.uid()}/` |
 | `storage.os-fotos` (bucket) | `SELECT` | `cliente`, `tecnico`, `admin` | Caminho começa com `os-fotos/{auth.uid()}/` ou papel = `admin` |
 
-#### 3.4.3 Helper Function recomendada no Supabase
-
-```sql
--- Função auxiliar reutilizável nas políticas RLS
-CREATE OR REPLACE FUNCTION public.get_papel_usuario()
-RETURNS TEXT AS $$
-  SELECT papel FROM public.clientes WHERE auth_user_id = auth.uid() LIMIT 1;
-$$ LANGUAGE sql SECURITY DEFINER STABLE;
-
--- Exemplo de uso em política:
--- CREATE POLICY "admin_tudo_ordens" ON public.ordens_servico
---   FOR ALL USING (public.get_papel_usuario() = 'admin');
-```
-
-
-
-
 ---
 
-### 3.5 Diagrama de Objetos (Instâncias em Tempo de Execução — UML Object Diagram)
-
-O **Diagrama de Objetos** ilustra uma fotografia instantânea (*runtime snapshot*) do sistema em um momento de pico operacional da **CJnet Telecom**. Ele detalha os valores concretos dos atributos e os vínculos de relacionamento entre as instâncias dos três perfis de usuário (**Cliente**, **Técnico**, **Administrador**), a **Ordem de Serviço**, os **Anexos Fotográficos**, os itens da **Fila de Sincronização**, os **Planos de Internet** e as **Notificações Push**:
-
-```mermaid
-classDiagram
-    class clienteJoao {
-        id = "cli-uuid-101"
-        authUserId = "auth-usr-01"
-        nome = "João da Silva"
-        cpfCnpj = "123.456.789-00"
-        telefone = "(35) 99876-1234"
-        endereco = "Rua Minas Gerais, 100 - Centro, Coqueiral/MG"
-        papel = CLIENTE
-        statusContrato = ATIVO
-        pushToken = "ExponentPushToken[joao_coqueiral_abc123]"
-    }
-
-    class tecnicoCarlos {
-        id = "tec-uuid-202"
-        authUserId = "auth-usr-02"
-        nome = "Carlos Reparo de Campo"
-        cpfCnpj = "987.654.321-99"
-        telefone = "(35) 98811-2233"
-        papel = TECNICO
-        statusContrato = ATIVO
-    }
-
-    class adminMaria {
-        id = "adm-uuid-303"
-        authUserId = "auth-usr-03"
-        nome = "Maria Gestora da Rede"
-        cpfCnpj = "555.444.333-22"
-        telefone = "(35) 99100-4455"
-        papel = ADMIN
-        statusContrato = ATIVO
-    }
-
-    class planoFibra400 {
-        id = "plano-uuid-400"
-        nome = "Fibra Turbo 400 Mega"
-        velocidadeMbps = 400
-        precoMensal = 99.90
-        beneficios = ["Wi-Fi 6 incluso", "Upload 200 Mbps", "Suporte prioritário local"]
-        ativo = true
-        destaque = true
-    }
-
-    class osSemSinal {
-        idLocal = "os-local-uuid-777"
-        idRemoto = "os-remoto-supabase-888"
-        clienteId = "cli-uuid-101"
-        tecnicoId = "tec-uuid-202"
-        tipoProblema = SEM_SINAL
-        descricao = "Roteador com luz LOS vermelha piscando desde ontem à noite"
-        parecerTecnico = "Fibra drop conectorizada novamente no poste; sinal normalizado para -19dBm"
-        status = EM_ATENDIMENTO
-        latitude = -21.1834
-        longitude = -45.4389
-        createdAt = "2026-09-11T14:30:00Z"
-        syncedAt = "2026-09-11T14:31:15Z"
-    }
-
-    class fotoDiagnosticoCliente {
-        id = "foto-local-001"
-        osId = "os-local-uuid-777"
-        fotoLocalPath = "file:///storage/emulated/0/DCIM/cjnet/onu_los_vermelho.jpg"
-        fotoRemotaUrl = "https://supabase.cjnet.com.br/storage/v1/object/public/os-fotos/auth-usr-01/onu_los_vermelho.jpg"
-        tipo = CLIENTE_ROTEADOR
-        tamanhoKb = 450
-        comprimida = true
-        enviada = true
-    }
-
-    class fotoComprovanteTecnico {
-        id = "foto-local-002"
-        osId = "os-local-uuid-777"
-        fotoLocalPath = "file:///storage/emulated/0/DCIM/cjnet/power_meter_normalizado.jpg"
-        fotoRemotaUrl = "https://supabase.cjnet.com.br/storage/v1/object/public/os-fotos/auth-usr-02/power_meter_normalizado.jpg"
-        tipo = TECNICO_REPARO
-        tamanhoKb = 680
-        comprimida = true
-        enviada = false
-    }
-
-    class itemFilaSync {
-        id = "sync-queue-uuid-999"
-        entidade = "ordem_servico"
-        operacao = UPDATE
-        payloadJson = "{\"status\":\"concluida\",\"parecer_tecnico\":\"Fibra drop reconectada...\"}"
-        tentativas = 0
-        status = PENDENTE
-        criadoEm = "2026-09-11T15:45:00Z"
-    }
-
-    class notifPushOS {
-        id = "notif-uuid-555"
-        clienteId = "cli-uuid-101"
-        osId = "os-remoto-supabase-888"
-        titulo = "Técnico a Caminho! 🚗"
-        corpo = "Carlos Reparo está em deslocamento para seu endereço em Coqueiral/MG."
-        tipo = STATUS_OS
-        enviada = true
-        criadaEm = "2026-09-11T15:00:00Z"
-        enviadaEm = "2026-09-11T15:00:05Z"
-    }
-
-    class enderecoJoao {
-        clienteId = "cli-uuid-101"
-        latitude = -21.1834
-        longitude = -45.4389
-        enderecoFormatado = "Rua Minas Gerais, 100 - Centro, Coqueiral/MG"
-        dentroCobertura = true
-    }
-
-    clienteJoao "1" --> "1" enderecoJoao : possui
-    clienteJoao "1" --> "1" osSemSinal : abriu_chamado
-    tecnicoCarlos "1" --> "1" osSemSinal : atende_no_campo
-    adminMaria ..> osSemSinal : distribuiu_e_atribuiu
-    osSemSinal "1" *--> "1" fotoDiagnosticoCliente : anexo_diagnostico_cliente
-    osSemSinal "1" *--> "1" fotoComprovanteTecnico : anexo_reparo_tecnico
-    osSemSinal ..> itemFilaSync : enfileira_encerramento_offline
-    osSemSinal ..> notifPushOS : originou_disparo
-    clienteJoao "1" <-- "1" notifPushOS : recebe_no_smartphone
-    planoFibra400 ..> clienteJoao : plano_contratado
-```
-
-#### Descrição do Cenário Representado no Diagrama de Objetos:
-1. **Cliente (`clienteJoao`)**: Abre a OS `osSemSinal` pelo app de autoatendimento residencial em Coqueiral/MG, anexando a foto do roteador (`fotoDiagnosticoCliente`) com luz LOS vermelha (já comprimida para 450 KB e sincronizada).
-2. **Administrador (`adminMaria`)**: No painel de gestão da **Aba do Administrador**, visualiza o chamado e o atribui ao técnico operacional `tecnicoCarlos`.
-3. **Técnico (`tecnicoCarlos`)**: Na **Aba do Técnico**, assume o chamado, vai até a residência, realiza a troca do conector de fibra óptica, tira a foto de comprovação com o medidor de potência (`fotoComprovanteTecnico`) e registra o encerramento do atendimento.
-4. **Fila Offline (`itemFilaSync`)**: Como o técnico atua em local com oscilação de sinal 4G, a conclusão do atendimento é registrada de imediato no SQLite local e inserida na `sync_queue` para envio em segundo plano assim que a conectividade for restaurada.
-5. **Notificação Push (`notifPushOS`)**: O `SyncService` dispara via `PushService` o alerta no smartphone do cliente João confirmando o status do atendimento.
-6. **Vitrine (`planoFibra400`)**: O plano contratado pelo cliente fica disponível também na vitrine pública da tela de login para qualquer visitante interessado.
-
----
-
-## 4. Diagramas Comportamentais e Metodologia de Desenvolvimento
-
-### 4.1 Diagramas de Estado do Sistema
-
-Os diagramas de estado a seguir modelam as transições de ciclo de vida das entidades centrais da arquitetura do aplicativo **CJnet**.
-
-#### 4.1.1 Diagrama de Estados: Ciclo de Vida da Ordem de Serviço (OS)
-
-Modela todas as etapas de uma Ordem de Serviço, desde a abertura offline pelo cliente, passagem pelo painel do Administrador, atendimento em campo pelo Técnico até o encerramento e notificação push:
-
-```mermaid
-stateDiagram-v2
-    [*] --> CriadaLocalOffline : Cliente confirma abertura de OS no app (UC05)
-    CriadaLocalOffline --> EnfileiradaSync : Salva no SQLite local + sync_queue (UUID local)
-    
-    state "Sincronização com Supabase" as SyncNuvem {
-        EnfileiradaSync --> UploadingFotoCliente : Conectividade restabelecida (NetInfo)
-        UploadingFotoCliente --> TransmitindoSupabase : Foto comprimida (≤ 1 MB) enviada ao Storage
-        TransmitindoSupabase --> SincronizadaPendente : Insert aceito no Supabase (ID Remoto gerado)
-    }
-
-    SincronizadaPendente --> AtribuidaTecnico : Admin atribui técnico responsável no painel (UC15)
-    AtribuidaTecnico --> EmDeslocamento : Técnico inicia rota GPS até a residência (UC12)
-    EmDeslocamento --> EmAtendimento : Técnico faz check-in no local do cliente
-    
-    EmAtendimento --> ConcluidaNoLocal : Reparo finalizado + foto do serviço concluído (UC17)
-    ConcluidaNoLocal --> SincronizandoConclusao : Salvo no SQLite local + sync_queue
-    SincronizandoConclusao --> Resolvida : Status e parecer técnico atualizados no Supabase
-    
-    EmAtendimento --> Cancelada : Chamado duplicado ou resolvido remotamente
-    SincronizadaPendente --> Cancelada : Cliente ou Admin cancela chamado
-    
-    Resolvida --> DisparandoNotificacaoPush : SyncService aciona PushService (UC20 / RF14)
-    DisparandoNotificacaoPush --> ArquivadaNoHistorico : Cliente notificado no smartphone
-    Cancelada --> ArquivadaNoHistorico
-    
-    ArquivadaNoHistorico --> [*]
-```
-
-#### 4.1.2 Diagrama de Estados: Item da Fila de Sincronização (`SyncQueueItem`)
-
-Modela o processamento de resiliência e retentativas com backoff exponencial para operações offline:
-
-```mermaid
-stateDiagram-v2
-    [*] --> PendenteLocal : Operação efetuada (INSERT/UPDATE gravado no SQLite)
-    PendenteLocal --> AguardandoRede : NetInfo detecta dispositivo sem conexão
-    AguardandoRede --> ProcessandoItem : Conexão restabelecida (Evento NetInfo / Timer)
-    PendenteLocal --> ProcessandoItem : Dispositivo já conectado no momento da ação
-    
-    state "Processamento e Envio" as Proc {
-        ProcessandoItem --> UploadMidiaStorage : Possui foto local associada? (Sim)
-        UploadMidiaStorage --> TransmitindoPayload : Foto salva no Supabase Storage
-        ProcessandoItem --> TransmitindoPayload : Não possui anexo de foto
-        TransmitindoPayload --> ValidandoResposta : Payload enviado via Supabase Client com RLS
-    }
-
-    ValidandoResposta --> Concluido : Resposta HTTP 200/201 (Sucesso)
-    Concluido --> AtualizandoSQLiteLocal : Grava id_remoto e synced_at no banco local
-    AtualizandoSQLiteLocal --> [*] : Item removido/marcado como concluído
-
-    ValidandoResposta --> FalhaTemporaria : Erro 5xx / Timeout / Queda de Rede
-    FalhaTemporaria --> AplicandoBackoff : tentativas < 5 (Incrementa contador)
-    AplicandoBackoff --> AguardandoRede : Aguarda backoff exponencial (2^n segundos)
-    
-    FalhaTemporaria --> ErroDefinitivo : tentativas >= 5 (Payload inválido / Falha crítica)
-    ErroDefinitivo --> NotificandoUsuario : Exibe alerta ao usuário sobre falha de envio
-    NotificandoUsuario --> [*]
-```
-
-#### 4.1.3 Diagrama de Estados: Sessão e Controle de Acesso Baseado em Papéis (`AuthContext & RBAC`)
-
-Modela a autenticação, segurança no `expo-secure-store` e o roteamento para as abas especializadas:
-
-```mermaid
-stateDiagram-v2
-    [*] --> InicializandoApp : App abre (Root Layout _layout.tsx)
-    InicializandoApp --> ChecandoSecureStore : Lê token JWT no expo-secure-store (Keychain / Keystore)
-    
-    ChecandoSecureStore --> SessaoAtivaLocal : Token JWT válido recuperado
-    ChecandoSecureStore --> VisitanteNaoAutenticado : Sem token / Sessão expirada
-    
-    state "Ambiente Público (Visitante)" as Publico {
-        VisitanteNaoAutenticado --> ExplorandoPlanos : Clica "Ver Planos" na tela de login (UC14)
-        VisitanteNaoAutenticado --> PreenchendoPreCadastro : Clica "Quero ser cliente" (UC02)
-        VisitanteNaoAutenticado --> Autenticando : Informa CPF/E-mail + Senha
-        ExplorandoPlanos --> VisitanteNaoAutenticado : Retorna à tela de login
-        PreenchendoPreCadastro --> VisitanteNaoAutenticado : Solicitação enviada
-    }
-
-    Autenticando --> GravandoSecureStore : Supabase Auth valida credenciais (HTTPS/TLS)
-    Autenticando --> VisitanteNaoAutenticado : Credenciais inválidas (Exibe mensagem de erro)
-    GravandoSecureStore --> SessaoAtivaLocal : JWT gravado exclusivamente no expo-secure-store (RNF03)
-    
-    state "Roteamento Dinâmico por Papel (RBAC)" as Roteamento {
-        SessaoAtivaLocal --> RedirecionandoPorPapel : Lê claim papel ('cliente' | 'tecnico' | 'admin')
-        RedirecionandoPorPapel --> AbaClienteAtiva : papel = 'cliente' -> Redireciona para (tabs-cliente)
-        RedirecionandoPorPapel --> AbaTecnicoAtiva : papel = 'tecnico' -> Redireciona para (tabs-tecnico)
-        RedirecionandoPorPapel --> AbaAdminAtiva : papel = 'admin' -> Redireciona para (tabs-admin)
-    }
-
-    AbaClienteAtiva --> Logout : Usuário clica em 'Sair'
-    AbaTecnicoAtiva --> Logout : Usuário clica em 'Sair'
-    AbaAdminAtiva --> Logout : Usuário clica em 'Sair'
-    
-    Logout --> LimpandoSecureStore : Deleta token JWT do expo-secure-store
-    LimpandoSecureStore --> VisitanteNaoAutenticado : Redireciona para a tela de login
-```
-
-#### 4.1.4 Diagrama de Estados: Ciclo de Vida do Pré-Cadastro (`PreCadastro`)
-
-Modela a captação de novos clientes a partir do aplicativo móvel:
-
-```mermaid
-stateDiagram-v2
-    [*] --> FormularioPreenchido : Visitante preenche dados cadastrais e endereço (UC02)
-    FormularioPreenchido --> GravadoLocalmente : Salvo no SQLite local (offline-first)
-    GravadoLocalmente --> EmFilaSync : Registrado na sync_queue com UUID temporário
-    EmFilaSync --> SincronizadoSupabase : Enviado para tabela public.pre_cadastros no Supabase
-    
-    SincronizadoSupabase --> PendenteAnalise : Aguardando análise da equipe comercial da CJnet
-    PendenteAnalise --> EmContato : Vendedor entra em contato via WhatsApp / Telefone
-    
-    EmContato --> ConvertidoEmContrato : Cliente aprova contratação do plano de fibra óptica
-    EmContato --> RecusadoOuSemCobertura : Fora de cobertura ou cliente desiste
-    
-    ConvertidoEmContrato --> UsuarioAtivado : Criada conta de acesso no Supabase Auth + public.clientes
-    UsuarioAtivado --> [*]
-    RecusadoOuSemCobertura --> [*]
-```
-
----
-
----
-
-### 4.2 Metodologia TDD (Test-Driven Development) e Arquitetura em Camadas
-
-A aplicação adota a metodologia **TDD** (*Test-Driven Development*), operando em um ciclo contínuo de **Red-Green-Refactor**. Esse processo garante a confiabilidade do código e o desacoplamento das regras de negócio através de camadas bem definidas na **Clean Architecture**:
-
-```mermaid
-flowchart TD
-    subgraph TDD ["Ciclo TDD (Test-Driven Development)"]
-        Red["🔴 <b>1. RED</b><br/>Escrever teste que falha<br/>(specs em tests/)"]
-        Green["🟢 <b>2. GREEN</b><br/>Escrever código mínimo<br/>para o teste passar"]
-        Refactor["🔵 <b>3. REFACTOR</b><br/>Refatorar garantindo<br/>arquitetura limpa"]
-
-        Red --> Green --> Refactor --> Red
-    end
-
-    subgraph Camadas ["Camadas da Aplicação e Mapeamento de Testes"]
-        UI["<b>Camada de Interface (Expo Router)</b><br/>app/(auth), (tabs-cliente), (tabs-tecnico), (tabs-admin)"]
-    Control["<b>Camada de Lógica & Controle (Hooks & Contexts)</b><br/>hooks/ (useOrdensServico, usePlanos, useNotificacoes)"]
-        Services["<b>Camada de Serviços & Sincronização</b><br/>services/ (syncService, authService, storageService)"]
-        Entities["<b>Camada de Dados & Entidades</b><br/>db/ (SQLite Schema & Queries) e api/ (Supabase Client)"]
-
-        UI --> Control
-        Control --> Services
-        Services --> Entities
-    end
-```
-
-#### Aplicação do TDD no Projeto:
-1. **Fase RED (Falha Inicial)**: Antes de implementar qualquer caso de uso (ex: abertura de OS offline ou consulta de planos), são desenvolvidos os testes unitários (`tests/domain/`, `tests/application/`) definindo o comportamento esperado das entidades e serviços.
-2. **Fase GREEN (Aprovação Mínima)**: Implementa-se a regra de negócio com a quantidade mínima de código necessária para que a suíte de testes do Jest execute com 100% de aprovação.
-3. **Fase REFACTOR (Refatoração Limpa)**: O código é organizado isolando responsabilidades entre `db/` (SQLite) e `api/` (Supabase), mantendo a garantia de que nenhuma regressão é introduzida.
-
-
----
-
-### 4.3 Diagrama de Sequência: Abertura de OS Offline com Foto e Sync Assíncrono
-
-```mermaid
-sequenceDiagram
-    autonumber
-    actor Cliente
-    participant UI as UI (nova-os.tsx / foto.tsx)
-    participant OSQuery as DB Queries (ordensServico.ts)
-    participant SQLite as SQLite Local (expo-sqlite)
-    participant SyncService as SyncService (syncService.ts)
-    participant Storage as Supabase Storage (bucket os-fotos)
-    participant Supabase as Supabase Database (Postgres API)
-
-    Cliente->>UI: Preenche formulário de OS e tira foto do roteador
-    UI->>OSQuery: criarOSLocal(dados, localFotoPath)
-    OSQuery->>SQLite: INSERT INTO ordens_servico (id_local, status='pendente')
-    OSQuery->>SQLite: INSERT INTO sync_queue (entidade='ordem_servico', status='pendente')
-    SQLite-->>OSQuery: OK (ID Local Gerado)
-    OSQuery-->>UI: Retorno com sucesso otimista
-    UI-->>Cliente: Exibe badge "OS Salva. Sincronizando quando online..."
-
-    Note over SyncService: Evento de Conexão (NetInfo: isOnline = true)
-    SyncService->>SQLite: SELECT * FROM sync_queue WHERE status='pendente'
-    SQLite-->>SyncService: Retorna item da OS + foto local
-    
-    SyncService->>Storage: uploadFoto(fotoLocalPath)
-    Storage-->>SyncService: Retorna fotoRemotaUrl (HTTPS)
-
-    SyncService->>Supabase: POST /rest/v1/ordens_servico (Payload + fotoRemotaUrl)
-    Supabase-->>SyncService: 201 Created (ID Remoto Atribuído)
-
-    SyncService->>SQLite: UPDATE ordens_servico SET status='aberto', id_remoto=X, synced_at=NOW()
-    SyncService->>SQLite: UPDATE sync_queue SET status='concluido'
-    SyncService-->>UI: Dispara atualização de UI via Hook (useOrdensServico)
-```
-
----
-
-### 4.4 Diagrama de Atividades: Processamento da Fila de Sincronização (`syncService`)
-
-```mermaid
-flowchart TD
-    A([Início: Transição Offline -> Online ou Timer]) --> B{Existe Conexão?}
-    B -- Não --> C[Manter dados no SQLite local] --> End([Fim])
-    B -- Sim --> D[Buscar itens em sync_queue com status PENDENTE ordenados por criado_em]
-    D --> E{Há itens na fila?}
-    E -- Não --> End
-    E -- Sim --> F[Pegar próximo item da fila]
-    F --> G{Tipo de Entidade?}
-
-    G -- Ordem de Serviço --> H{Possui Foto Local?}
-    H -- Sim --> I[Fazer upload do arquivo para Supabase Storage]
-    I --> J[Obter URL pública da foto]
-    H -- Não --> K[Montar payload da OS]
-    J --> K
-    K --> L[Executar Insert/Update via client Supabase com RLS]
-
-    G -- Atualização Perfil --> M[Executar Update de Perfil no Supabase]
-
-    L --> N{Sucesso na API?}
-    M --> N
-    N -- Sim --> O[Atualizar registro no SQLite local: synced_at = now]
-    O --> P[Marcar item na sync_queue como CONCLUÍDO]
-    P --> E
-
-    N -- Falha (Erro de Rede / Timeout) --> Q[Incrementar campo tentativas no item]
-    Q --> R{Tentativas > 5?}
-    R -- Sim --> S[Marcar status = ERRO_DEFINITIVO]
-    R -- Não --> T[Aplicar Backoff Exponencial: esperar 2^n segundos]
-    S --> E
-    T --> E
-```
-
----
-
-### 4.5 Diagrama de Componentes da Aplicação Mobile
-
-```mermaid
-componentDiagram
-    package "Dispositivo Móvel (Expo React Native)" {
-        [Expo Router (Stack & Tabs por Perfil)] as Router
-        [Contextos Globais (Auth & Sync)] as Contexts
-        [Custom Hooks (useOS, usePlanos)] as Hooks
-        
-        package "Camada de Dados Local" {
-            [SQLite Client (expo-sqlite)] as SQLiteDB
-            [Queries Locais (src/db/queries)] as DBQueries
-        }
-
-        package "Camada de Serviços" {
-            [SyncService] as SyncSvc
-            [StorageService] as StorageSvc
-            [NetInfo Listener] as NetInfo
-        }
-
-        package "Camada de API Remota" {
-            [Supabase JS Client] as SupabaseSDK
-        }
-    }
-
-    cloud "Supabase Cloud PaaS" {
-        [Supabase Auth (JWT + Roles)] as RemoteAuth
-        [PostgreSQL + RLS + PostGIS] as RemoteDB
-        [Supabase Storage Buckets] as RemoteStorage
-    }
-
-    Router --> Contexts
-    Contexts --> Hooks
-    Hooks --> DBQueries
-    DBQueries --> SQLiteDB
-    
-    NetInfo --> SyncSvc
-    SyncSvc --> DBQueries
-    SyncSvc --> StorageSvc
-    SyncSvc --> SupabaseSDK
-
-    StorageSvc --> RemoteStorage
-    SupabaseSDK --> RemoteAuth
-    SupabaseSDK --> RemoteDB
-
----
-
-### 4.6 Padrão BCE (Boundary-Control-Entity / Diagrama de Robustez)
-
-O padrão **BCE (Boundary-Control-Entity)**, fundamentado na Análise de Robustez de Jacobson, estabelece a separação formal entre as interfaces de interação externa (**Boundary**), as regras de negócio e orquestração de fluxos (**Control**) e as estruturas de dados e regras centrais de domínio (**Entity**). Essa separação viabiliza o desacoplamento preconizado pela **Clean Architecture** e orienta os testes unitários da metodologia **TDD**.
-
-#### 4.6.1 Classificação dos Elementos do Sistema em BCE
-
-```mermaid
-classDiagram
-    class Boundaries {
-        <<boundary>>
-        +LoginScreen (login.tsx)
-        +VitrinePlanosScreen (planos.tsx)
-        +PreCadastroScreen (cadastro.tsx)
-        +NovaOSScreen (nova-os.tsx)
-        +MeusChamadosScreen (chamados.tsx)
-        +MapaCoberturaScreen (mapa.tsx)
-        +DashboardTecnicoScreen (minhas-os.tsx)
-        +ConcluirOSScreen (concluir-os.tsx)
-        +PainelAdminDashboard (dashboard.tsx)
-        +CameraHardware (expo-camera)
-        +LocationSensor (expo-location)
-        +NetInfoListener (@react-native-netinfo)
-        +SecureStoreAdapter (expo-secure-store)
-        +SupabaseGateway (HTTP/REST API)
-        +PushServiceGateway (FCM/Expo Push)
-    }
-
-    class Controls {
-        <<control>>
-        +AuthService (Sessão JWT & RBAC)
-        +OrdemServicoController (useOrdensServico)
-        +SyncService (Fila Assíncrona Offline)
-        +ImageCompressorService (Comprime <= 1MB)
-        +GeoCoverageController (Validação GeoJSON)
-        +PlanoInternetController (usePlanos)
-        +PushNotificationController (useNotificacoes)
-        +PreCadastroController (Triagem Visitante)
-    }
-
-    class Entities {
-        <<entity>>
-        +Cliente (Perfil, AuthUserId, PushToken)
-        +OrdemServico (Problema, Status, Parecer)
-        +OSFoto (PathLocal, URLRemota, Tipo)
-        +PlanoInternet (Velocidade, Preço, Benefícios)
-        +EnderecoCliente (Lat/Lng, Logradouro)
-        +SyncQueueItem (Entidade, Operação, Payload)
-        +PreCadastro (Nome, Telefone, Status)
-        +NotificacaoPush (Título, Mensagem, Tipo)
-        +AreaCobertura (Polígono GeoJSON)
-    }
-```
-
-#### 4.6.2 Diagrama de Robustez BCE (Interação entre Atores, Fronteiras, Controles e Entidades)
-
-```mermaid
-flowchart LR
-    %% Atores
-    Cliente((Cliente))
-    Tecnico((Técnico))
-    Admin((Administrador))
-    Visitante((Visitante))
-    NetSensor((NetInfo Sensor))
-
-    %% Boundaries (Fronteiras / UI & Hardware)
-    subgraph Boundaries ["<<boundary>> Fronteiras (UI, Sensores & Gateways)"]
-        B_Login[UI: Login & Vitrine]
-        B_Cadastro[UI: Pré-Cadastro]
-        B_OSCliente[UI: Nova OS & Foto]
-        B_HistCliente[UI: Meus Chamados]
-        B_Mapa[UI: Mapa de Cobertura]
-        B_OSTecnico[UI: Aba Técnico & Rota GPS]
-        B_AdminPainel[UI: Aba Admin & Métricas]
-        B_Cam[Sensor: expo-camera]
-        B_GPS[Sensor: expo-location]
-        B_Key[SecureStore: JWT Token]
-        B_CloudDB[Gateway: Supabase Postgres + RLS]
-        B_Storage[Gateway: Supabase Storage]
-        B_PushGW[Gateway: Push Service FCM]
-    end
-
-    %% Controls (Controladores & Serviços)
-    subgraph Controls ["<<control>> Controladores & Orquestradores"]
-        C_Auth[AuthService / AuthContext]
-        C_OS[OrdemServicoController]
-        C_Sync[SyncService / SyncQueue]
-        C_Img[ImageCompressorService]
-        C_Geo[GeoCoverageController]
-        C_Plano[PlanoInternetController]
-        C_Push[PushNotificationController]
-        C_PreCad[PreCadastroController]
-    end
-
-    %% Entities (Entidades de Domínio & Persistência)
-    subgraph Entities ["<<entity>> Entidades de Domínio"]
-        E_Cli[(Cliente)]
-        E_OS[(OrdemServico)]
-        E_Foto[(OSFoto)]
-        E_Plano[(PlanoInternet)]
-        E_End[(EnderecoCliente)]
-        E_Queue[(SyncQueueItem)]
-        E_Pre[(PreCadastro)]
-        E_Push[(NotificacaoPush)]
-        E_Geo[(AreaCobertura)]
-    end
-
-    %% Relações Visitante
-    Visitante --> B_Login
-    Visitante --> B_Cadastro
-    B_Login --> C_Plano
-    B_Login --> C_Auth
-    B_Cadastro --> C_PreCad
-    C_Plano --> E_Plano
-    C_PreCad --> E_Pre
-    C_PreCad --> C_Sync
-
-    %% Relações Cliente
-    Cliente --> B_OSCliente
-    Cliente --> B_HistCliente
-    Cliente --> B_Mapa
-    B_OSCliente --> B_Cam
-    B_OSCliente --> C_OS
-    B_Cam --> C_Img
-    C_Img --> E_Foto
-    C_OS --> E_OS
-    C_OS --> C_Sync
-    B_HistCliente --> C_OS
-    B_Mapa --> B_GPS
-    B_GPS --> C_Geo
-    C_Geo --> E_Geo
-
-    %% Relações Técnico
-    Tecnico --> B_OSTecnico
-    B_OSTecnico --> B_Cam
-    B_OSTecnico --> C_OS
-    B_OSTecnico --> B_GPS
-
-    %% Relações Administrador
-    Admin --> B_AdminPainel
-    B_AdminPainel --> C_OS
-    B_AdminPainel --> C_Plano
-    B_AdminPainel --> C_Push
-
-    %% Relações de Autenticação & Armazenamento Seguro
-    C_Auth --> B_Key
-    C_Auth --> B_CloudDB
-    C_Auth --> E_Cli
-
-    %% Relações do Motor Sync e Gateways Remotos
-    NetSensor --> C_Sync
-    C_Sync --> E_Queue
-    C_Sync --> B_Storage
-    C_Sync --> B_CloudDB
-    C_Sync --> C_Push
-    C_Push --> E_Push
-    C_Push --> B_PushGW
-
-    %% Relações entre Entidades
-    E_Cli -.-> E_OS
-    E_OS -.-> E_Foto
-    E_Cli -.-> E_End
-    E_OS -.-> E_Push
-```
-
-#### 4.6.3 Matriz de Rastreabilidade BCE por Caso de Uso
-
-| Caso de Uso (UC) | Fronteiras Envolvidas (`<<boundary>>`) | Controladores / Serviços (`<<control>>`) | Entidades Afetadas (`<<entity>>`) |
-|---|---|---|---|
-| **UC01: Ver Cobertura** | `MapaCoberturaScreen`, `expo-location` | `GeoCoverageController` | `AreaCobertura`, `EnderecoCliente` |
-| **UC02: Realizar Pré-Cadastro** | `PreCadastroScreen` | `PreCadastroController`, `SyncService` | `PreCadastro`, `SyncQueueItem` |
-| **UC03: Fazer Login e RBAC** | `LoginScreen`, `expo-secure-store`, `Supabase Auth` | `AuthService` | `Cliente` |
-| **UC05: Abrir OS (Offline)** | `NovaOSScreen` | `OrdemServicoController`, `SyncService` | `OrdemServico`, `SyncQueueItem` |
-| **UC06: Histórico de OSs** | `MeusChamadosScreen` | `OrdemServicoController` | `OrdemServico`, `OSFoto` |
-| **UC07: Atualizar Endereço** | `PerfilClienteScreen`, `expo-location` | `GeoCoverageController`, `SyncService` | `EnderecoCliente`, `Cliente` |
-| **UC08: Fila Offline SQLite** | `SQLite Engine (expo-sqlite)` | `SyncService` | `SyncQueueItem` |
-| **UC09: Tirar Foto Roteador** | `expo-camera`, `expo-file-system` | `ImageCompressorService` | `OSFoto` |
-| **UC11: Sincronizar Fila** | `NetInfoListener`, `Supabase REST Gateway` | `SyncService` | `SyncQueueItem`, `OrdemServico`, `OSFoto` |
-| **UC12: Atendimento do Técnico** | `DashboardTecnicoScreen`, `ConcluirOSScreen` | `OrdemServicoController`, `SyncService` | `OrdemServico`, `OSFoto`, `SyncQueueItem` |
-| **UC14: Consultar Planos (Login)**| `VitrinePlanosScreen`, `LoginScreen` | `PlanoInternetController` | `PlanoInternet` |
-| **UC15: Painel Administrador** | `PainelAdminDashboard` | `OrdemServicoController`, `PlanoInternetController` | `OrdemServico`, `PlanoInternet` |
-| **UC16: Gerenciar Planos** | `CadastroPlanosScreen` | `PlanoInternetController`, `Supabase REST` | `PlanoInternet` |
-| **UC17: Foto do Reparo Técnico** | `expo-camera`, `ConcluirOSScreen` | `ImageCompressorService`, `SyncService` | `OSFoto`, `OrdemServico` |
-| **UC19: Push Alerta em Massa** | `DisparoAvisosScreen`, `PushServiceGateway` | `PushNotificationController` | `NotificacaoPush`, `Cliente` |
-| **UC20: Push de Status da OS** | `PushServiceGateway (FCM/Expo)` | `SyncService`, `PushNotificationController` | `NotificacaoPush`, `OrdemServico`, `Cliente` |
-
----
-
-## 5. Diretrizes de Arquitetura e Implementação (DDD, Clean Arch & TDD)
+## 5. Diretrizes de Arquitetura e Implementação (DDD, Clean Architecture & TDD)
 
 ### 5.1 Organização do Projeto (`src/`)
 
@@ -1264,16 +635,23 @@ src/
 
 ---
 
-### 5.3 Estratégia de Testes (TDD / Jest)
+### 5.3 Metodologia TDD (Test-Driven Development) e Estratégia de Testes
 
+A aplicação adota a metodologia **TDD** (*Test-Driven Development*), operando em um ciclo contínuo de **Red-Green-Refactor**:
+- **1. RED (Falha Inicial)**: Antes de implementar qualquer funcionalidade ou regra de negócio (ex: abertura de OS offline, compressão de imagens, consulta pública de planos), são desenvolvidos os testes unitários (`tests/domain/`, `tests/application/`) definindo o comportamento esperado.
+- **2. GREEN (Aprovação Mínima)**: Implementa-se a regra de negócio com a quantidade mínima de código necessária para que a suíte de testes do Jest execute com 100% de aprovação.
+- **3. REFACTOR (Refatoração Limpa)**: O código é refinado e organizado nas camadas de Clean Architecture (`db/`, `api/`, `services/`), garantindo manutenibilidade sem regressões.
+
+#### Mapeamento de Testes:
 - **Testes Unitários de Banco Local (`src/db/queries/`)**:
-  - Testar inserção de OS com status `pendente` e verificação da gravação idêntica em `sync_queue`.
+  - Testar inserção de OS com status `pendente` e gravação correspondente em `sync_queue`.
   - Testar leitura offline da vitrine de planos de internet na tabela `planos_internet`.
 - **Testes Unitários de Serviços (`src/services/syncService.ts`)**:
   - Mockar o `supabaseClient` e o `sqliteDb`.
-  - Simular execução da fila com retentativa (backoff) após erro HTTP 500.
-  - Verificar se a foto é enviada primeiro e se seu URL remoto é injetado no registro final da OS.
+  - Simular execução da fila com retentativa (backoff exponencial) após indisponibilidade temporária.
+  - Verificar se a foto é comprimida para $\le 1$ MB e seu URL remoto injetado no registro final da OS.
 - **Testes de Integração de Telas (Expo Router)**:
   - Garantir que a troca de rota de `(auth)` para `(tabs-cliente)`, `(tabs-tecnico)` ou `(tabs-admin)` ocorra automaticamente de acordo com o `AuthContext` e o papel do usuário.
+
 
 
