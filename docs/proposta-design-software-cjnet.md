@@ -275,13 +275,16 @@ classDiagram
     class Cliente {
         +String id
         +String authUserId
+        +String planoId
         +String nome
         +String cpfCnpj
+        +String email
         +String telefone
         +String endereco
         +PapelUsuario papel "CLIENTE, TECNICO, ADMIN"
-        +StatusContrato statusContrato
+        +StatusContrato statusContrato "ATIVO, SUSPENSO, CANCELADO"
         +String pushToken
+        +Date createdAt
         +Date updatedAt
         +abrirOS(tipo, descricao) OrdemServico
     }
@@ -297,20 +300,46 @@ classDiagram
         +consultarVitrinePublica() List~PlanoInternet~
     }
 
+    class AreaCobertura {
+        +String id
+        +String nomeZona
+        +String poligonoGeoJSON
+        +Boolean ativo
+        +verificarPonto(lat, lng) Boolean
+    }
+
+    class EnderecoCliente {
+        +String id
+        +String clienteId
+        +String areaCoberturaId
+        +Double latitude
+        +Double longitude
+        +String logradouro
+        +String numero
+        +String bairro
+        +String cidade
+        +String estado
+        +String cep
+        +String complemento
+        +Boolean dentroCobertura
+        +validarCobertura(poligonoGeoJSON) Boolean
+    }
+
     class OrdemServico {
         +String idLocal
         +String idRemoto
         +String clienteId
         +String tecnicoId
-        +TipoProblema tipoProblema
+        +TipoProblema tipoProblema "SEM_SINAL, LENTIDAO, QUEDA, OUTROS"
         +String descricao
         +String parecerTecnico
         +StatusOS status "PENDENTE, EM_ATENDIMENTO, CONCLUIDO, CANCELADO"
         +Double latitude
         +Double longitude
         +Date createdAt
+        +Date dataFechamento
         +Date syncedAt
-        +adicionarFoto(pathLocal) OSFoto
+        +adicionarFoto(pathLocal, tipo) OSFoto
         +atribuirTecnico(tecnicoId)
         +encerrarAtendimento(parecerTecnico)
     }
@@ -324,33 +353,17 @@ classDiagram
         +Int tamanhoKb
         +Boolean comprimida
         +Boolean enviada
-    }
-
-    class EnderecoCliente {
-        +String clienteId
-        +Double latitude
-        +Double longitude
-        +String enderecoFormatado
-        +Boolean dentroCobertura
-        +validarCobertura(poligonoGeoJSON) Boolean
-    }
-
-    class SyncQueueItem {
-        +String id
-        +String entidade
-        +OperacaoSync operacao
-        +String payloadJson
-        +Int tentativas
-        +StatusSync status
-        +Date criadoEm
+        +comprimir() void
     }
 
     class PreCadastro {
         +String id
+        +String planoId
+        +String areaCoberturaId
         +String nome
         +String cpfCnpj
         +String telefone
-        +String endereco
+        +String enderecoCompleto
         +Double latitude
         +Double longitude
         +StatusPreCadastro status "PENDENTE, CONTATADO, CONVERTIDO"
@@ -360,15 +373,25 @@ classDiagram
 
     class NotificacaoPush {
         +String id
-        +String titulo
-        +String corpo
         +String clienteId
         +String osId
+        +String titulo
+        +String corpo
         +TipoNotificacao tipo "STATUS_OS, AVISO_ADMIN"
         +Boolean enviada
         +Date criadaEm
         +Date enviadaEm
         +enviarParaDispositivo(pushToken) void
+    }
+
+    class SyncQueueItem {
+        +String id
+        +String entidade
+        +OperacaoSync operacao "INSERT, UPDATE"
+        +String payloadJson
+        +Int tentativas
+        +StatusSync status "PENDENTE, PROCESSANDO, ERRO, CONCLUIDO"
+        +Date criadoEm
     }
 
     class AppMeta {
@@ -379,12 +402,17 @@ classDiagram
         +setLastSyncAt(date) void
     }
 
-    Cliente "1" -- "0..*" OrdemServico : solicita
+    PlanoInternet "1" -- "0..*" Cliente : contratado_por
+    PlanoInternet "1" -- "0..*" PreCadastro : interesse_em
+    AreaCobertura "1" -- "0..*" EnderecoCliente : abrange
+    AreaCobertura "1" -- "0..*" PreCadastro : valida_regiao
     Cliente "1" -- "1" EnderecoCliente : possui
+    Cliente "1" -- "0..*" OrdemServico : solicita
+    Cliente "1" -- "0..*" OrdemServico : atende_como_tecnico
     Cliente "1" -- "0..*" NotificacaoPush : recebe
     OrdemServico "1" *-- "0..*" OSFoto : contem
-    OrdemServico ..> SyncQueueItem : gera_pendencia
     OrdemServico "0..*" -- "0..1" NotificacaoPush : dispara
+    OrdemServico ..> SyncQueueItem : gera_pendencia
     PreCadastro ..> SyncQueueItem : gera_pendencia
 ```
 
@@ -392,17 +420,16 @@ classDiagram
 
 | Classe | Persistente? | Estratégia Local (SQLite) | Estratégia Remota (Supabase Postgres) | Observação |
 |--------|-------------|----------------------------|----------------------------------------|------------|
-| `Cliente` | Sim | Tabela `clientes` | Tabela `public.clientes` | FK `auth_user_id → auth.users`, inclui colunas `papel` e `push_token` |
-| `PlanoInternet` | Sim | Tabela `planos_internet` | Tabela `public.planos_internet` | Exibido na tela de login sem autenticação; gerenciado pelo Admin |
-| `OrdemServico` | Sim | Tabela `ordens_servico` (PK `id_local` UUID) | Tabela `public.ordens_servico` (PK `id` BigInt/UUID) | Inclui `tecnico_id` (FK) e `parecer_tecnico` para encerramento |
-| `OSFoto` | Sim | Guardado em `foto_local_path` + campo `tamanho_kb` e `comprimida` | Bucket Supabase Storage `os-fotos` + Tabela `public.os_fotos` | Comprimida para ≤ 1 MB antes do upload (RNF09); suporta foto do cliente e do técnico |
-| `EnderecoCliente` | Sim | Tabela `enderecos_cliente` | Tabela `public.clientes` / `PostGIS` | Armazena coordenadas (Lat/Lng) |
-| `SyncQueueItem` | Sim (Apenas Local) | Tabela `sync_queue` | N/A (Fila efêmera no mobile) | Controla retentativas com backoff exponencial |
-| `PreCadastro` | Sim | Tabela `pre_cadastros` | Tabela `public.pre_cadastros` | Visitante envia pedido de contrato; sincroniza quando online |
-| `NotificacaoPush` | Sim | Tabela `notificacoes` (cache local) | Tabela `public.notificacoes_push` | Disparada pelo SyncService via PushService (RF14) |
+| `Cliente` | Sim | Tabela `clientes` | Tabela `public.clientes` | FK `auth_user_id → auth.users`, FK `plano_id → planos_internet`, `papel`, `push_token` |
+| `PlanoInternet` | Sim | Tabela `planos_internet` | Tabela `public.planos_internet` | Exibido na tela de login sem autenticação; gerenciado pelo Administrador |
+| `AreaCobertura` | Sim | Tabela `area_cobertura` (cache GeoJSON) | Tabela `public.area_cobertura` (PostGIS) | Polígonos de cobertura da rede em Coqueiral/MG |
+| `EnderecoCliente` | Sim | Tabela `enderecos_cliente` | Tabela `public.enderecos_cliente` | FK `cliente_id → clientes`, FK `area_cobertura_id → area_cobertura` |
+| `OrdemServico` | Sim | Tabela `ordens_servico` (PK `id_local` UUID) | Tabela `public.ordens_servico` (PK `id` UUID) | FK `cliente_id`, FK `tecnico_id`, `parecer_tecnico`, `status` |
+| `OSFoto` | Sim | Guardado em `foto_local_path` + flags locais | Bucket `os-fotos` + Tabela `public.os_fotos` | Comprimida $\le$ 1 MB (RNF09); FK `os_id → ordens_servico` |
+| `PreCadastro` | Sim | Tabela `pre_cadastros` | Tabela `public.pre_cadastros` | FK `plano_id`, FK `area_cobertura_id`; sincroniza quando online |
+| `NotificacaoPush` | Sim | Tabela `notificacoes` (cache local) | Tabela `public.notificacoes_push` | FK `cliente_id`, FK `os_id`; disparada pelo SyncService via PushService |
+| `SyncQueueItem` | Sim (Apenas Local) | Tabela `sync_queue` | N/A (Fila efêmera no mobile) | Controla retentativas offline com backoff exponencial |
 | `AppMeta` | Sim (Apenas Local) | Tabela `app_meta` | N/A | Guarda `last_sync_at` e flags de configuração. **Tokens JWT ficam exclusivamente no `expo-secure-store`** (RNF03) — nunca nesta tabela. |
-
-
 
 ---
 
@@ -410,159 +437,195 @@ classDiagram
 
 ### 4.1 Diagrama Entidade-Relacionamento (DER)
 
-O **Diagrama Entidade-Relacionamento (DER)** apresenta o modelo de dados relacional e a modelagem física do banco de dados, estabelecendo chaves primárias (PK), chaves estrangeiras (FK), tipos de dados e cardinalidades exatas entre as tabelas do ecossistema **CJnet**:
+O **Diagrama Entidade-Relacionamento (DER)** apresenta a modelagem relacional física do banco de dados no **Supabase Postgres (Remoto)** e o mapeamento das chaves primárias (PK), chaves estrangeiras (FK), tipos de dados e cardinalidades exatas do ecossistema **CJnet**:
 
 ```mermaid
 erDiagram
-    CLIENTES ||--o{ ORDENS_SERVICO : solicita
-    CLIENTES ||--o| ENDERECOS_CLIENTE : possui
-    ORDENS_SERVICO ||--o{ OS_FOTOS : contem
-    AREA_COBERTURA ||--o{ ENDERECOS_CLIENTE : intercepta
-    ORDENS_SERVICO }o--|| CLIENTES : atribuido_tecnico
-    ORDENS_SERVICO ||--o{ NOTIFICACOES_PUSH : dispara
-    CLIENTES ||--o{ NOTIFICACOES_PUSH : recebe
-
-    CLIENTES {
-        string id PK
-        string auth_user_id FK "Vínculo com auth.users no Supabase"
-        string nome
-        string cpf_cnpj
-        string telefone
-        string endereco
-        string papel "CLIENTE, TECNICO, ADMIN"
-        string status_contrato "ATIVO, SUSPENSO, CANCELADO"
-        string push_token "Token Expo/FCM para notificações push"
-        timestamp updated_at
-    }
+    PLANOS_INTERNET ||--o{ CLIENTES : "contratado_por"
+    PLANOS_INTERNET ||--o{ PRE_CADASTROS : "interesse_em"
+    AREA_COBERTURA ||--o{ ENDERECOS_CLIENTE : "abrange"
+    AREA_COBERTURA ||--o{ PRE_CADASTROS : "valida_viabilidade"
+    CLIENTES ||--o| ENDERECOS_CLIENTE : "possui"
+    CLIENTES ||--o{ ORDENS_SERVICO : "solicita (cliente_id)"
+    CLIENTES ||--o{ ORDENS_SERVICO : "executa (tecnico_id)"
+    ORDENS_SERVICO ||--o{ OS_FOTOS : "contem_anexos"
+    ORDENS_SERVICO ||--o{ NOTIFICACOES_PUSH : "dispara_evento"
+    CLIENTES ||--o{ NOTIFICACOES_PUSH : "recebe_alerta"
 
     PLANOS_INTERNET {
-        string id PK
-        string nome
-        int velocidade_mbps
-        decimal preco_mensal
-        text beneficios "JSON array de benefícios"
-        boolean ativo
-        boolean destaque
-        timestamp updated_at
-    }
-
-    ORDENS_SERVICO {
-        string id_local PK "UUID gerado no mobile (offline-first)"
-        string id_remoto "ID atribuído pelo Supabase"
-        string cliente_id FK "Cliente solicitante"
-        string tecnico_id FK "Técnico responsável pelo atendimento"
-        string tipo_problema "SEM_SINAL, LENTIDAO, QUEDA, OUTROS"
-        text descricao "Descrição detalhada do problema"
-        text parecer_tecnico "Observação técnica ao concluir chamado"
-        string status "PENDENTE, EM_ATENDIMENTO, CONCLUIDO, CANCELADO"
-        double latitude
-        double longitude
-        timestamp created_at
-        timestamp synced_at
-    }
-
-    OS_FOTOS {
-        string id PK
-        string os_id_local FK "Vínculo com a OS local"
-        string foto_local_path "Caminho no sistema de arquivos local"
-        string foto_remota_url "URL pública no Supabase Storage"
-        string tipo "CLIENTE_ROTEADOR, TECNICO_REPARO"
-        int tamanho_kb "Tamanho do arquivo comprimido (<= 1024 KB)"
-        boolean comprimida
-        boolean enviada
-    }
-
-    ENDERECOS_CLIENTE {
-        string cliente_id PK, FK
-        double latitude
-        double longitude
-        text endereco_formatado
-        boolean dentro_cobertura
-    }
-
-    SYNC_QUEUE {
-        string id PK "UUID da pendência local"
-        string entidade "ordem_servico, pre_cadastro, cliente"
-        string operacao "INSERT, UPDATE"
-        text payload_json "Dados serializados para sincronização"
-        int tentativas "Contador para backoff exponencial"
-        string status "PENDENTE, PROCESSANDO, ERRO, CONCLUIDO"
-        timestamp criado_em
-    }
-
-    PRE_CADASTROS {
-        string id PK "UUID da solicitação"
-        string nome
-        string cpf_cnpj
-        string telefone
-        text endereco
-        double latitude
-        double longitude
-        string status "PENDENTE, CONTATADO, CONVERTIDO"
-        timestamp criado_em
-        timestamp synced_at
-    }
-
-    NOTIFICACOES_PUSH {
-        string id PK
-        string cliente_id FK
-        string os_id FK
-        string titulo
-        text corpo
-        string tipo "STATUS_OS, AVISO_ADMIN"
-        boolean enviada
-        timestamp criada_em
-        timestamp enviada_em
+        uuid id PK "Identificador único do plano"
+        string nome "Ex: Fibra Turbo 400 Mega"
+        int velocidade_mbps "Velocidade em Mbps (ex: 400)"
+        decimal preco_mensal "Valor da mensalidade (ex: 99.90)"
+        jsonb beneficios "JSON com vantagens: Wi-Fi 6, Suporte Local..."
+        boolean ativo "Disponibilidade comercial"
+        boolean destaque "Exibição em destaque na tela de login"
+        timestamp created_at "Data de criação"
+        timestamp updated_at "Data de atualização"
     }
 
     AREA_COBERTURA {
-        string id PK
+        uuid id PK "Identificador único da zona"
         string nome_zona "Nome do setor atendido em Coqueiral/MG"
-        geometry poligono_postgis "Polígono GeoJSON da cobertura"
+        geometry poligono_postgis "Polígono GeoJSON / PostGIS delimitador"
+        boolean ativo "Status operacional da área"
+        timestamp updated_at "Data de atualização da malha"
+    }
+
+    CLIENTES {
+        uuid id PK "Identificador único do usuário/cliente"
+        uuid auth_user_id FK "Vínculo com auth.users no Supabase"
+        uuid plano_id FK "FK para PLANOS_INTERNET (plano ativo)"
+        string nome "Nome completo ou Razão Social"
+        string cpf_cnpj "Documento fiscal único indexado"
+        string email "E-mail para autenticação e avisos"
+        string telefone "WhatsApp / Telefone de contato"
+        string papel "CLIENTE, TECNICO, ADMIN (RBAC)"
+        string status_contrato "ATIVO, SUSPENSO, CANCELADO"
+        string push_token "Token Expo/FCM para notificações push"
+        timestamp created_at "Data de cadastro"
+        timestamp updated_at "Data de atualização cadastral"
+    }
+
+    ENDERECOS_CLIENTE {
+        uuid id PK "Identificador único do endereço"
+        uuid cliente_id FK "FK única para CLIENTES (relação 1:1)"
+        uuid area_cobertura_id FK "FK para AREA_COBERTURA"
+        double latitude "Coordenada GPS (Latitude)"
+        double longitude "Coordenada GPS (Longitude)"
+        string logradouro "Rua, Avenida, Praça..."
+        string numero "Número do imóvel"
+        string bairro "Bairro em Coqueiral/MG"
+        string cidade "Cidade (Coqueiral)"
+        string estado "Estado (MG)"
+        string cep "CEP (37235-000)"
+        text complemento "Apto, bloco, ponto de referência"
+        boolean dentro_cobertura "Validação geográfica automática"
+        timestamp updated_at "Data de atualização"
+    }
+
+    ORDENS_SERVICO {
+        uuid id PK "Identificador único remoto no Supabase"
+        string id_local "UUID gerado no mobile (offline-first)"
+        uuid cliente_id FK "FK para CLIENTES (solicitante do reparo)"
+        uuid tecnico_id FK "FK para CLIENTES (técnico responsável)"
+        string tipo_problema "SEM_SINAL, LENTIDAO, QUEDA, OUTROS"
+        text descricao "Descrição detalhada do cliente"
+        text parecer_tecnico "Laudo técnico registrado ao concluir chamado"
+        string status "PENDENTE, EM_ATENDIMENTO, CONCLUIDO, CANCELADO"
+        double latitude "Coordenada GPS da solicitação"
+        double longitude "Coordenada GPS da solicitação"
+        timestamp created_at "Data e hora de abertura"
+        timestamp data_fechamento "Data e hora de encerramento pelo técnico"
+        timestamp synced_at "Data de sincronização com o backend"
+    }
+
+    OS_FOTOS {
+        uuid id PK "Identificador único do anexo"
+        uuid os_id FK "FK para ORDENS_SERVICO"
+        string foto_local_path "Caminho no sistema de arquivos local do mobile"
+        string foto_remota_url "URL pública no Supabase Storage"
+        string tipo "CLIENTE_ROTEADOR, TECNICO_REPARO"
+        int tamanho_kb "Tamanho do arquivo comprimido (<= 1024 KB)"
+        boolean comprimida "Flag indicativa de compressão (RNF09)"
+        boolean enviada "Flag de status de upload"
+        timestamp created_at "Data de captura"
+    }
+
+    PRE_CADASTROS {
+        uuid id PK "Identificador único do pré-cadastro"
+        uuid plano_id FK "FK para PLANOS_INTERNET (plano de interesse)"
+        uuid area_cobertura_id FK "FK para AREA_COBERTURA"
+        string nome "Nome do visitante interessado"
+        string cpf_cnpj "Documento fiscal do interessado"
+        string telefone "Telefone / WhatsApp de contato"
+        text endereco_completo "Endereço informado para instalação"
+        double latitude "Coordenada geográfica aproximada"
+        double longitude "Coordenada geográfica aproximada"
+        string status "PENDENTE, CONTATADO, CONVERTIDO, RECUSADO"
+        timestamp criado_em "Data de envio da solicitação"
+        timestamp synced_at "Data de sincronização com a nuvem"
+    }
+
+    NOTIFICACOES_PUSH {
+        uuid id PK "Identificador único da notificação"
+        uuid cliente_id FK "FK para CLIENTES (destinatário)"
+        uuid os_id FK "FK para ORDENS_SERVICO (origem do evento)"
+        string titulo "Título da notificação push"
+        text corpo "Conteúdo detalhado da mensagem ou aviso"
+        string tipo "STATUS_OS, AVISO_ADMIN, MANUTENCAO"
+        boolean enviada "Flag de confirmação de envio via FCM/Expo"
+        timestamp criada_em "Data de geração do evento"
+        timestamp enviada_em "Data de entrega ao dispositivo"
     }
 ```
 
-### 4.2 Mapeamento Local/Remoto e Políticas de RLS (Row Level Security)
+---
 
-#### 4.2.1 Mapeamento de Tabelas: SQLite (Local) vs Supabase Postgres (Remoto)
+### 4.2 Modelo Físico Local (SQLite Mobile) e Políticas de Segurança (RLS)
+
+#### 4.2.1 Tabelas Exclusivas do Banco Local SQLite (`expo-sqlite`)
+
+Além de manter cópias em cache local das tabelas remotas para leitura offline, o dispositivo móvel possui tabelas locais exclusivas para governança da resiliência:
+
+1. **`SYNC_QUEUE` (Fila Assíncrona de Sincronização)**:
+   - `id` (TEXT PK — UUID): Identificador da pendência local.
+   - `entidade` (TEXT): Entidade afetada (`ordem_servico`, `pre_cadastro`, `cliente`, `os_foto`).
+   - `operacao` (TEXT): Tipo da operação (`INSERT`, `UPDATE`).
+   - `payload_json` (TEXT): Dados completos serializados para envio.
+   - `tentativas` (INTEGER DEFAULT 0): Contador de retentativas com backoff exponencial ($2^n$ segundos).
+   - `status` (TEXT): Status da pendência (`PENDENTE`, `PROCESSANDO`, `ERRO`, `CONCLUIDO`).
+   - `criado_em` (TEXT): Timestamp de inclusão na fila.
+
+2. **`APP_META` (Metadados da Aplicação)**:
+   - `chave` (TEXT PK): Identificador da configuração (ex: `last_sync_at`, `offline_mode`).
+   - `valor` (TEXT): Valor associado.
+   - `atualizado_em` (TEXT): Timestamp da última atualização.
+   - *Nota de Segurança*: **Tokens JWT de sessão nunca são gravados nesta tabela**, ficando armazenados com isolamento de hardware exclusivamente no **`expo-secure-store`** (RNF03).
+
+#### 4.2.2 Mapeamento de Tabelas: SQLite (Local) vs Supabase Postgres (Remoto)
 
 | Tabela Local (SQLite) | Tabela Remota (Supabase) | Sincroniza? | Direção | Observação |
 |-----------------------|--------------------------|-------------|----------|------------|
 | `clientes` | `public.clientes` | Sim | Bidirecional | Leitura local offline; escrita sobe via `sync_queue` |
+| `planos_internet` | `public.planos_internet` | Sim | Nuvem → Mobile (somente leitura) | Atualizado pelo Administrador; consultado público na tela de login |
+| `area_cobertura` | `public.area_cobertura` | Sim | Nuvem → Mobile (cache GeoJSON) | Polígonos de fibra para checagem client-side no mapa |
+| `enderecos_cliente` | `public.enderecos_cliente` | Sim | Bidirecional | Armazena geolocalização e endereço residencial |
 | `ordens_servico` | `public.ordens_servico` | Sim | Mobile → Nuvem (INSERT) + Nuvem → Mobile (UPDATE status) | PK local = `id_local` (UUID); PK remota = `id` (UUID) |
-| `os_fotos` | Bucket `os-fotos` + `public.os_fotos` | Sim | Mobile → Nuvem | Binário sobe para o Storage; URL remota gravada no SQLite |
-| `planos_internet` | `public.planos_internet` | Sim | Nuvem → Mobile (somente leitura) | Atualizado pelo Admin; consumido público no login sem auth |
-| `enderecos_cliente` | `public.clientes` (colunas lat/lng) | Sim | Bidirecional | Pode usar coluna geometry PostGIS na nuvem |
-| `notificacoes` | `public.notificacoes_push` | Sim | Nuvem → Mobile | Gravado no SQLite local apenas para exibir histórico no app |
+| `os_fotos` | Bucket `os-fotos` + `public.os_fotos` | Sim | Mobile → Nuvem | Imagem comprimida sobe para o Storage; metadados no Postgres |
 | `pre_cadastros` | `public.pre_cadastros` | Sim | Mobile → Nuvem | Visitante sem conta; sincroniza quando online |
-| `sync_queue` | N/A | Não | Apenas Local | Fila efêmera — nunca sincronizada com a nuvem |
-| `app_meta` | N/A | Não | Apenas Local | Guarda `last_sync_at` e flags. **Tokens JWT: exclusivamente no `expo-secure-store`** |
+| `notificacoes` | `public.notificacoes_push` | Sim | Nuvem → Mobile | Histórico de alertas e avisos recebidos no app |
+| `sync_queue` | N/A | Não | Apenas Local | Fila efêmera no mobile com retry e backoff |
+| `app_meta` | N/A | Não | Apenas Local | Metadados de cache; **Tokens JWT: exclusivamente no `expo-secure-store`** |
 
-#### 4.2.2 Políticas de Row Level Security (RLS) por Tabela
+#### 4.2.3 Políticas de Row Level Security (RLS) por Tabela
 
-> **Regra base**: Todas as tabelas no Supabase Postgres devem ter `ALTER TABLE ... ENABLE ROW LEVEL SECURITY` ativado. Nenhuma operação é permitida sem política explícita.
+> **Regra base**: Todas as tabelas no Supabase Postgres possuem `ALTER TABLE ... ENABLE ROW LEVEL SECURITY` ativado. Nenhuma leitura ou escrita ocorre sem política explícita.
 
 | Tabela | Operação | Papel Permitido | Condição RLS |
 |--------|----------|----------------|---------------|
-| `public.clientes` | `SELECT` | `cliente`, `tecnico`, `admin` | `auth.uid() = auth_user_id` (cliente vê só o próprio) / `admin` vê todos |
-| `public.clientes` | `UPDATE` | `cliente`, `admin` | `auth.uid() = auth_user_id` (cliente atualiza só o próprio) |
-| `public.clientes` | `INSERT` | `service_role` (via SyncService) | Apenas via backend autenticado com chave de serviço |
+| `public.clientes` | `SELECT` | `cliente`, `tecnico`, `admin` | `auth.uid() = auth_user_id` (cliente/técnico vê o próprio) / `admin` vê todos |
+| `public.clientes` | `UPDATE` | `cliente`, `admin` | `auth.uid() = auth_user_id` (cliente atualiza o próprio perfil) |
+| `public.clientes` | `INSERT` | `service_role` | Criação de contas via backend/serviço autenticado |
+| `public.planos_internet` | `SELECT` | **público (anon)** | `TRUE` — acessado livremente na tela de login sem autenticação |
+| `public.planos_internet` | `INSERT`, `UPDATE`, `DELETE` | `admin` | `(SELECT papel FROM clientes WHERE auth_user_id = auth.uid()) = 'admin'` |
+| `public.area_cobertura` | `SELECT` | **público (anon)** + autenticados | `TRUE` — consulta pública de disponibilidade no mapa |
+| `public.area_cobertura` | `INSERT`, `UPDATE`, `DELETE` | `admin` | `(SELECT papel FROM clientes WHERE auth_user_id = auth.uid()) = 'admin'` |
+| `public.enderecos_cliente` | `SELECT`, `UPDATE` | `cliente`, `admin` | `auth.uid() = (SELECT auth_user_id FROM clientes WHERE id = cliente_id)` |
 | `public.ordens_servico` | `SELECT` | `cliente` | `auth.uid() = (SELECT auth_user_id FROM clientes WHERE id = cliente_id)` |
 | `public.ordens_servico` | `SELECT` | `tecnico` | `auth.uid() = (SELECT auth_user_id FROM clientes WHERE id = tecnico_id)` |
-| `public.ordens_servico` | `SELECT` | `admin` | `TRUE` (acesso irrestrito ao painel) |
+| `public.ordens_servico` | `SELECT` | `admin` | `TRUE` (visão geral do painel gerencial) |
 | `public.ordens_servico` | `INSERT` | `cliente` | `auth.uid() = (SELECT auth_user_id FROM clientes WHERE id = cliente_id)` |
-| `public.ordens_servico` | `UPDATE` | `tecnico` | Somente campos `status`, `parecer_tecnico`, `synced_at` quando `tecnico_id` bate com `auth.uid()` |
-| `public.ordens_servico` | `UPDATE` | `admin` | `TRUE` (pode reatribuir técnico e cancelar) |
-| `public.os_fotos` | `SELECT` | `cliente`, `tecnico`, `admin` | Herdado pelo `os_id` da OS que o usuário tem acesso |
-| `public.os_fotos` | `INSERT` | `cliente`, `tecnico` | Restrito ao `os_id` de OSs que pertencem ao usuário |
-| `public.planos_internet` | `SELECT` | **público (anon)** | `TRUE` — acessado sem autenticação na tela de login |
-| `public.planos_internet` | `INSERT`, `UPDATE`, `DELETE` | `admin` | `(SELECT papel FROM clientes WHERE auth_user_id = auth.uid()) = 'admin'` |
-| `public.notificacoes_push` | `SELECT` | `cliente` | `auth.uid() = (SELECT auth_user_id FROM clientes WHERE id = cliente_id)` |
-| `public.notificacoes_push` | `INSERT` | `service_role` | Apenas via SyncService com chave de serviço (backend) |
-| `public.pre_cadastros` | `INSERT` | **público (anon)** + `service_role` | `TRUE` — visitante não autenticado pode inserir; sync via `service_role` |
+| `public.ordens_servico` | `UPDATE` | `tecnico` | Campos `status`, `parecer_tecnico`, `synced_at` quando `tecnico_id` bate com `auth.uid()` |
+| `public.ordens_servico` | `UPDATE` | `admin` | `TRUE` (atribuição de técnico, cancelamento e reabertura) |
+| `public.os_fotos` | `SELECT` | `cliente`, `tecnico`, `admin` | Herdado do `os_id` da OS que o usuário possui permissão |
+| `public.os_fotos` | `INSERT` | `cliente`, `tecnico` | Restrito ao `os_id` das OSs vinculadas ao usuário |
+| `public.pre_cadastros` | `INSERT` | **público (anon)** + `service_role` | `TRUE` — visitante não logado pode solicitar contrato |
 | `public.pre_cadastros` | `SELECT`, `UPDATE` | `admin` | `(SELECT papel FROM clientes WHERE auth_user_id = auth.uid()) = 'admin'` |
-| `storage.os-fotos` (bucket) | `INSERT` | `cliente`, `tecnico` | Somente no caminho `os-fotos/{auth.uid()}/` |
-| `storage.os-fotos` (bucket) | `SELECT` | `cliente`, `tecnico`, `admin` | Caminho começa com `os-fotos/{auth.uid()}/` ou papel = `admin` |
+| `public.notificacoes_push` | `SELECT` | `cliente` | `auth.uid() = (SELECT auth_user_id FROM clientes WHERE id = cliente_id)` |
+| `public.notificacoes_push` | `INSERT` | `service_role` | Disparado apenas por serviços de backend autorizados |
+| `storage.os-fotos` (bucket) | `INSERT` | `cliente`, `tecnico` | Somente no diretório `os-fotos/{auth.uid()}/` |
+| `storage.os-fotos` (bucket) | `SELECT` | `cliente`, `tecnico`, `admin` | Caminho `os-fotos/{auth.uid()}/` ou papel = `admin` |
 
 ---
 
