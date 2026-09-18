@@ -281,12 +281,15 @@ classDiagram
         +String email
         +String telefone
         +String endereco
-        +PapelUsuario papel "CLIENTE, TECNICO, ADMIN"
-        +StatusContrato statusContrato "ATIVO, SUSPENSO, CANCELADO"
+        +PapelUsuario papel
+        +StatusContrato statusContrato
         +String pushToken
         +Date createdAt
         +Date updatedAt
-        +abrirOS(tipo, descricao) OrdemServico
+        +abrirOS(tipo, descricao, foto) OrdemServico
+        +atualizarEndereco(endereco) void
+        +atualizarPushToken(token) void
+        +consultarHistoricoOS() List~OrdemServico~
     }
 
     class PlanoInternet {
@@ -298,6 +301,7 @@ classDiagram
         +Boolean ativo
         +Boolean destaque
         +consultarVitrinePublica() List~PlanoInternet~
+        +atualizarPlano(nome, velocidade, preco, beneficios) void
     }
 
     class AreaCobertura {
@@ -322,7 +326,8 @@ classDiagram
         +String cep
         +String complemento
         +Boolean dentroCobertura
-        +validarCobertura(poligonoGeoJSON) Boolean
+        +validarCobertura(area) Boolean
+        +formatarEnderecoCompleto() String
     }
 
     class OrdemServico {
@@ -330,18 +335,20 @@ classDiagram
         +String idRemoto
         +String clienteId
         +String tecnicoId
-        +TipoProblema tipoProblema "SEM_SINAL, LENTIDAO, QUEDA, OUTROS"
+        +TipoProblema tipoProblema
         +String descricao
         +String parecerTecnico
-        +StatusOS status "PENDENTE, EM_ATENDIMENTO, CONCLUIDO, CANCELADO"
+        +StatusOS status
         +Double latitude
         +Double longitude
         +Date createdAt
         +Date dataFechamento
         +Date syncedAt
         +adicionarFoto(pathLocal, tipo) OSFoto
-        +atribuirTecnico(tecnicoId)
-        +encerrarAtendimento(parecerTecnico)
+        +atribuirTecnico(tecnicoId) void
+        +iniciarAtendimento() void
+        +encerrarAtendimento(parecerTecnico, fotoConclusao) void
+        +cancelar(motivo) void
     }
 
     class OSFoto {
@@ -349,11 +356,12 @@ classDiagram
         +String osId
         +String fotoLocalPath
         +String fotoRemotaUrl
-        +TipoFoto tipo "CLIENTE_ROTEADOR, TECNICO_REPARO"
+        +TipoFoto tipo
         +Int tamanhoKb
         +Boolean comprimida
         +Boolean enviada
-        +comprimir() void
+        +comprimirParaLimiteMaximo(maxKb) void
+        +marcarEnviada(urlRemota) void
     }
 
     class PreCadastro {
@@ -366,9 +374,12 @@ classDiagram
         +String enderecoCompleto
         +Double latitude
         +Double longitude
-        +StatusPreCadastro status "PENDENTE, CONTATADO, CONVERTIDO"
+        +StatusPreCadastro status
         +Date criadoEm
         +Date syncedAt
+        +submeterSolicitacao() void
+        +marcarContatado() void
+        +converterEmContrato() Cliente
     }
 
     class NotificacaoPush {
@@ -377,21 +388,24 @@ classDiagram
         +String osId
         +String titulo
         +String corpo
-        +TipoNotificacao tipo "STATUS_OS, AVISO_ADMIN"
+        +TipoNotificacao tipo
         +Boolean enviada
         +Date criadaEm
         +Date enviadaEm
-        +enviarParaDispositivo(pushToken) void
+        +enviarParaDispositivo(pushToken) Boolean
     }
 
     class SyncQueueItem {
         +String id
         +String entidade
-        +OperacaoSync operacao "INSERT, UPDATE"
+        +OperacaoSync operacao
         +String payloadJson
         +Int tentativas
-        +StatusSync status "PENDENTE, PROCESSANDO, ERRO, CONCLUIDO"
+        +StatusSync status
         +Date criadoEm
+        +incrementarTentativa() void
+        +calcularProximoBackoff() Int
+        +marcarConcluido() void
     }
 
     class AppMeta {
@@ -400,6 +414,72 @@ classDiagram
         +Date atualizadoEm
         +getLastSyncAt() Date
         +setLastSyncAt(date) void
+    }
+
+    class PapelUsuario {
+        <<enumeration>>
+        CLIENTE
+        TECNICO
+        ADMIN
+    }
+
+    class StatusContrato {
+        <<enumeration>>
+        ATIVO
+        SUSPENSO
+        CANCELADO
+    }
+
+    class TipoProblema {
+        <<enumeration>>
+        SEM_SINAL
+        LENTIDAO
+        QUEDA
+        MUDANCA_ENDERECO
+        OUTROS
+    }
+
+    class StatusOS {
+        <<enumeration>>
+        PENDENTE
+        EM_ATENDIMENTO
+        CONCLUIDO
+        CANCELADO
+    }
+
+    class TipoFoto {
+        <<enumeration>>
+        CLIENTE_ROTEADOR
+        TECNICO_REPARO
+    }
+
+    class StatusPreCadastro {
+        <<enumeration>>
+        PENDENTE
+        CONTATADO
+        CONVERTIDO
+        RECUSADO
+    }
+
+    class TipoNotificacao {
+        <<enumeration>>
+        STATUS_OS
+        AVISO_ADMIN
+        MANUTENCAO
+    }
+
+    class OperacaoSync {
+        <<enumeration>>
+        INSERT
+        UPDATE
+    }
+
+    class StatusSync {
+        <<enumeration>>
+        PENDENTE
+        PROCESSANDO
+        ERRO
+        CONCLUIDO
     }
 
     PlanoInternet "1" -- "0..*" Cliente : contratado_por
@@ -422,7 +502,7 @@ classDiagram
 |--------|-------------|----------------------------|----------------------------------------|------------|
 | `Cliente` | Sim | Tabela `clientes` | Tabela `public.clientes` | FK `auth_user_id → auth.users`, FK `plano_id → planos_internet`, `papel`, `push_token` |
 | `PlanoInternet` | Sim | Tabela `planos_internet` | Tabela `public.planos_internet` | Exibido na tela de login sem autenticação; gerenciado pelo Administrador |
-| `AreaCobertura` | Sim | Tabela `area_cobertura` (cache GeoJSON) | Tabela `public.area_cobertura` (PostGIS) | Polígonos de cobertura da rede em Coqueiral/MG |
+| `AreaCobertura` | Sim | Tabela `area_cobertura` (cache GeoJSON) | Tabela `public.area_cobertura` (PostGIS) | Polígonos de cobertura da rede de fibra em Coqueiral/MG |
 | `EnderecoCliente` | Sim | Tabela `enderecos_cliente` | Tabela `public.enderecos_cliente` | FK `cliente_id → clientes`, FK `area_cobertura_id → area_cobertura` |
 | `OrdemServico` | Sim | Tabela `ordens_servico` (PK `id_local` UUID) | Tabela `public.ordens_servico` (PK `id` UUID) | FK `cliente_id`, FK `tecnico_id`, `parecer_tecnico`, `status` |
 | `OSFoto` | Sim | Guardado em `foto_local_path` + flags locais | Bucket `os-fotos` + Tabela `public.os_fotos` | Comprimida $\le$ 1 MB (RNF09); FK `os_id → ordens_servico` |
