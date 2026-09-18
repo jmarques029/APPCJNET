@@ -280,16 +280,12 @@ classDiagram
         +String cpfCnpj
         +String email
         +String telefone
-        +String endereco
-        +PapelUsuario papel
-        +StatusContrato statusContrato
+        +String papel "CLIENTE | TECNICO | ADMIN"
+        +String statusContrato "ATIVO | SUSPENSO | CANCELADO"
         +String pushToken
-        +Date createdAt
-        +Date updatedAt
         +abrirOS(tipo, descricao, foto) OrdemServico
-        +atualizarEndereco(endereco) void
-        +atualizarPushToken(token) void
         +consultarHistoricoOS() List~OrdemServico~
+        +atualizarPushToken(token) void
     }
 
     class PlanoInternet {
@@ -301,7 +297,7 @@ classDiagram
         +Boolean ativo
         +Boolean destaque
         +consultarVitrinePublica() List~PlanoInternet~
-        +atualizarPlano(nome, velocidade, preco, beneficios) void
+        +atualizarPlano(nome, vel, preco) void
     }
 
     class AreaCobertura {
@@ -319,15 +315,10 @@ classDiagram
         +Double latitude
         +Double longitude
         +String logradouro
-        +String numero
         +String bairro
         +String cidade
-        +String estado
-        +String cep
-        +String complemento
         +Boolean dentroCobertura
         +validarCobertura(area) Boolean
-        +formatarEnderecoCompleto() String
     }
 
     class OrdemServico {
@@ -335,20 +326,15 @@ classDiagram
         +String idRemoto
         +String clienteId
         +String tecnicoId
-        +TipoProblema tipoProblema
+        +String tipoProblema "SEM_SINAL | LENTIDAO | QUEDA | OUTROS"
+        +String status "PENDENTE | EM_ATENDIMENTO | CONCLUIDO | CANCELADO"
         +String descricao
         +String parecerTecnico
-        +StatusOS status
-        +Double latitude
-        +Double longitude
         +Date createdAt
         +Date dataFechamento
-        +Date syncedAt
         +adicionarFoto(pathLocal, tipo) OSFoto
-        +atribuirTecnico(tecnicoId) void
         +iniciarAtendimento() void
-        +encerrarAtendimento(parecerTecnico, fotoConclusao) void
-        +cancelar(motivo) void
+        +encerrarAtendimento(parecer, foto) void
     }
 
     class OSFoto {
@@ -356,11 +342,10 @@ classDiagram
         +String osId
         +String fotoLocalPath
         +String fotoRemotaUrl
-        +TipoFoto tipo
+        +String tipo "CLIENTE_ROTEADOR | TECNICO_REPARO"
         +Int tamanhoKb
-        +Boolean comprimida
         +Boolean enviada
-        +comprimirParaLimiteMaximo(maxKb) void
+        +comprimirParaLimiteMaximo(1024Kb) void
         +marcarEnviada(urlRemota) void
     }
 
@@ -369,16 +354,10 @@ classDiagram
         +String planoId
         +String areaCoberturaId
         +String nome
-        +String cpfCnpj
         +String telefone
-        +String enderecoCompleto
-        +Double latitude
-        +Double longitude
-        +StatusPreCadastro status
+        +String status "PENDENTE | CONTATADO | CONVERTIDO"
         +Date criadoEm
-        +Date syncedAt
         +submeterSolicitacao() void
-        +marcarContatado() void
         +converterEmContrato() Cliente
     }
 
@@ -388,24 +367,20 @@ classDiagram
         +String osId
         +String titulo
         +String corpo
-        +TipoNotificacao tipo
+        +String tipo "STATUS_OS | AVISO_ADMIN | MANUTENCAO"
         +Boolean enviada
-        +Date criadaEm
-        +Date enviadaEm
         +enviarParaDispositivo(pushToken) Boolean
     }
 
     class SyncQueueItem {
         +String id
-        +String entidade
-        +OperacaoSync operacao
+        +String entidade "ordens_servico | pre_cadastros | fotos"
+        +String operacao "INSERT | UPDATE"
         +String payloadJson
         +Int tentativas
-        +StatusSync status
-        +Date criadoEm
+        +String status "PENDENTE | PROCESSANDO | CONCLUIDO | ERRO"
+        +processarSincronizacao() void
         +incrementarTentativa() void
-        +calcularProximoBackoff() Int
-        +marcarConcluido() void
     }
 
     class AppMeta {
@@ -414,72 +389,6 @@ classDiagram
         +Date atualizadoEm
         +getLastSyncAt() Date
         +setLastSyncAt(date) void
-    }
-
-    class PapelUsuario {
-        <<enumeration>>
-        CLIENTE
-        TECNICO
-        ADMIN
-    }
-
-    class StatusContrato {
-        <<enumeration>>
-        ATIVO
-        SUSPENSO
-        CANCELADO
-    }
-
-    class TipoProblema {
-        <<enumeration>>
-        SEM_SINAL
-        LENTIDAO
-        QUEDA
-        MUDANCA_ENDERECO
-        OUTROS
-    }
-
-    class StatusOS {
-        <<enumeration>>
-        PENDENTE
-        EM_ATENDIMENTO
-        CONCLUIDO
-        CANCELADO
-    }
-
-    class TipoFoto {
-        <<enumeration>>
-        CLIENTE_ROTEADOR
-        TECNICO_REPARO
-    }
-
-    class StatusPreCadastro {
-        <<enumeration>>
-        PENDENTE
-        CONTATADO
-        CONVERTIDO
-        RECUSADO
-    }
-
-    class TipoNotificacao {
-        <<enumeration>>
-        STATUS_OS
-        AVISO_ADMIN
-        MANUTENCAO
-    }
-
-    class OperacaoSync {
-        <<enumeration>>
-        INSERT
-        UPDATE
-    }
-
-    class StatusSync {
-        <<enumeration>>
-        PENDENTE
-        PROCESSANDO
-        ERRO
-        CONCLUIDO
     }
 
     PlanoInternet "1" -- "0..*" Cliente : contratado_por
@@ -492,18 +401,9 @@ classDiagram
     Cliente "1" -- "0..*" NotificacaoPush : recebe
     OrdemServico "1" *-- "0..*" OSFoto : contem
     OrdemServico "0..*" -- "0..1" NotificacaoPush : dispara
-    OrdemServico ..> SyncQueueItem : gera_pendencia
-    PreCadastro ..> SyncQueueItem : gera_pendencia
+    OrdemServico ..> SyncQueueItem : enfileira_offline
+    PreCadastro ..> SyncQueueItem : enfileira_offline
     SyncQueueItem "1" -- "1" AppMeta : sincroniza_com
-    Cliente ..> PapelUsuario : define_papel
-    Cliente ..> StatusContrato : define_status
-    OrdemServico ..> TipoProblema : categorizado_em
-    OrdemServico ..> StatusOS : possui_status
-    OSFoto ..> TipoFoto : tipo_anexo
-    PreCadastro ..> StatusPreCadastro : possui_status
-    NotificacaoPush ..> TipoNotificacao : tipo_notificacao
-    SyncQueueItem ..> OperacaoSync : tipo_operacao
-    SyncQueueItem ..> StatusSync : status_fila
 ```
 
 ### 3.2 Tabela de Persistência e Estratégia Mapeada
