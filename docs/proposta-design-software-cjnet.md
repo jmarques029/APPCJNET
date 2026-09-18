@@ -494,6 +494,16 @@ classDiagram
     OrdemServico "0..*" -- "0..1" NotificacaoPush : dispara
     OrdemServico ..> SyncQueueItem : gera_pendencia
     PreCadastro ..> SyncQueueItem : gera_pendencia
+    SyncQueueItem "1" -- "1" AppMeta : sincroniza_com
+    Cliente ..> PapelUsuario : define_papel
+    Cliente ..> StatusContrato : define_status
+    OrdemServico ..> TipoProblema : categorizado_em
+    OrdemServico ..> StatusOS : possui_status
+    OSFoto ..> TipoFoto : tipo_anexo
+    PreCadastro ..> StatusPreCadastro : possui_status
+    NotificacaoPush ..> TipoNotificacao : tipo_notificacao
+    SyncQueueItem ..> OperacaoSync : tipo_operacao
+    SyncQueueItem ..> StatusSync : status_fila
 ```
 
 ### 3.2 Tabela de Persistência e Estratégia Mapeada
