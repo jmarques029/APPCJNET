@@ -266,9 +266,9 @@ flowchart LR
 
 ---
 
-## 3. Diagrama de Classes e Estrutura de Dados
+## 3. Diagrama de Classes de Domínio (UML)
 
-### 3.1 Diagrama de Classes de Domínio (UML)
+O **Diagrama de Classes** modela a estrutura orientada a objetos das entidades centrais da regra de negócio do **App CJnet**, contendo atributos tipados, valores válidos para enumerações e métodos de negócio, com associações e composições totalmente integradas:
 
 ```mermaid
 classDiagram
@@ -406,26 +406,9 @@ classDiagram
     SyncQueueItem "1" -- "1" AppMeta : sincroniza_com
 ```
 
-### 3.2 Tabela de Persistência e Estratégia Mapeada
-
-| Classe | Persistente? | Estratégia Local (SQLite) | Estratégia Remota (Supabase Postgres) | Observação |
-|--------|-------------|----------------------------|----------------------------------------|------------|
-| `Cliente` | Sim | Tabela `clientes` | Tabela `public.clientes` | FK `auth_user_id → auth.users`, FK `plano_id → planos_internet`, `papel`, `push_token` |
-| `PlanoInternet` | Sim | Tabela `planos_internet` | Tabela `public.planos_internet` | Exibido na tela de login sem autenticação; gerenciado pelo Administrador |
-| `AreaCobertura` | Sim | Tabela `area_cobertura` (cache GeoJSON) | Tabela `public.area_cobertura` (PostGIS) | Polígonos de cobertura da rede de fibra em Coqueiral/MG |
-| `EnderecoCliente` | Sim | Tabela `enderecos_cliente` | Tabela `public.enderecos_cliente` | FK `cliente_id → clientes`, FK `area_cobertura_id → area_cobertura` |
-| `OrdemServico` | Sim | Tabela `ordens_servico` (PK `id_local` UUID) | Tabela `public.ordens_servico` (PK `id` UUID) | FK `cliente_id`, FK `tecnico_id`, `parecer_tecnico`, `status` |
-| `OSFoto` | Sim | Guardado em `foto_local_path` + flags locais | Bucket `os-fotos` + Tabela `public.os_fotos` | Comprimida $\le$ 1 MB (RNF09); FK `os_id → ordens_servico` |
-| `PreCadastro` | Sim | Tabela `pre_cadastros` | Tabela `public.pre_cadastros` | FK `plano_id`, FK `area_cobertura_id`; sincroniza quando online |
-| `NotificacaoPush` | Sim | Tabela `notificacoes` (cache local) | Tabela `public.notificacoes_push` | FK `cliente_id`, FK `os_id`; disparada pelo SyncService via PushService |
-| `SyncQueueItem` | Sim (Apenas Local) | Tabela `sync_queue` | N/A (Fila efêmera no mobile) | Controla retentativas offline com backoff exponencial |
-| `AppMeta` | Sim (Apenas Local) | Tabela `app_meta` | N/A | Guarda `last_sync_at` e flags de configuração. **Tokens JWT ficam exclusivamente no `expo-secure-store`** (RNF03) — nunca nesta tabela. |
-
 ---
 
-## 4. Diagrama Entidade-Relacionamento (DER Relacional) e Modelo de Dados
-
-### 4.1 Diagrama Entidade-Relacionamento (DER)
+## 4. Diagrama Entidade-Relacionamento (DER Relacional)
 
 O **Diagrama Entidade-Relacionamento (DER)** apresenta a modelagem relacional física do banco de dados no **Supabase Postgres (Remoto)** e o mapeamento das chaves primárias (PK), chaves estrangeiras (FK), tipos de dados e cardinalidades exatas do ecossistema **CJnet**:
 
@@ -552,9 +535,119 @@ erDiagram
 
 ---
 
-### 4.2 Modelo Físico Local (SQLite Mobile) e Políticas de Segurança (RLS)
+## 5. Diagrama de Sequência (UML)
 
-#### 4.2.1 Tabelas Exclusivas do Banco Local SQLite (`expo-sqlite`)
+O **Diagrama de Sequência** detalha a troca de mensagens, fluxo assíncrono e etapas de processamento desde a abertura de uma Ordem de Serviço pelo cliente (mesmo offline), compressão da foto do equipamento, enfileiramento local, sincronização com o Supabase e notificação em tempo real:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Cliente as 👤 Cliente
+    participant UI as 📱 App Mobile (UI)
+    participant DB as 💾 SQLite Local
+    participant Queue as 📋 sync_queue
+    participant Sync as ⚡ SyncService
+    participant Supa as ☁️ Supabase (Postgres/Storage)
+    actor Tecnico as 👷 Técnico de Campo
+    participant Push as 🔔 PushService
+
+    Note over Cliente,UI: 1. Fluxo Offline-First de Abertura de Chamado
+    Cliente->>UI: Preenche formulário de OS e tira foto da ONU/Roteador
+    UI->>UI: Comprime imagem (<= 1 MB - RNF09) e salva em foto_local_path
+    UI->>DB: INSERT ordens_servico (id_local UUID, status='PENDENTE')
+    UI->>Queue: INSERT sync_queue (entidade='ordem_servico', op='INSERT')
+    UI-->>Cliente: Exibe confirmação imediata (Otimista: "Sincronizando...")
+
+    Note over Sync,Supa: 2. Processamento em Background (Conexão Detectada)
+    Sync->>Queue: Lê pendências com status='PENDENTE'
+    Sync->>Supa: Upload da foto comprimida para bucket 'os-fotos'
+    Supa-->>Sync: Retorna foto_remota_url
+    Sync->>Supa: INSERT public.ordens_servico (id_local, cliente_id, foto_url, status)
+    Supa-->>Sync: Retorna id_remoto e synced_at
+    Sync->>DB: UPDATE ordens_servico (id_remoto, synced_at)
+    Sync->>Queue: UPDATE sync_queue (status='CONCLUIDO')
+
+    Note over Tecnico,Push: 3. Atendimento Técnico e Notificação Push
+    Tecnico->>UI: Abre Aba do Técnico e visualiza OS atribuída
+    Tecnico->>UI: Altera status para 'EM_ATENDIMENTO'
+    UI->>Supa: UPDATE ordens_servico (status='EM_ATENDIMENTO')
+    Supa->>Sync: Dispara evento de alteração de status
+    Sync->>Push: Envia notificação para push_token do Cliente
+    Push-->>Cliente: "Seu chamado está Em Atendimento!"
+
+    Tecnico->>UI: Conclui reparo, anexa foto do serviço e registra parecer
+    Tecnico->>UI: Finaliza chamado (status='CONCLUIDO')
+    UI->>Supa: UPDATE ordens_servico (status='CONCLUIDO', data_fechamento=now())
+    Supa->>Push: Dispara notificação de conclusão
+    Push-->>Cliente: "Seu chamado foi Concluído com Sucesso!"
+```
+
+---
+
+## 6. Diagrama de Atividades (UML)
+
+O **Diagrama de Atividades** ilustra o fluxo de trabalho operacional, decisões de captura de mídia, controle de conectividade de rede e o ciclo de vida completo da Ordem de Serviço no aplicativo:
+
+```mermaid
+flowchart TD
+    Start([Início: Cliente identifica instabilidade na conexão]) --> OpenApp[Acessar App CJnet -> Aba Suporte]
+    OpenApp --> FormOS[Preencher Tipo de Problema e Descrição]
+    
+    FormOS --> CheckFoto{Deseja anexar foto<br/>do equipamento?}
+    CheckFoto -- Sim --> TakePic[Tirar foto da ONU/Roteador via Câmera]
+    TakePic --> CompressPic[Comprimir foto para <= 1 MB - RNF09]
+    CompressPic --> SaveLocalMedia[Salvar arquivo no storage interno do dispositivo]
+    SaveLocalMedia --> SaveLocalDB
+    CheckFoto -- Não --> SaveLocalDB
+
+    SaveLocalDB[Gravar OS no SQLite com id_local UUID e status PENDENTE] --> EnqueueSync[Adicionar item na fila sync_queue]
+    EnqueueSync --> FeedbackUI[Exibir feedback visual imediato ao Cliente]
+
+    FeedbackUI --> NetCheck{Dispositivo com<br/>conexão ativa?}
+    NetCheck -- Não --> OfflineState[Manter dados em cache local SQLite e aguardar rede]
+    OfflineState --> NetCheck
+    NetCheck -- Sim --> ProcessQueue[SyncService processa fila em background]
+
+    ProcessQueue --> UploadStorage[Upload da foto comprimida para Supabase Storage]
+    UploadStorage --> SyncPostgres[INSERT da OS na tabela public.ordens_servico]
+    SyncPostgres --> UpdateQueueStatus[Marcar item como CONCLUIDO na sync_queue]
+
+    UpdateQueueStatus --> AdminAssign[Admin / Sistema atribui OS ao Técnico na região]
+    AdminAssign --> TechView[Técnico visualiza chamado na Aba do Técnico]
+    TechView --> TechStart[Técnico inicia deslocamento e marca EM_ATENDIMENTO]
+    TechStart --> Push1[SyncService envia Push: 'Chamado em Atendimento']
+
+    Push1 --> TechRepair[Técnico realiza reparo no endereço do cliente]
+    TechRepair --> TechPhoto[Técnico tira foto do serviço concluído e registra parecer]
+    TechPhoto --> TechFinish[Técnico encerra atendimento: status CONCLUIDO]
+    TechFinish --> Push2[SyncService envia Push: 'Chamado Concluído']
+    Push2 --> EndNode([Fim: Histórico de chamados atualizado e sincronizado])
+```
+
+---
+
+## 7. Modelo de Persistência, Banco Local SQLite e Políticas de Segurança (RLS)
+
+### 7.1 Tabela de Persistência e Estratégia Mapeada
+
+| Classe | Persistente? | Estratégia Local (SQLite) | Estratégia Remota (Supabase Postgres) | Observação |
+|--------|-------------|----------------------------|----------------------------------------|------------|
+| `Cliente` | Sim | Tabela `clientes` | Tabela `public.clientes` | FK `auth_user_id → auth.users`, FK `plano_id → planos_internet`, `papel`, `push_token` |
+| `PlanoInternet` | Sim | Tabela `planos_internet` | Tabela `public.planos_internet` | Exibido na tela de login sem autenticação; gerenciado pelo Administrador |
+| `AreaCobertura` | Sim | Tabela `area_cobertura` (cache GeoJSON) | Tabela `public.area_cobertura` (PostGIS) | Polígonos de cobertura da rede de fibra em Coqueiral/MG |
+| `EnderecoCliente` | Sim | Tabela `enderecos_cliente` | Tabela `public.enderecos_cliente` | FK `cliente_id → clientes`, FK `area_cobertura_id → area_cobertura` |
+| `OrdemServico` | Sim | Tabela `ordens_servico` (PK `id_local` UUID) | Tabela `public.ordens_servico` (PK `id` UUID) | FK `cliente_id`, FK `tecnico_id`, `parecer_tecnico`, `status` |
+| `OSFoto` | Sim | Guardado em `foto_local_path` + flags locais | Bucket `os-fotos` + Tabela `public.os_fotos` | Comprimida $\le$ 1 MB (RNF09); FK `os_id → ordens_servico` |
+| `PreCadastro` | Sim | Tabela `pre_cadastros` | Tabela `public.pre_cadastros` | FK `plano_id`, FK `area_cobertura_id`; sincroniza quando online |
+| `NotificacaoPush` | Sim | Tabela `notificacoes` (cache local) | Tabela `public.notificacoes_push` | FK `cliente_id`, FK `os_id`; disparada pelo SyncService via PushService |
+| `SyncQueueItem` | Sim (Apenas Local) | Tabela `sync_queue` | N/A (Fila efêmera no mobile) | Controla retentativas offline com backoff exponencial |
+| `AppMeta` | Sim (Apenas Local) | Tabela `app_meta` | N/A | Guarda `last_sync_at` e flags de configuração. **Tokens JWT ficam exclusivamente no `expo-secure-store`** (RNF03) — nunca nesta tabela. |
+
+---
+
+### 7.2 Modelo Físico Local (SQLite Mobile)
+
+#### 7.2.1 Tabelas Exclusivas do Banco Local SQLite (`expo-sqlite`)
 
 Além de manter cópias em cache local das tabelas remotas para leitura offline, o dispositivo móvel possui tabelas locais exclusivas para governança da resiliência:
 
@@ -573,7 +666,9 @@ Além de manter cópias em cache local das tabelas remotas para leitura offline,
    - `atualizado_em` (TEXT): Timestamp da última atualização.
    - *Nota de Segurança*: **Tokens JWT de sessão nunca são gravados nesta tabela**, ficando armazenados com isolamento de hardware exclusivamente no **`expo-secure-store`** (RNF03).
 
-#### 4.2.2 Mapeamento de Tabelas: SQLite (Local) vs Supabase Postgres (Remoto)
+---
+
+### 7.3 Mapeamento de Tabelas: SQLite (Local) vs Supabase Postgres (Remoto)
 
 | Tabela Local (SQLite) | Tabela Remota (Supabase) | Sincroniza? | Direção | Observação |
 |-----------------------|--------------------------|-------------|----------|------------|
@@ -588,7 +683,9 @@ Além de manter cópias em cache local das tabelas remotas para leitura offline,
 | `sync_queue` | N/A | Não | Apenas Local | Fila efêmera no mobile com retry e backoff |
 | `app_meta` | N/A | Não | Apenas Local | Metadados de cache; **Tokens JWT: exclusivamente no `expo-secure-store`** |
 
-#### 4.2.3 Políticas de Row Level Security (RLS) por Tabela
+---
+
+### 7.4 Políticas de Row Level Security (RLS) por Tabela
 
 > **Regra base**: Todas as tabelas no Supabase Postgres possuem `ALTER TABLE ... ENABLE ROW LEVEL SECURITY` ativado. Nenhuma leitura ou escrita ocorre sem política explícita.
 
@@ -619,9 +716,9 @@ Além de manter cópias em cache local das tabelas remotas para leitura offline,
 
 ---
 
-## 5. Diretrizes de Arquitetura e Implementação (DDD, Clean Architecture & TDD)
+## 8. Diretrizes de Arquitetura e Implementação (DDD, Clean Architecture & TDD)
 
-### 5.1 Organização do Projeto (`src/`)
+### 8.1 Organização do Projeto (`src/`)
 
 ```
 src/
@@ -668,7 +765,7 @@ src/
 
 ---
 
-### 5.2 Contextos Delimitados (DDD - Domain Driven Design)
+### 8.2 Contextos Delimitados (DDD - Domain Driven Design)
 
 1. **Contexto de Autenticação & Gestão de Acessos**:
    - *Entidades*: `Cliente` (com `PapelUsuario`: Cliente, Técnico, Admin), `EnderecoCliente`.
@@ -688,7 +785,7 @@ src/
 
 ---
 
-### 5.3 Metodologia TDD (Test-Driven Development) e Estratégia de Testes
+### 8.3 Metodologia TDD (Test-Driven Development) e Estratégia de Testes
 
 A aplicação adota a metodologia **TDD** (*Test-Driven Development*), operando em um ciclo contínuo de **Red-Green-Refactor**:
 - **1. RED (Falha Inicial)**: Antes de implementar qualquer funcionalidade ou regra de negócio (ex: abertura de OS offline, compressão de imagens, consulta pública de planos), são desenvolvidos os testes unitários (`tests/domain/`, `tests/application/`) definindo o comportamento esperado.
