@@ -1,16 +1,19 @@
 export class Preco {
   private readonly _centavos: number;
 
-  private constructor(centavos: number) {
-    this._centavos = centavos;
-  }
-
-  public static fromReais(reais: number): Preco {
+  constructor(reais: number) {
     if (typeof reais !== 'number' || isNaN(reais) || reais < 0) {
       throw new Error(`Valor de preço inválido: "${reais}". Deve ser um número não negativo.`);
     }
-    const centavos = Math.round(reais * 100);
-    return new Preco(centavos);
+    this._centavos = Math.round(reais * 100);
+  }
+
+  public static fromReais(reais: number): Preco {
+    return new Preco(reais);
+  }
+
+  public static fromCentavos(centavos: number): Preco {
+    return new Preco(centavos / 100);
   }
 
   public get valorReais(): number {

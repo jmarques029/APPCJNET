@@ -15,6 +15,10 @@ export interface DocumentoPdfOrdemServico {
     telefone: string;
     email: string;
   };
+  dadosTecnico?: {
+    nome: string;
+    documento: string;
+  };
   dadosChamado: {
     tipoProblema: string;
     descricao: string;
@@ -29,15 +33,19 @@ export interface DocumentoPdfOrdemServico {
 }
 
 export class RegraGeracaoPdfService {
-  public static comporDocumentoOS(os: OrdemServico, cliente: Cliente): DocumentoPdfOrdemServico {
+  public static comporDocumentoOS(
+    os: OrdemServico,
+    cliente: Cliente,
+    tecnico?: Cliente
+  ): DocumentoPdfOrdemServico {
     if (os.clienteId !== cliente.id) {
       throw new Error('A Ordem de Serviço não pertence ao cliente informado.');
     }
 
     const agora = new Date();
-    const numeroOS = os.idRemoto ? `#${os.idRemoto.substring(0, 8)}` : `(Local) #${os.idLocal.substring(0, 8)}`;
+    const numeroOS = os.idRemoto ? `#${os.idRemoto}` : `(Local) #${os.idLocal}`;
 
-    return {
+    const doc: DocumentoPdfOrdemServico = {
       cabecalho: {
         empresa: 'CJnet Provedor de Internet',
         cidade: 'Coqueiral / MG',
@@ -64,5 +72,14 @@ export class RegraGeracaoPdfService {
       declaracaoEncerramento:
         'Declaro que o atendimento acima foi registrado conforme as diretrizes técnicas da CJnet Provedor de Internet.',
     };
+
+    if (tecnico) {
+      doc.dadosTecnico = {
+        nome: tecnico.nome,
+        documento: tecnico.cpfCnpj.formatted,
+      };
+    }
+
+    return doc;
   }
 }

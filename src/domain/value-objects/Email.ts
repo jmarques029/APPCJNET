@@ -3,11 +3,7 @@ import { InvalidEmailError } from '../errors/DomainError';
 export class Email {
   private readonly _value: string;
 
-  private constructor(value: string) {
-    this._value = value;
-  }
-
-  public static create(raw: string): Email {
+  constructor(raw: string) {
     if (!raw) {
       throw new InvalidEmailError(raw);
     }
@@ -16,7 +12,11 @@ export class Email {
     if (!emailRegex.test(trimmed)) {
       throw new InvalidEmailError(raw);
     }
-    return new Email(trimmed);
+    this._value = trimmed;
+  }
+
+  public static create(raw: string): Email {
+    return new Email(raw);
   }
 
   public get value(): string {

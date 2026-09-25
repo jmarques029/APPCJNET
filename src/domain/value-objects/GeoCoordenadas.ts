@@ -4,12 +4,7 @@ export class GeoCoordenadas {
   private readonly _latitude: number;
   private readonly _longitude: number;
 
-  private constructor(latitude: number, longitude: number) {
-    this._latitude = latitude;
-    this._longitude = longitude;
-  }
-
-  public static create(latitude: number, longitude: number): GeoCoordenadas {
+  constructor(latitude: number, longitude: number) {
     if (typeof latitude !== 'number' || typeof longitude !== 'number') {
       throw new InvalidCoordinateError(latitude, longitude);
     }
@@ -19,6 +14,11 @@ export class GeoCoordenadas {
     if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
       throw new InvalidCoordinateError(latitude, longitude);
     }
+    this._latitude = latitude;
+    this._longitude = longitude;
+  }
+
+  public static create(latitude: number, longitude: number): GeoCoordenadas {
     return new GeoCoordenadas(latitude, longitude);
   }
 

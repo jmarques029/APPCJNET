@@ -4,12 +4,7 @@ export class CpfCnpj {
   private readonly _value: string;
   private readonly _isCnpj: boolean;
 
-  private constructor(value: string, isCnpj: boolean) {
-    this._value = value;
-    this._isCnpj = isCnpj;
-  }
-
-  public static create(raw: string): CpfCnpj {
+  constructor(raw: string) {
     if (!raw) {
       throw new InvalidCpfError(raw);
     }
@@ -17,21 +12,31 @@ export class CpfCnpj {
     const cleaned = raw.replace(/\D/g, '');
 
     if (cleaned.length === 11) {
-      if (!this.validarCpf(cleaned)) {
+      if (!CpfCnpj.validarCpf(cleaned)) {
         throw new InvalidCpfError(raw);
       }
-      return new CpfCnpj(cleaned, false);
+      this._value = cleaned;
+      this._isCnpj = false;
     } else if (cleaned.length === 14) {
-      if (!this.validarCnpj(cleaned)) {
+      if (!CpfCnpj.validarCnpj(cleaned)) {
         throw new InvalidCpfError(raw);
       }
-      return new CpfCnpj(cleaned, true);
+      this._value = cleaned;
+      this._isCnpj = true;
     } else {
       throw new InvalidCpfError(raw);
     }
   }
 
+  public static create(raw: string): CpfCnpj {
+    return new CpfCnpj(raw);
+  }
+
   public get value(): string {
+    return this._value;
+  }
+
+  public get valorSemFormatacao(): string {
     return this._value;
   }
 

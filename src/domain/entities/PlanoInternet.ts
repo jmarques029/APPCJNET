@@ -70,10 +70,37 @@ export class PlanoInternet {
     this._updatedAt = new Date();
   }
 
+  public setAtivo(ativo: boolean): void {
+    this._ativo = ativo;
+    this._updatedAt = new Date();
+  }
+
   public atualizarValores(nome: string, velocidadeMbps: number, precoReais: number): void {
     this._nome = nome.trim();
     this._velocidadeMbps = velocidadeMbps;
     this._precoMensal = Preco.fromReais(precoReais);
+    this._updatedAt = new Date();
+  }
+
+  public atualizarPlano(dados: {
+    nome?: string;
+    velocidadeMbps?: number;
+    precoMensal?: Preco | number;
+    beneficios?: string[];
+    destaque?: boolean;
+    ativo?: boolean;
+  }): void {
+    if (dados.nome) this._nome = dados.nome.trim();
+    if (dados.velocidadeMbps) this._velocidadeMbps = dados.velocidadeMbps;
+    if (dados.precoMensal !== undefined) {
+      this._precoMensal =
+        dados.precoMensal instanceof Preco
+          ? dados.precoMensal
+          : Preco.fromReais(dados.precoMensal);
+    }
+    if (dados.beneficios) this._beneficios = [...dados.beneficios];
+    if (dados.destaque !== undefined) this._destaque = dados.destaque;
+    if (dados.ativo !== undefined) this._ativo = dados.ativo;
     this._updatedAt = new Date();
   }
 }
