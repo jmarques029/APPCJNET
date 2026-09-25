@@ -96,7 +96,7 @@ graph TD
 | **RNF02** | **Desempenho** | A consulta e gravação local no banco de dados SQLite deve responder em tempo < 100ms no dispositivo móvel. | Alta |
 | **RNF03** | **Segurança de Rede e Dados** | Toda comunicação com a nuvem deve utilizar HTTPS/TLS; as tabelas no Supabase devem possuir políticas rígidas de **Row Level Security (RLS)** restritas ao `auth.uid()`; e os tokens JWT de sessão devem ser armazenados exclusivamente via **`expo-secure-store`** (Keychain iOS / Android Keystore), nunca em `AsyncStorage` ou SQLite. | Alta |
 | **RNF04** | **Usabilidade** | A interface deve ser otimizada para telas de dispositivos Android e iOS com botões grandes, alto contraste e linguagem simples, acessível para usuários de diferentes faixas etárias de cidade do interior. | Alta |
-| **RNF05** | **Manutenibilidade** | A arquitetura do código deve seguir **Clean Architecture / TDD**, isolando completamente a camada de banco de dados SQLite (`src/db/`) da camada de API remota Supabase (`src/api/`). | Média |
+| **RNF05** | **Manutenibilidade** | A arquitetura do código deve seguir **Clean Architecture / DDD / TDD**, isolando as regras de negócio puras na camada de domínio (`src/domain/`), completamente desacoplada do banco local SQLite (`src/infra/db/`) e da API remota Supabase (`src/infra/api/`). | Média |
 | **RNF06** | **Confiabilidade** | O serviço de sincronização (`syncService`) deve implementar retentativas com backoff exponencial e garantir idempotência sem duplicação de chamados no backend. | Alta |
 | **RNF07** | **Portabilidade** | O app deve ser construído sobre Expo (React Native) com suporte a navegação por arquivos (Expo Router) e suporte à execução universal em Android (mínimo API 26 / Android 8.0) e iOS (mínimo iOS 16). | Alta |
 | **RNF08** | **Eficiência Energética** | A captura de geolocalização e fotos deve ser pontual, proibindo rastreamento de localização em segundo plano (*background location tracking*) para conservar bateria. | Média |
@@ -718,57 +718,285 @@ Além de manter cópias em cache local das tabelas remotas para leitura offline,
 
 ## 8. Diretrizes de Arquitetura e Implementação (DDD, Clean Architecture & TDD)
 
-### 8.1 Organização do Projeto (`src/`)
+### 8.1 Estratégia de Desenvolvimento Incremental e Desacoplado
 
-```
-src/
-├── app/                    # Rotas e Páginas (Expo Router com Guard por Papel)
-│   ├── (auth)/             # Telas Públicas / Não Logadas
-│   │   ├── login.tsx       # Tela de Login com atalho/botão "Ver Planos"
-│   │   ├── planos.tsx      # Vitrine Pública de Planos de Fibra Óptica
-│   │   ├── cadastro.tsx    # Formulário de pré-cadastro
-│   │   └── esqueci-senha.tsx
-│   ├── (app)/              # Telas Autenticadas (Redirecionamento dinâmico)
-│   │   ├── (tabs-cliente)/ # ABA DO CLIENTE (inicio, suporte, mapa, perfil)
-│   │   ├── (tabs-tecnico)/ # ABA DO TÉCNICO (minhas-os, rota-mapa, concluir-os)
-│   │   └── (tabs-admin)/   # ABA DO ADMINISTRADOR (dashboard, gerir-os, planos, avisos)
-│   └── _layout.tsx         # Root Layout (Gerencia Auth Guard e Role Routing)
-├── db/                     # BANCO LOCAL (SQLite) - Isolar de Supabase!
-│   ├── schema.ts           # Schema das tabelas SQLite (clientes, ordens_servico, planos, etc)
-│   ├── migrations/         # Scripts de criação e alteração de tabelas
-│   └── queries/            # Funções puras de CRUD SQLite (ordensServico.ts, planos.ts, clientes.ts)
-├── api/                    # COMUNICAÇÃO REMOTA (Supabase) - Isolar de SQLite!
-│   ├── supabaseClient.ts   # Instância inicializada do client Supabase
-│   └── endpoints/          # Funções HTTP/RPC (ordensServico.ts, planos.ts, auth.ts)
-├── services/               # ORQUESTRADORES & SERVIÇOS DE REDE
-│   ├── syncService.ts      # Consome db/ e api/ para sincronização bidirecional
-│   ├── authService.ts      # Gerencia sessão, papéis de usuário (cliente/técnico/admin) e cache
-│   └── storageService.ts   # Upload de fotos dos equipamentos e serviços
-├── hooks/                  # HOOKS DE INTERFACE
-│   ├── useNetworkStatus.ts # Escuta mudanças de conectividade via NetInfo
-│   ├── useOrdensServico.ts # Interface reativa para abertura e gestão de OS
-│   └── usePlanos.ts        # Consulta reativa da vitrine de planos de internet
-├── components/             # COMPONENTES DE UI PURA
-│   ├── ui/                 # Botões, cards, inputs, badges de status
-│   └── domain/             # CardOS, CardPlanoInternet, DashboardAdminCard
-├── context/                # CONTEXTOS DA APLICAÇÃO
-│   ├── AuthContext.tsx     # Estado global de autenticação e papel (Role)
-│   └── SyncContext.tsx     # Estado da fila de sincronização
-└── utils/                  # Utilitários de moeda, datas e validação de CPF/CNPJ
+Nesta etapa inicial, o desenvolvimento do **App CJnet** segue um fluxo estritamente incremental e desacoplado:
+
+$$\mathbf{Domínio} \longrightarrow \mathbf{Use\ Cases} \longrightarrow \mathbf{Context\ API\ \&\ Sessão\ Segura} \longrightarrow \mathbf{Componentes/Telas\ com\ Fakes} \longrightarrow \mathbf{Persistência\ Permanente}$$
+
+Todo o ciclo é validado com **TDD (Test-Driven Development)** antes que qualquer dado toque em um banco de dados permanente (SQLite local ou Supabase Postgres remoto).
+
+```mermaid
+flowchart LR
+    D[1. Domínio Puro<br/>• Entities & VOs<br/>• Domain Services<br/>• Interfaces/Contratos] --> UC[2. Use Cases<br/>• Regras de Aplicação<br/>• Repositórios Fake<br/>• Testes de Casos de Uso]
+    UC --> CTX[3. Context & Sessão<br/>• AuthContext / SyncContext<br/>• expo-secure-store<br/>• Gestão de Papel / Role]
+    CTX --> UI[4. Telas & Componentes<br/>• Rotas Expo Router<br/>• Componentes Visuais<br/>• Mock/Fakes em Memória]
+    UI --> INFRA[5. Infra Permanente<br/>• Banco Local SQLite<br/>• Supabase API & RLS<br/>• syncService em Background]
+
+    style D fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    style UC fill:#e1f5fe,stroke:#0288d1,stroke-width:2px;
+    style CTX fill:#fff8e1,stroke:#fbc02d,stroke-width:2px;
+    style UI fill:#fff3e0,stroke:#f57c00,stroke-width:2px;
+    style INFRA fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px;
 ```
 
-> **Regra de Ouro da Arquitetura**:  
-> - `src/db/` **NUNCA** importa nada de `src/api/`.  
-> - `src/api/` **NUNCA** importa nada de `src/db/`.  
-> - `src/services/` é a **única camada** autorizada a orquestrar as duas pontas.  
-> - `src/components/` recebe propriedades puras de dados.
+#### Fases do Pipeline Incremental:
+1. **Fase 1 — Camada de Domínio Puro (`src/domain/`)**: Criação das regras centrais em TypeScript 100% puro. Validação imediata com testes unitários em `tests/domain/` sem necessidade de mocks ou I/O.
+2. **Fase 2 — Casos de Uso (`src/usecases/`)**: Implementação da orquestração do sistema consumindo apenas entidades de domínio e interfaces abstratas. Validação com repositórios em memória (*Fakes*) em `tests/application/`.
+3. **Fase 3 — Context API e Sessão Segura (`src/context/`, `src/services/authService.ts`)**: Centralização do estado global de autenticação e papel do usuário (`cliente`, `tecnico`, `admin`), integrando o armazenamento seguro de tokens via `expo-secure-store`.
+4. **Fase 4 — Componentes e Telas com Fakes (`src/components/`, `src/app/`)**: Construção e navegação de todas as telas (Login, Vitrine de Planos, Aba do Cliente, Aba do Técnico e Aba do Administrador) alimentadas pelos use cases com dados simulados/fakes para validação visual e de fluxo.
+5. **Fase 5 — Infraestrutura Permanente (`src/infra/db/` e `src/infra/api/`)**: Conexão com o banco local SQLite (`expo-sqlite`) e a API remota Supabase com suas respectivas migrações e políticas de segurança RLS, finalizando a sincronização resiliente (`syncService`).
 
 ---
 
-### 8.2 Contextos Delimitados (DDD - Domain Driven Design)
+### 8.2 Especificação da Camada de Domínio Puro (`src/domain/`)
+
+O domínio contém as regras de negócio centrais e é **100% puro**, sem qualquer importação ou dependência do React, Expo, SQLite, Supabase ou bibliotecas de UI.
+
+```
+src/domain/
+├── entities/           # Entidades e Raízes de Agregado (Entities & Aggregate Roots)
+├── value-objects/      # Tipos imutáveis, sem identidade própria e validados na criação
+├── services/           # Serviços de Domínio (Domain Services: regras cruzadas como RegraGeracaoPdfService)
+├── repositories/       # Definição puramente declarativa das interfaces de repositórios
+└── errors/             # Erros de Domínio Customizados
+```
+
+#### 1. Value Objects (Objetos de Valor)
+Tipos imutáveis, sem identidade própria e validados no momento da criação:
+- **`CpfCnpj`**: Encapsula a validação dos algoritmos de dígitos verificadores de CPF e CNPJ, impedindo a existência de clientes com documentos inválidos.
+- **`Email`**: Valida a estrutura formal de e-mail através de expressões regulares estritas.
+- **`StatusOS`**: Controla os estados válidos (`PENDENTE`, `EM_ATENDIMENTO`, `CONCLUIDO`, `CANCELADO`) e impede transições ilegais (ex: transitar de `CONCLUIDO` para `PENDENTE`).
+- **`TipoProblema`**: Enum/VO tipado (`SEM_SINAL`, `LENTIDAO`, `QUEDA`, `OUTROS`).
+- **`PapelUsuario`**: Controla os privilégios do usuário (`CLIENTE`, `TECNICO`, `ADMIN`).
+- **`GeoCoordenadas`**: Encapsula `latitude` e `longitude`, fornecendo métodos puros para cálculo de distância e validação de limites geográficos.
+- **`Preco` / `VelocidadeMbps`**: Encapsulam regras monetárias e de largura de banda sem dependência de formatação de UI.
+
+#### 2. Entidades e Agregados (Entities & Aggregate Roots)
+Modelos ricos que possuem identidade própria contínua (`id`), estado mutável controlado e métodos que garantem as invariantes de negócio:
+- **`OrdemServico` (Aggregate Root)**: Atua como a raiz do agregado de suporte técnico. Controla a inclusão de fotos anexadas (`OSFoto`), transições de status, laudo técnico de fechamento e garante que uma OS não seja encerrada sem parecer técnico ou foto do reparo quando exigido.
+- **`Cliente`**: Entidade que agrega dados cadastrais, endereço do ponto de instalação, histórico de contratos e pushToken do dispositivo.
+- **`PlanoInternet`**: Entidade comercial contendo nome, velocidade em Mbps, preço mensal e lista de benefícios inclusos.
+- **`OSFoto`**: Entidade de mídia anexada à OS. Valida que o tamanho da imagem não exceda o limite operacional de **1 MB (1024 KB)** antes da transmissão (RNF09).
+- **`AreaCobertura`**: Entidade geográfica que encapsula a malha de atendimento da CJnet.
+- **`PreCadastro`**: Entidade que representa solicitações de novos clientes interessados na contratação de planos.
+- **`SyncQueueItem`**: Entidade que governa o estado e as regras de retentativa (backoff exponencial) da fila offline.
+
+#### 3. Serviços de Domínio (Domain Services)
+Lógicas de negócio puras que não pertencem naturalmente a uma única entidade ou que envolvem a interação entre múltiplos agregados:
+- **`RegraGeracaoPdfService`**: Define a composição, regras de formatação, layout declarativo e estrutura de dados para emissão de Ordens de Serviço e laudos técnicos de atendimento em PDF (para assinatura e arquivo do cliente/provedor).
+- **`ValidacaoCoberturaGeograficaService`**: Executa o algoritmo geométrico puro (*Ray-Casting*) para determinar se um par de coordenadas `(latitude, longitude)` está contido no polígono GeoJSON de uma `AreaCobertura` de Coqueiral/MG.
+- **`CalculoViabilidadeInstalacaoService`**: Cruza a distância do ponto de instalação até a caixa de terminação óptica (CTO) mais próxima da CJnet para certificar viabilidade técnica.
+
+#### 4. Contratos e Interfaces (Repository & Gateway Contracts)
+Definição puramente declarativa das interfaces de repositórios e gateways de serviços externos (Inversão de Dependência - DIP):
+- **`IOrdemServicoRepository`**: Métodos abstratos como `salvar(os)`, `buscarPorId(id)`, `listarPorCliente(clienteId)`, `listarPorTecnico(tecnicoId)`.
+- **`IClienteRepository`**: Métodos `salvar(cliente)`, `buscarPorCpfCnpj(cpfCnpj)`, `buscarPorAuthId(authId)`.
+- **`IPlanoRepository`**: Métodos `listarAtivos()`, `salvar(plano)`.
+- **`ISyncQueueRepository`**: Métodos `enfileirar(item)`, `obterPendentes()`, `marcarConcluido(id)`.
+- **`IPushNotificationGateway`**: Contrato declarativo para disparo de alertas.
+- **`IPdfGeneratorGateway`**: Contrato declarativo para compilação física do documento PDF estruturado pelo `RegraGeracaoPdfService`.
+
+---
+
+### 8.3 Visão Geral e Camadas da Arquitetura (Clean Architecture & DDD)
+
+```mermaid
+graph TD
+    subgraph UI_Layer ["📱 Camada de Apresentação (Presentation & UI)"]
+        Routes["Rotas (src/app/)"]
+        Components["Componentes UI (src/components/)"]
+        Hooks["Custom Hooks (src/hooks/)"]
+        Contexts["Contextos de Estado (src/context/)"]
+    end
+
+    subgraph App_Layer ["⚙️ Camada de Aplicação (Application / Use Cases)"]
+        UseCases["Casos de Uso (src/usecases/)<br/>• AbrirOrdemServicoUseCase<br/>• ConsultarPlanosUseCase<br/>• ConcluirAtendimentoUseCase<br/>• SincronizarDadosUseCase"]
+        Services["Serviços de Orquestração (src/services/)<br/>• syncService • authService • storageService"]
+        Factories["Injeção de Dependência (src/factories/)"]
+    end
+
+    subgraph Domain_Layer ["💎 Camada de Domínio (Domain Core - Zero Dependências)"]
+        Entities["Entidades & Agregados (src/domain/entities/)<br/>• Cliente • OrdemServico • PlanoInternet • OSFoto"]
+        VOs["Objetos de Valor (src/domain/value-objects/)<br/>• CpfCnpj • Email • StatusOS • GeoCoordenadas"]
+        DomainServices["Serviços de Domínio (src/domain/services/)<br/>• RegraGeracaoPdfService • ValidacaoCoberturaService"]
+        RepoContracts["Contratos e Interfaces (src/domain/repositories/)<br/>• IOrdemServicoRepository • IPlanoRepository"]
+        DomainErrors["Erros de Domínio (src/domain/errors/)"]
+    end
+
+    subgraph Infra_Layer ["💾 Camada de Infraestrutura (Infrastructure & Drivers)"]
+        FakesImpl["Repositórios Fake / In-Memory (src/infra/fakes/)<br/>• FakeOrdemServicoRepository • FakePlanoRepository"]
+        SQLiteImpl["Banco Local (src/infra/db/)<br/>• SQLiteOrdemServicoRepository • SQLite Driver"]
+        SupaImpl["API Remota (src/infra/api/)<br/>• SupabaseOrdemServicoRepository • SupabaseClient"]
+        DeviceImpl["Hardware & Sistema (src/infra/device/)<br/>• SecureStore • Camera • FileSystem • NetInfo"]
+    end
+
+    UI_Layer -->|Consome| App_Layer
+    UI_Layer -.->|Exibe| Domain_Layer
+    App_Layer -->|Manipula| Domain_Layer
+    Factories -->|Instancia com| Infra_Layer
+    Factories -->|Injeta em| App_Layer
+    Infra_Layer -->|Implementa Contratos| RepoContracts
+
+    style Domain_Layer fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    style App_Layer fill:#e1f5fe,stroke:#0288d1,stroke-width:2px;
+    style UI_Layer fill:#fff3e0,stroke:#f57c00,stroke-width:2px;
+    style Infra_Layer fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px;
+```
+
+---
+
+### 8.4 Organização do Projeto e Disposição das Pastas (`src/`)
+
+```
+src/
+├── domain/                     # 💎 CAMADA DE DOMÍNIO (Core do Negócio — Zero Dependências Externas)
+│   ├── entities/               # Entidades e Raízes de Agregado
+│   │   ├── Cliente.ts          # Assinante com papel, pushToken e contratos
+│   │   ├── OrdemServico.ts     # Raiz de Agregado de chamados técnicos
+│   │   ├── PlanoInternet.ts    # Planos de fibra óptica
+│   │   ├── OSFoto.ts           # Anexo de foto (validação <= 1MB - RNF09)
+│   │   ├── AreaCobertura.ts    # Delimitação geográfica
+│   │   ├── EnderecoCliente.ts  # Endereço e geolocalização do ponto
+│   │   ├── PreCadastro.ts      # Lead de pré-contratação
+│   │   └── SyncQueueItem.ts    # Item da fila de sincronização
+│   ├── value-objects/          # Objetos de Valor Imutáveis
+│   │   ├── CpfCnpj.ts          # Validação matemática de CPF e CNPJ
+│   │   ├── Email.ts            # Validação estrutural de e-mail
+│   │   ├── StatusOS.ts         # PENDENTE | EM_ATENDIMENTO | CONCLUIDO | CANCELADO
+│   │   ├── TipoProblema.ts     # SEM_SINAL | LENTIDAO | QUEDA | OUTROS
+│   │   ├── PapelUsuario.ts     # CLIENTE | TECNICO | ADMIN
+│   │   └── GeoCoordenadas.ts   # Latitude/Longitude com cálculo de distâncias
+│   ├── services/               # Serviços de Domínio (Regras Cruzadas)
+│   │   ├── RegraGeracaoPdfService.ts # Regras e estrutura para emissão de OS em PDF
+│   │   └── ValidacaoCoberturaService.ts # Algoritmo de pertinência geográfica
+│   ├── repositories/           # Interfaces e Contratos Declarativos de Repositórios
+│   │   ├── IClienteRepository.ts
+│   │   ├── IOrdemServicoRepository.ts
+│   │   ├── IPlanoRepository.ts
+│   │   ├── IAreaCoberturaRepository.ts
+│   │   ├── IPreCadastroRepository.ts
+│   │   └── ISyncQueueRepository.ts
+│   └── errors/                 # Erros Customizados de Domínio
+│       ├── DomainError.ts
+│       ├── InvalidCpfError.ts
+│       ├── InvalidStatusTransitionError.ts
+│       └── FileSizeExceededError.ts
+│
+├── usecases/                   # ⚙️ CAMADA DE APLICAÇÃO (Casos de Uso do Sistema)
+│   ├── ordens-servico/         # Casos de uso de suporte
+│   │   ├── AbrirOrdemServicoUseCase.ts
+│   │   ├── ListarOrdensServicoUseCase.ts
+│   │   ├── IniciarAtendimentoUseCase.ts
+│   │   └── ConcluirAtendimentoUseCase.ts
+│   ├── planos/                 # Casos de uso da vitrine comercial
+│   │   ├── ConsultarPlanosPublicosUseCase.ts
+│   │   └── GerenciarPlanosUseCase.ts
+│   ├── auth/                   # Casos de uso de autenticação e sessão
+│   │   ├── AutenticarUsuarioUseCase.ts
+│   │   └── ObterPerfilUsuarioUseCase.ts
+│   └── sync/                   # Casos de uso de sincronização offline
+│       └── SincronizarFilaUseCase.ts
+│
+├── infra/                      # 💾 CAMADA DE INFRAESTRUTURA (Implementações Técnicas)
+│   ├── fakes/                  # Repositórios In-Memory para desenvolvimento desacoplado inicial
+│   │   ├── FakeOrdemServicoRepository.ts
+│   │   ├── FakePlanoRepository.ts
+│   │   └── FakeClienteRepository.ts
+│   ├── db/                     # Banco de Dados Local SQLite (expo-sqlite)
+│   │   ├── schema.ts           # DDL das tabelas SQLite
+│   │   ├── migrations/         # Scripts de migração locais
+│   │   └── repositories/       # Repositórios SQLite concretos
+│   │       ├── SQLiteOrdemServicoRepository.ts
+│   │       └── SQLiteSyncQueueRepository.ts
+│   ├── api/                    # Comunicação Remota Supabase
+│   │   ├── supabaseClient.ts   # Instância do Supabase JS Client
+│   │   └── repositories/       # Repositórios Supabase REST/RPC
+│   │       ├── SupabaseOrdemServicoRepository.ts
+│   │       └── SupabaseAuthRepository.ts
+│   ├── storage/                # Gestão de Arquivos e Mídia
+│   │   ├── LocalFileStorage.ts # expo-file-system
+│   │   └── SupabaseFileStorage.ts # Supabase Storage (bucket 'os-fotos')
+│   └── device/                 # Recursos Nativos do Dispositivo
+│       ├── SecureKeyStorage.ts # expo-secure-store (JWT isolado - RNF03)
+│       ├── ImageCompressor.ts  # Compressão de imagens para <= 1MB (RNF09)
+│       └── NetworkInfo.ts      # Verificação de conectividade
+│
+├── factories/                  # 🏭 INJEÇÃO DE DEPENDÊNCIA
+│   ├── makeOrdensServico.ts    # Injeta repositórios (Fakes ou Concretos) nos UseCases
+│   ├── makePlanos.ts
+│   ├── makeAuth.ts
+│   └── makeSyncService.ts
+│
+├── services/                   # ⚡ SERVIÇOS E ORQUESTRADORES
+│   ├── syncService.ts          # Processa a fila sync_queue com backoff exponencial
+│   ├── authService.ts          # Gerencia credenciais no SecureStore e papel ativo
+│   └── pushService.ts          # Gerenciamento de notificações push via Expo/FCM
+│
+├── app/                        # 📱 ROTAS E PÁGINAS (Expo Router — File-based Routing)
+│   ├── (auth)/                 # Telas Públicas / Não Logadas
+│   │   ├── login.tsx           # Tela de Login com atalho "Ver Planos"
+│   │   ├── planos.tsx          # Vitrine Pública de Planos de Fibra Óptica
+│   │   ├── cadastro.tsx        # Formulário de pré-cadastro
+│   │   └── esqueci-senha.tsx
+│   ├── (app)/                  # Telas Autenticadas (Protegidas por Guard de Papel)
+│   │   ├── (tabs-cliente)/     # ABA DO CLIENTE (inicio, suporte, mapa, perfil)
+│   │   ├── (tabs-tecnico)/     # ABA DO TÉCNICO (minhas-os, rota-mapa, concluir-os)
+│   │   └── (tabs-admin)/       # ABA DO ADMINISTRADOR (dashboard, gerir-os, planos, avisos)
+│   └── _layout.tsx             # Root Layout (Gerencia Contextos, Auth Guard e Role Routing)
+│
+├── components/                 # 🎨 COMPONENTES DE INTERFACE VISUAL
+│   ├── ui/                     # Botões, inputs, badges, cards, modais genéricos
+│   └── domain/                 # Componentes visuais conectados a conceitos do negócio
+│       ├── CardOS.tsx          # Card de chamado com badge de status
+│       ├── CardPlano.tsx       # Card de plano de internet com destaques
+│       └── DashboardStats.tsx  # Métricas gerenciais para o administrador
+│
+├── hooks/                      # 🪝 HOOKS REATIVOS DE INTERFACE
+│   ├── useNetworkStatus.ts     # Escuta estado da conexão de rede
+│   ├── useOrdensServico.ts     # Interface reativa para os UseCases de OS
+│   ├── usePlanos.ts            # Interface reativa para a vitrine de planos
+│   └── useAuth.ts              # Acesso ao usuário autenticado e papel ativo
+│
+├── context/                    # 🌐 CONTEXTOS DE ESTADO GLOBAL
+│   ├── AuthContext.tsx         # Estado de autenticação, papel (Role) e sessão segura
+│   └── SyncContext.tsx         # Estado da sincronização e pendências offline
+│
+└── utils/                      # 🛠️ UTILITÁRIOS E HELPERS
+    ├── formatters.ts           # Formatação de moeda (R$), data e Mbps
+    ├── validators.ts           # Validações auxiliares de formulário
+    └── constants.ts            # Cores do tema, URLs e constantes do app
+```
+
+---
+
+### 8.5 Regras de Dependência da Arquitetura Limpa
+
+```
+[ Camada de Apresentação (app, components, hooks) ]
+                     │
+                     ▼
+  [ Camada de Aplicação (usecases, services) ]
+                     │
+                     ▼
+       [ Camada de Domínio (domain) ] ◄─── Zero Dependências Externas!
+                     ▲
+                     │
+  [ Camada de Infraestrutura (infra: db, api, fakes) ] ── (Implementa Interfaces de Repositório do Domínio)
+```
+
+- **Regra 1 (`domain`)**: A camada de domínio não depende de nenhuma outra camada. Não possui dependências do React, Expo, SQLite ou Supabase.
+- **Regra 2 (`usecases`)**: Dependem unicamente de `domain`. Interagem com bancos e APIs exclusivamente através das interfaces `domain/repositories/`.
+- **Regra 3 (`infra`)**: Conhece `domain` (para implementar as interfaces de repositório e mapear entidades), mas `domain` nunca conhece `infra`.
+- **Regra 4 (`app` / `components`)**: A interface visual consome casos de uso (`usecases`) ou hooks que orquestram os casos de uso, nunca acessando o SQLite ou Supabase diretamente.
+- **Regra 5 (`db` vs `api`)**: `src/infra/db/` **NUNCA** importa nada de `src/infra/api/` e vice-versa. A sincronização e orquestração entre ambos é responsabilidade exclusiva de `src/services/syncService.ts` e dos casos de uso em `src/usecases/sync/`.
+
+---
+
+### 8.6 Contextos Delimitados (DDD - Domain-Driven Design)
 
 1. **Contexto de Autenticação & Gestão de Acessos**:
-   - *Entidades*: `Cliente` (com `PapelUsuario`: Cliente, Técnico, Admin), `EnderecoCliente`.
+   - *Entidades*: `Cliente` (com `PapelUsuario`: `CLIENTE`, `TECNICO`, `ADMIN`), `EnderecoCliente`.
    - *Regra*: Redirecionamento dinâmico da navegação conforme o papel do usuário logado.
 2. **Contexto de Suporte & Ordem de Serviço (Cliente & Técnico)**:
    - *Entidades*: `OrdemServico`, `OSFoto`.
@@ -781,27 +1009,39 @@ src/
    - *Regra*: Exibição pública dos planos de fibra óptica na tela de login sem necessidade de autenticação.
 5. **Contexto de Geolocalização & Cobertura**:
    - *Entidades*: `AreaCobertura` (GeoJSON / PostGIS).
-   - *Regra*: Comparação client-side (offline) das coordenadas do cliente com o polígono delimitador de Coqueiral/MG.
+   - *Regra*: Comparação client-side (offline) das coordenadas do cliente com o polígono delimitador de Coqueiral/MG via `ValidacaoCoberturaService`.
 
 ---
 
-### 8.3 Metodologia TDD (Test-Driven Development) e Estratégia de Testes
+### 8.7 Metodologia TDD (Test-Driven Development) e Estratégia de Testes
 
-A aplicação adota a metodologia **TDD** (*Test-Driven Development*), operando em um ciclo contínuo de **Red-Green-Refactor**:
-- **1. RED (Falha Inicial)**: Antes de implementar qualquer funcionalidade ou regra de negócio (ex: abertura de OS offline, compressão de imagens, consulta pública de planos), são desenvolvidos os testes unitários (`tests/domain/`, `tests/application/`) definindo o comportamento esperado.
-- **2. GREEN (Aprovação Mínima)**: Implementa-se a regra de negócio com a quantidade mínima de código necessária para que a suíte de testes do Jest execute com 100% de aprovação.
-- **3. REFACTOR (Refatoração Limpa)**: O código é refinado e organizado nas camadas de Clean Architecture (`db/`, `api/`, `services/`), garantindo manutenibilidade sem regressões.
+A aplicação adota a metodologia **TDD** (*Test-Driven Development*), operando em um ciclo contínuo de **Red-Green-Refactor**, com testes organizados espelhando a arquitetura limpa e o pipeline incremental:
 
-#### Mapeamento de Testes:
-- **Testes Unitários de Banco Local (`src/db/queries/`)**:
-  - Testar inserção de OS com status `pendente` e gravação correspondente em `sync_queue`.
-  - Testar leitura offline da vitrine de planos de internet na tabela `planos_internet`.
-- **Testes Unitários de Serviços (`src/services/syncService.ts`)**:
-  - Mockar o `supabaseClient` e o `sqliteDb`.
-  - Simular execução da fila com retentativa (backoff exponencial) após indisponibilidade temporária.
-  - Verificar se a foto é comprimida para $\le 1$ MB e seu URL remoto injetado no registro final da OS.
-- **Testes de Integração de Telas (Expo Router)**:
-  - Garantir que a troca de rota de `(auth)` para `(tabs-cliente)`, `(tabs-tecnico)` ou `(tabs-admin)` ocorra automaticamente de acordo com o `AuthContext` e o papel do usuário.
+```
+tests/
+├── domain/                     # 1. Testes Unitários de Domínio Puro (Sem mocks, execução instantânea)
+│   ├── Cliente.test.ts         # Valida criação, mudança de status e atualização de pushToken
+│   ├── OrdemServico.test.ts    # Valida regras de transição de status e anexo de fotos
+│   ├── OSFoto.test.ts          # Valida regras de compressão (<= 1MB - RNF09)
+│   ├── CpfCnpj.test.ts         # Valida algoritmo de dígitos verificadores
+│   ├── RegraGeracaoPdf.test.ts # Valida composição e regras do layout do PDF
+│   └── PlanoInternet.test.ts   # Valida dados da vitrine pública
+│
+├── application/                # 2. Testes Unitários de Casos de Uso (com Repositórios Fake / In-Memory)
+│   ├── AbrirOrdemServico.test.ts
+│   ├── ConsultarPlanos.test.ts
+│   ├── ConcluirAtendimento.test.ts
+│   └── SincronizarFila.test.ts # Valida retentativas e idempotência
+│
+└── infra/                      # 3. Testes de Integração de Infraestrutura Permanente
+    ├── SQLiteRepositories.test.ts # Valida gravação local e sync_queue
+    └── SupabaseRepositories.test.ts # Valida mapeamento de DTOs e RLS
+```
+
+#### Ciclo TDD Aplicado ao App:
+1. **RED (Falha Inicial)**: Escreve-se o teste unitário em `tests/domain/` ou `tests/application/` definindo a expectativa da regra de negócio (ex: *lançar `FileSizeExceededError` se a foto tiver mais de 1024 KB* ou *rejeitar fechamento de OS sem parecer técnico*). O teste falha.
+2. **GREEN (Aprovação Mínima)**: Implementa-se a regra na entidade `src/domain/entities/OSFoto.ts` ou serviço `src/domain/services/` com o código estritamente necessário para o teste passar.
+3. **REFACTOR (Refatoração Limpa)**: O código é otimizado e isolado conforme os princípios SOLID e Clean Architecture, mantendo 100% de cobertura nos testes antes de qualquer conexão com banco de dados permanente.
 
 
 
