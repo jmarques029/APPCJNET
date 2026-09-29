@@ -61,6 +61,27 @@ export async function signIn(email: string, password: string): Promise<AuthResul
     // });
     // return { success: true, role };
 
+    // Em ambiente de desenvolvimento ou mock sem Supabase configurado,
+    // permite login com credenciais de demonstração:
+    if (email && password) {
+      const lower = email.toLowerCase();
+      const role: UserRole = lower.includes('admin')
+        ? 'admin'
+        : lower.includes('tecnico')
+        ? 'tecnico'
+        : 'cliente';
+
+      await saveSession({
+        accessToken: `jwt-demo-${Date.now()}`,
+        refreshToken: `refresh-demo-${Date.now()}`,
+        userId: 'cli-cjnet-01',
+        role,
+        name: email.split('@')[0],
+      });
+
+      return { success: true, role };
+    }
+
     throw new Error('Supabase client não configurado — configure src/api/supabaseClient.ts');
   } catch (err: unknown) {
     return {

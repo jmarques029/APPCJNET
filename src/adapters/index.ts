@@ -18,3 +18,4 @@ export * from './hooks/useSync';
 export * from './hooks/useNetworkStatus';
 export * from './hooks/useOrdensServico';
 export * from './hooks/usePlanos';
+export * from './screens';
