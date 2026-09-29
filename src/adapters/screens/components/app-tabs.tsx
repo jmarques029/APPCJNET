@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import { useColorScheme } from 'react-native';
 
-import { Colors } from '@/constants/theme';
+import { Colors } from '@/adapters/screens/theme';
 
 export default function AppTabs() {
   const scheme = useColorScheme();

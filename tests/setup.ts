@@ -1,5 +1,8 @@
 import '@testing-library/jest-native/extend-expect';
 
+(global as any).IS_REACT_ACT_ENVIRONMENT = true;
+
+
 
 
 // Mock @expo/vector-icons para evitar warnings de act(...) por carregamento assíncrono de fontes nos testes

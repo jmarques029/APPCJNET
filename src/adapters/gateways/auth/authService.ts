@@ -24,7 +24,7 @@ import {
   clearSession,
   type SessionData,
   type UserRole,
-} from './SecureTokenStore';
+} from '@/infra/auth/SecureTokenStore';
 
 // ─── Tipo de retorno do login ─────────────────────────────────────────────────
 

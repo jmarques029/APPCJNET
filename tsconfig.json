@@ -8,6 +8,15 @@
       ],
       "@/assets/*": [
         "./assets/*"
+      ],
+      "@/components/*": [
+        "./src/adapters/screens/components/*"
+      ],
+      "@/constants/*": [
+        "./src/adapters/screens/*"
+      ],
+      "@/hooks/*": [
+        "./src/adapters/screens/hooks/*"
       ]
     }
   },
