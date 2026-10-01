@@ -15,11 +15,11 @@ import * as SecureStore from 'expo-secure-store';
 // ─── Chaves de armazenamento seguro ───────────────────────────────────────────
 
 const KEYS = {
-  ACCESS_TOKEN: 'cjnet:access_token',
-  REFRESH_TOKEN: 'cjnet:refresh_token',
-  USER_ID: 'cjnet:user_id',
-  USER_ROLE: 'cjnet:user_role',   // 'cliente' | 'tecnico' | 'admin'
-  USER_NAME: 'cjnet:user_name',
+  ACCESS_TOKEN: 'cjnet_access_token',
+  REFRESH_TOKEN: 'cjnet_refresh_token',
+  USER_ID: 'cjnet_user_id',
+  USER_ROLE: 'cjnet_user_role',   // 'cliente' | 'tecnico' | 'admin'
+  USER_NAME: 'cjnet_user_name',
 } as const;
 
 // ─── Opções padrão do SecureStore ─────────────────────────────────────────────
