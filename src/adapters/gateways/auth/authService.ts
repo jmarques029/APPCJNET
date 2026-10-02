@@ -71,12 +71,30 @@ export async function signIn(email: string, password: string): Promise<AuthResul
         ? 'tecnico'
         : 'cliente';
 
+      const userId =
+        role === 'admin'
+          ? 'adm-01'
+          : role === 'tecnico'
+          ? 'tec-joao-01'
+          : lower.includes('maria')
+          ? 'cli-maria-02'
+          : 'cli-cjnet-01';
+
+      const displayName =
+        role === 'admin'
+          ? 'Administrador CJnet'
+          : role === 'tecnico'
+          ? 'João Santos'
+          : lower.includes('maria')
+          ? 'Maria Fernandes'
+          : 'Carlos Eduardo Silva';
+
       await saveSession({
         accessToken: `jwt-demo-${Date.now()}`,
         refreshToken: `refresh-demo-${Date.now()}`,
-        userId: 'cli-cjnet-01',
+        userId,
         role,
-        name: email.split('@')[0],
+        name: displayName,
       });
 
       return { success: true, role };

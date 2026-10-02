@@ -302,6 +302,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 20,
+    marginRight: Platform.OS === 'ios' ? 44 : 0,
   },
   btnSairHeaderText: {
     color: '#ef4444',

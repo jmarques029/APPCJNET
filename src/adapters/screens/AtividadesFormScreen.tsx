@@ -92,7 +92,8 @@ export function AtividadesFormScreen({
   onVoltar,
   onSair,
 }: AtividadesFormScreenProps) {
-  const { signOut } = useAuth();
+  const { user, signOut } = useAuth();
+  const activeClienteId = user?.id || clienteId;
   const [tipoProblema, setTipoProblema] = useState<TipoProblemaType>('SEM_SINAL');
   const [descricao, setDescricao] = useState<string>(initialDescricao ?? '');
   const [endereco, setEndereco] = useState<string>('Rua Direita, 120, Centro - Coqueiral/MG');
@@ -122,7 +123,7 @@ export function AtividadesFormScreen({
       const useCase = new AbrirOrdemServicoUseCase(sharedOsRepo, sharedClienteRepo);
 
       const novaOS = await useCase.execute({
-        clienteId,
+        clienteId: activeClienteId,
         tipoProblema,
         descricao: descricao.trim(),
         foto: fotoAnexada
@@ -442,6 +443,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 20,
+    marginRight: Platform.OS === 'ios' ? 44 : 0,
   },
   btnSairHeaderText: {
     color: '#ef4444',

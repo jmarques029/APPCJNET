@@ -33,7 +33,7 @@ export function initializeSharedStore(): void {
   if (seeded) return;
   seeded = true;
 
-  // 1. Cliente Demo
+  // 1. Clientes e Usuários do Sistema
   const cliente = new Cliente({
     id: DEMO_CLIENTE_ID,
     authUserId: 'auth-demo-01',
@@ -44,6 +44,42 @@ export function initializeSharedStore(): void {
     papel: 'CLIENTE',
   });
   sharedClienteRepo.salvar(cliente);
+
+  // Cliente 2 (Maria Fernandes) - usado para validar que o cliente só enxerga as suas próprias OSs
+  const cliente2 = new Cliente({
+    id: 'cli-maria-02',
+    authUserId: 'auth-demo-02',
+    nome: 'Maria Fernandes',
+    cpfCnpj: new CpfCnpj('52998224725'),
+    email: new Email('maria.fernandes@cjnet.com.br'),
+    telefone: '35997654321',
+    papel: 'CLIENTE',
+  });
+  sharedClienteRepo.salvar(cliente2);
+
+  // Técnico de Campo (João Santos)
+  const tecnico = new Cliente({
+    id: 'tec-joao-01',
+    authUserId: 'auth-tec-01',
+    nome: 'João Santos',
+    cpfCnpj: new CpfCnpj('52998224725'),
+    email: new Email('tecnico@cjnet.com.br'),
+    telefone: '35998112233',
+    papel: 'TECNICO',
+  });
+  sharedClienteRepo.salvar(tecnico);
+
+  // Administrador Geral (Empresa CJnet)
+  const admin = new Cliente({
+    id: 'adm-01',
+    authUserId: 'auth-adm-01',
+    nome: 'Gerência CJnet',
+    cpfCnpj: new CpfCnpj('11222333000181'),
+    email: new Email('admin@cjnet.com.br'),
+    telefone: '3538551234',
+    papel: 'ADMIN',
+  });
+  sharedClienteRepo.salvar(admin);
 
   // 2. Planos de Fibra Óptica CJnet (Coqueiral/MG)
   const planos = [
@@ -141,9 +177,21 @@ export function initializeSharedStore(): void {
     dataFechamento: new Date(Date.now() - 1000 * 60 * 60 * 70),
   });
 
+  // 4. Ordem de Serviço de outro cliente (Maria Fernandes)
+  // Serve para comprovar que na aba do cliente Carlos (cli-cjnet-01) esta OS NÃO aparece!
+  const osOutroCliente = new OrdemServico({
+    idLocal: 'OS-2001',
+    clienteId: 'cli-maria-02',
+    tipoProblema: TipoProblema.OUTROS,
+    descricao: 'Instalação de ponto adicional no escritório residencial após reforma.',
+    status: StatusOS.PENDENTE,
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 5),
+  });
+
   sharedOsRepo.salvar(os1);
   sharedOsRepo.salvar(os2);
   sharedOsRepo.salvar(os3);
+  sharedOsRepo.salvar(osOutroCliente);
 }
 
 // Inicializa imediatamente para garantir dados disponíveis

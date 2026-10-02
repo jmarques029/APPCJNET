@@ -185,6 +185,30 @@ describe('Camada de Interface do Usuário e Rotas (adapters/screens/)', () => {
       });
     });
 
+    it('deve abrir modal com andamento e técnico ao tocar no card da OS', async () => {
+      const { getByText, getByTestId } = await render(
+        <AuthProvider autoRestore={false}>
+          <HistoricoRelatoriosScreen />
+        </AuthProvider>
+      );
+
+      await waitFor(() => {
+        expect(getByText('#OS-1002')).toBeTruthy();
+      });
+
+      const card = getByTestId('os-card-OS-1002');
+      fireEvent.press(card);
+
+      await waitFor(() => {
+        expect(getByText('Andamento do Atendimento')).toBeTruthy();
+        expect(getByText('Técnico Responsável')).toBeTruthy();
+        expect(getByText('João Santos')).toBeTruthy();
+      });
+
+      const btnFechar = getByTestId('btn-fechar-modal-os');
+      fireEvent.press(btnFechar);
+    });
+
     it('deve chamar callback onSair ao tocar no botão Sair', async () => {
       const mockSair = jest.fn();
       const { getByTestId } = await render(
@@ -196,6 +220,36 @@ describe('Camada de Interface do Usuário e Rotas (adapters/screens/)', () => {
       const btnSair = getByTestId('btn-sair-header');
       fireEvent.press(btnSair);
       expect(mockSair).toHaveBeenCalled();
+    });
+
+    it('deve exibir apenas as OSs abertas pelo próprio cliente logado e o técnico atribuído, sem exibir OSs de terceiros', async () => {
+      const sessionCliente = {
+        accessToken: 'jwt-token',
+        refreshToken: 'refresh-token',
+        userId: 'cli-cjnet-01',
+        role: 'cliente' as const,
+        name: 'Carlos Eduardo Silva',
+      };
+
+      const { getByText, getAllByText, queryByText } = await render(
+        <AuthProvider autoRestore={false} initialSession={sessionCliente}>
+          <HistoricoRelatoriosScreen />
+        </AuthProvider>
+      );
+
+      await waitFor(() => {
+        // OSs abertas por Carlos Eduardo
+        expect(getByText('#OS-1001')).toBeTruthy();
+        expect(getByText('#OS-1002')).toBeTruthy();
+        expect(getByText('#OS-1003')).toBeTruthy();
+      });
+
+      // Verifica exibição do técnico atribuído e andamento
+      expect(getByText('Técnico Atribuído: João Santos')).toBeTruthy();
+      expect(getAllByText('Aguardando Atribuição de Técnico').length).toBeGreaterThan(0);
+
+      // OS de outro cliente (Maria Fernandes) NUNCA deve aparecer para o Carlos!
+      expect(queryByText('#OS-2001')).toBeNull();
     });
   });
 
