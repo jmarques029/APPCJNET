@@ -25,8 +25,12 @@ describe('Camada de Interface do Usuário e Rotas (adapters/screens/)', () => {
   });
 
   describe('AssinaturaScreen (Vitrine de Planos & Assinatura CJnet)', () => {
-    it('deve carregar e renderizar os planos de fibra óptica disponíveis', async () => {
-      const { getByText } = await render(<AssinaturaScreen />);
+    it('deve carregar e renderizar os planos de fibra óptica disponíveis e botão sair', async () => {
+      const { getByText, getAllByText } = await render(
+        <AuthProvider autoRestore={false}>
+          <AssinaturaScreen />
+        </AuthProvider>
+      );
 
       await waitFor(() => {
         expect(getByText('Planos & Assinaturas')).toBeTruthy();
@@ -37,11 +41,16 @@ describe('Camada de Interface do Usuário e Rotas (adapters/screens/)', () => {
       expect(getByText('PLANO MAIS POPULAR')).toBeTruthy();
       expect(getByText('CJnet Fibra 600 Mega Gamer')).toBeTruthy();
       expect(getByText('CJnet Fibra 1 Giga Dedicado')).toBeTruthy();
+      expect(getAllByText('Sair').length).toBeGreaterThan(0);
     });
 
     it('deve chamar callback onAssinarPlano ao tocar em Assinar Este Plano', async () => {
       const mockAssinar = jest.fn();
-      const { getAllByText } = await render(<AssinaturaScreen onAssinarPlano={mockAssinar} />);
+      const { getAllByText } = await render(
+        <AuthProvider autoRestore={false}>
+          <AssinaturaScreen onAssinarPlano={mockAssinar} />
+        </AuthProvider>
+      );
 
       await waitFor(() => {
         const botoes = getAllByText('Assinar Este Plano');
@@ -51,11 +60,28 @@ describe('Camada de Interface do Usuário e Rotas (adapters/screens/)', () => {
 
       expect(mockAssinar).toHaveBeenCalled();
     });
+
+    it('deve chamar callback onSair ao tocar no botão Sair', async () => {
+      const mockSair = jest.fn();
+      const { getByTestId } = await render(
+        <AuthProvider autoRestore={false}>
+          <AssinaturaScreen onSair={mockSair} />
+        </AuthProvider>
+      );
+
+      const btnSair = getByTestId('btn-sair-header');
+      fireEvent.press(btnSair);
+      expect(mockSair).toHaveBeenCalled();
+    });
   });
 
   describe('AtividadesFormScreen (Formulário de Abertura de Chamado Técnico / OS)', () => {
-    it('deve renderizar campos de tipo de problema, descrição e foto do roteador', async () => {
-      const { getByText, getByPlaceholderText } = await render(<AtividadesFormScreen />);
+    it('deve renderizar campos de tipo de problema, descrição e botão sair', async () => {
+      const { getByText, getByPlaceholderText, getAllByText } = await render(
+        <AuthProvider autoRestore={false}>
+          <AtividadesFormScreen />
+        </AuthProvider>
+      );
 
       expect(getByText('Novo Chamado de Suporte')).toBeTruthy();
       expect(getByText('Sem Sinal de Internet')).toBeTruthy();
@@ -64,15 +90,18 @@ describe('Camada de Interface do Usuário e Rotas (adapters/screens/)', () => {
       expect(getByText('Tirar Foto das Luzes do Roteador')).toBeTruthy();
       expect(getByPlaceholderText(/Exemplo: As luzes do roteador/)).toBeTruthy();
       expect(getByText('Registrar Chamado Técnico')).toBeTruthy();
+      expect(getAllByText('Sair').length).toBeGreaterThan(0);
     });
 
     it('deve permitir alternar foto da ONU e disparar abertura de chamado com sucesso', async () => {
       const mockSuccess = jest.fn();
       const { getByText, getByTestId } = await render(
-        <AtividadesFormScreen
-          initialDescricao="Cabo de fibra rompido na fachada da residência."
-          onSuccess={mockSuccess}
-        />
+        <AuthProvider autoRestore={false}>
+          <AtividadesFormScreen
+            initialDescricao="Cabo de fibra rompido na fachada da residência."
+            onSuccess={mockSuccess}
+          />
+        </AuthProvider>
       );
 
       // Anexa foto
@@ -95,11 +124,28 @@ describe('Camada de Interface do Usuário e Rotas (adapters/screens/)', () => {
         );
       });
     });
+
+    it('deve chamar callback onSair ao tocar no botão Sair', async () => {
+      const mockSair = jest.fn();
+      const { getByTestId } = await render(
+        <AuthProvider autoRestore={false}>
+          <AtividadesFormScreen onSair={mockSair} />
+        </AuthProvider>
+      );
+
+      const btnSair = getByTestId('btn-sair-header');
+      fireEvent.press(btnSair);
+      expect(mockSair).toHaveBeenCalled();
+    });
   });
 
   describe('HistoricoRelatoriosScreen (Histórico de Chamados e Relatórios CJnet)', () => {
-    it('deve carregar métricas do relatório e lista de ordens de serviço', async () => {
-      const { getByText, getAllByText } = await render(<HistoricoRelatoriosScreen />);
+    it('deve carregar métricas do relatório, lista de chamados e botão sair', async () => {
+      const { getByText, getAllByText } = await render(
+        <AuthProvider autoRestore={false}>
+          <HistoricoRelatoriosScreen />
+        </AuthProvider>
+      );
 
       await waitFor(() => {
         expect(getByText('Histórico & Relatórios')).toBeTruthy();
@@ -115,10 +161,15 @@ describe('Camada de Interface do Usuário e Rotas (adapters/screens/)', () => {
       expect(getByText('#OS-1002')).toBeTruthy();
       expect(getByText('#OS-1003')).toBeTruthy();
       expect(getByText('PARECER TÉCNICO CJNET')).toBeTruthy();
+      expect(getAllByText('Sair').length).toBeGreaterThan(0);
     });
 
     it('deve filtrar os chamados ao tocar nos chips de filtro', async () => {
-      const { getByText, getByTestId, queryByText } = await render(<HistoricoRelatoriosScreen />);
+      const { getByText, getByTestId, queryByText } = await render(
+        <AuthProvider autoRestore={false}>
+          <HistoricoRelatoriosScreen />
+        </AuthProvider>
+      );
 
       await waitFor(() => {
         expect(getByText('#OS-1001')).toBeTruthy();
@@ -132,6 +183,19 @@ describe('Camada de Interface do Usuário e Rotas (adapters/screens/)', () => {
         expect(getByText('#OS-1003')).toBeTruthy();
         expect(queryByText('#OS-1001')).toBeNull();
       });
+    });
+
+    it('deve chamar callback onSair ao tocar no botão Sair', async () => {
+      const mockSair = jest.fn();
+      const { getByTestId } = await render(
+        <AuthProvider autoRestore={false}>
+          <HistoricoRelatoriosScreen onSair={mockSair} />
+        </AuthProvider>
+      );
+
+      const btnSair = getByTestId('btn-sair-header');
+      fireEvent.press(btnSair);
+      expect(mockSair).toHaveBeenCalled();
     });
   });
 

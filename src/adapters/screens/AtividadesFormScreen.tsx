@@ -22,6 +22,7 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -34,12 +35,15 @@ import {
   DEMO_CLIENTE_ID,
 } from './mockStore';
 import { AbrirOrdemServicoUseCase } from '@/application/use-cases';
+import { useAuth } from '@/adapters/context/AuthContext';
+import { AppNavBar } from './components/AppNavBar';
 
 export interface AtividadesFormScreenProps {
   clienteId?: string;
   initialDescricao?: string;
   onSuccess?: (os: OrdemServico) => void;
   onVoltar?: () => void;
+  onSair?: () => void;
 }
 
 interface TipoProblemaOption {
@@ -86,7 +90,9 @@ export function AtividadesFormScreen({
   initialDescricao,
   onSuccess,
   onVoltar,
+  onSair,
 }: AtividadesFormScreenProps) {
+  const { signOut } = useAuth();
   const [tipoProblema, setTipoProblema] = useState<TipoProblemaType>('SEM_SINAL');
   const [descricao, setDescricao] = useState<string>(initialDescricao ?? '');
   const [endereco, setEndereco] = useState<string>('Rua Direita, 120, Centro - Coqueiral/MG');
@@ -169,6 +175,36 @@ export function AtividadesFormScreen({
     }
   };
 
+  const handleSair = async () => {
+    if (onSair) {
+      onSair();
+      return;
+    }
+    const executarLogout = async () => {
+      await signOut();
+      router.replace('/login' as any);
+    };
+
+    if (Platform.OS === 'web') {
+      if (typeof window !== 'undefined' && window.confirm('Deseja realmente sair da sua conta?')) {
+        await executarLogout();
+      }
+    } else {
+      Alert.alert(
+        'Encerrar Sessão',
+        'Deseja realmente sair da sua conta CJnet?',
+        [
+          { text: 'Cancelar', style: 'cancel' },
+          {
+            text: 'Sair',
+            style: 'destructive',
+            onPress: executarLogout,
+          },
+        ]
+      );
+    }
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView
@@ -178,13 +214,25 @@ export function AtividadesFormScreen({
       >
         {/* Cabeçalho */}
         <View style={styles.headerContainer}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={handleVoltar}
-            accessibilityLabel="Voltar"
-          >
-            <Ionicons name="arrow-back" size={24} color="#0f172a" />
-          </TouchableOpacity>
+          <View style={styles.headerTopRow}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={handleVoltar}
+              accessibilityLabel="Voltar"
+            >
+              <Ionicons name="arrow-back" size={24} color="#0f172a" />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.btnSairHeader}
+              onPress={handleSair}
+              accessibilityLabel="Sair da conta"
+              testID="btn-sair-header"
+            >
+              <Ionicons name="log-out-outline" size={18} color="#ef4444" />
+              <Text style={styles.btnSairHeaderText}>Sair</Text>
+            </TouchableOpacity>
+          </View>
           <View style={styles.headerTexts}>
             <Text style={styles.badgeTop}>SUPORTE AO CLIENTE</Text>
             <Text style={styles.headerTitle}>Novo Chamado de Suporte</Text>
@@ -344,6 +392,7 @@ export function AtividadesFormScreen({
           </Text>
         </View>
       </ScrollView>
+      <AppNavBar currentTab="atividades" onSair={onSair} />
     </SafeAreaView>
   );
 }
@@ -368,6 +417,12 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     marginBottom: 20,
   },
+  headerTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
   backButton: {
     width: 40,
     height: 40,
@@ -375,9 +430,24 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
     borderWidth: 1,
     borderColor: '#e2e8f0',
+  },
+  btnSairHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fef2f2',
+    borderColor: '#fecaca',
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  btnSairHeaderText: {
+    color: '#ef4444',
+    fontSize: 13,
+    fontWeight: '700',
+    marginLeft: 4,
   },
   headerTexts: {
     flexDirection: 'column',

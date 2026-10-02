@@ -20,6 +20,8 @@ import {
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
+  Alert,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -27,11 +29,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { OrdemServico } from '@/domain/entities/OrdemServico';
 import { sharedOsRepo, sharedClienteRepo, DEMO_CLIENTE_ID } from './mockStore';
 import { ListarOrdensServicoUseCase } from '@/application/use-cases';
+import { useAuth } from '@/adapters/context/AuthContext';
+import { AppNavBar } from './components/AppNavBar';
 
 export interface HistoricoRelatoriosScreenProps {
   usuarioId?: string;
   onNovoChamado?: () => void;
   onVoltar?: () => void;
+  onSair?: () => void;
 }
 
 type StatusFiltro = 'TODOS' | 'PENDENTE' | 'EM_ATENDIMENTO' | 'CONCLUIDO';
@@ -40,7 +45,9 @@ export function HistoricoRelatoriosScreen({
   usuarioId = DEMO_CLIENTE_ID,
   onNovoChamado,
   onVoltar,
+  onSair,
 }: HistoricoRelatoriosScreenProps) {
+  const { signOut } = useAuth();
   const [ordens, setOrdens] = useState<OrdemServico[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [filtro, setFiltro] = useState<StatusFiltro>('TODOS');
@@ -90,6 +97,36 @@ export function HistoricoRelatoriosScreen({
       onVoltar();
     } else {
       router.back();
+    }
+  };
+
+  const handleSair = async () => {
+    if (onSair) {
+      onSair();
+      return;
+    }
+    const executarLogout = async () => {
+      await signOut();
+      router.replace('/login' as any);
+    };
+
+    if (Platform.OS === 'web') {
+      if (typeof window !== 'undefined' && window.confirm('Deseja realmente sair da sua conta?')) {
+        await executarLogout();
+      }
+    } else {
+      Alert.alert(
+        'Encerrar Sessão',
+        'Deseja realmente sair da sua conta CJnet?',
+        [
+          { text: 'Cancelar', style: 'cancel' },
+          {
+            text: 'Sair',
+            style: 'destructive',
+            onPress: executarLogout,
+          },
+        ]
+      );
     }
   };
 
@@ -144,13 +181,25 @@ export function HistoricoRelatoriosScreen({
               <Ionicons name="arrow-back" size={24} color="#0f172a" />
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.btnNovoChamado}
-              onPress={handleNovoChamado}
-            >
-              <Ionicons name="add" size={20} color="#ffffff" />
-              <Text style={styles.btnNovoChamadoText}>Abrir OS</Text>
-            </TouchableOpacity>
+            <View style={styles.headerRightActions}>
+              <TouchableOpacity
+                style={styles.btnNovoChamado}
+                onPress={handleNovoChamado}
+              >
+                <Ionicons name="add" size={18} color="#ffffff" />
+                <Text style={styles.btnNovoChamadoText}>Abrir OS</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.btnSairHeader}
+                onPress={handleSair}
+                accessibilityLabel="Sair da conta"
+                testID="btn-sair-header"
+              >
+                <Ionicons name="log-out-outline" size={18} color="#ef4444" />
+                <Text style={styles.btnSairHeaderText}>Sair</Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
           <View style={styles.headerTexts}>
@@ -302,6 +351,7 @@ export function HistoricoRelatoriosScreen({
           </View>
         )}
       </ScrollView>
+      <AppNavBar currentTab="historico" onSair={onSair} />
     </SafeAreaView>
   );
 }
@@ -346,12 +396,33 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#0284c7',
-    paddingHorizontal: 14,
-    paddingVertical: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
     borderRadius: 20,
   },
   btnNovoChamadoText: {
     color: '#ffffff',
+    fontSize: 13,
+    fontWeight: '700',
+    marginLeft: 4,
+  },
+  headerRightActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  btnSairHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fef2f2',
+    borderColor: '#fecaca',
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  btnSairHeaderText: {
+    color: '#ef4444',
     fontSize: 13,
     fontWeight: '700',
     marginLeft: 4,
