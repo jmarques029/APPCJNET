@@ -48,7 +48,14 @@ export function LoginScreen({ onLoginSuccess, onVerPlanos }: LoginScreenProps) {
       if (onLoginSuccess) {
         onLoginSuccess();
       } else {
-        router.replace('/historico' as any);
+        const lower = email.toLowerCase();
+        if (lower.includes('admin')) {
+          router.replace('/admin' as any);
+        } else if (lower.includes('tecnico')) {
+          router.replace('/tecnico' as any);
+        } else {
+          router.replace('/cliente' as any);
+        }
       }
     }
   };

@@ -19,12 +19,16 @@ import { router } from 'expo-router';
 import { useAuth } from '@/adapters/context/AuthContext';
 
 export interface AppNavBarProps {
-  currentTab: 'historico' | 'atividades' | 'assinatura';
+  currentTab: 'cliente' | 'tecnico' | 'admin' | 'historico' | 'atividades' | 'assinatura';
   onSair?: () => void;
 }
 
 export function AppNavBar({ currentTab, onSair }: AppNavBarProps) {
-  const { signOut } = useAuth();
+  const { signOut, role } = useAuth();
+
+  const isClienteTab = currentTab === 'cliente' || currentTab === 'historico' || currentTab === 'atividades';
+  const isTecnicoTab = currentTab === 'tecnico';
+  const isAdminTab = currentTab === 'admin';
 
   const handleSair = async () => {
     if (onSair) {
@@ -59,55 +63,63 @@ export function AppNavBar({ currentTab, onSair }: AppNavBarProps) {
 
   return (
     <View style={styles.navContainer}>
+      {/* Aba Cliente: só abre chamado e acompanha suas OS aberta, verifica o técnico atribuído */}
       <TouchableOpacity
-        style={[styles.navItem, currentTab === 'historico' && styles.navItemActive]}
-        onPress={() => router.push('/historico' as any)}
-        accessibilityLabel="Ir para Histórico de Chamados"
+        style={[styles.navItem, isClienteTab && styles.navItemActive]}
+        onPress={() => router.push('/cliente' as any)}
+        accessibilityLabel="Ir para Aba do Cliente"
+        testID="tab-nav-cliente"
       >
         <Ionicons
-          name={currentTab === 'historico' ? 'list' : 'list-outline'}
+          name={isClienteTab ? 'person-circle' : 'person-circle-outline'}
           size={22}
-          color={currentTab === 'historico' ? '#0284c7' : '#64748b'}
+          color={isClienteTab ? '#0284c7' : '#64748b'}
         />
-        <Text style={[styles.navLabel, currentTab === 'historico' && styles.navLabelActive]}>
-          Histórico
+        <Text style={[styles.navLabel, isClienteTab && styles.navLabelActive]}>
+          Cliente
         </Text>
       </TouchableOpacity>
 
+      {/* Aba Técnico: visualiza OS atribuída, fecha OS e tira foto da resolução do problema */}
       <TouchableOpacity
-        style={[styles.navItem, currentTab === 'atividades' && styles.navItemActive]}
-        onPress={() => router.push('/atividades' as any)}
-        accessibilityLabel="Abrir Nova Ordem de Serviço"
+        style={[styles.navItem, isTecnicoTab && styles.navItemActive]}
+        onPress={() => router.push('/tecnico' as any)}
+        accessibilityLabel="Ir para Aba do Técnico"
+        testID="tab-nav-tecnico"
       >
         <Ionicons
-          name={currentTab === 'atividades' ? 'add-circle' : 'add-circle-outline'}
+          name={isTecnicoTab ? 'construct' : 'construct-outline'}
           size={22}
-          color={currentTab === 'atividades' ? '#0284c7' : '#64748b'}
+          color={isTecnicoTab ? '#0284c7' : '#64748b'}
         />
-        <Text style={[styles.navLabel, currentTab === 'atividades' && styles.navLabelActive]}>
-          Nova OS
+        <Text style={[styles.navLabel, isTecnicoTab && styles.navLabelActive]}>
+          Técnico
         </Text>
       </TouchableOpacity>
 
+      {/* Aba Admin: controla todas as OS abertas, atribui a um técnico, conversa com cliente, analisa histórico */}
       <TouchableOpacity
-        style={[styles.navItem, currentTab === 'assinatura' && styles.navItemActive]}
-        onPress={() => router.push('/assinatura' as any)}
-        accessibilityLabel="Ver Planos de Internet"
+        style={[styles.navItem, isAdminTab && styles.navItemActive]}
+        onPress={() => router.push('/admin' as any)}
+        accessibilityLabel="Ir para Aba do Administrador"
+        testID="tab-nav-admin"
       >
         <Ionicons
-          name={currentTab === 'assinatura' ? 'sparkles' : 'sparkles-outline'}
+          name={isAdminTab ? 'shield-checkmark' : 'shield-checkmark-outline'}
           size={22}
-          color={currentTab === 'assinatura' ? '#0284c7' : '#64748b'}
+          color={isAdminTab ? '#0284c7' : '#64748b'}
         />
-        <Text style={[styles.navLabel, currentTab === 'assinatura' && styles.navLabelActive]}>
-          Planos
+        <Text style={[styles.navLabel, isAdminTab && styles.navLabelActive]}>
+          Admin
         </Text>
       </TouchableOpacity>
 
+      {/* Botão Sair */}
       <TouchableOpacity
         style={[styles.navItem, styles.navItemSair]}
         onPress={handleSair}
         accessibilityLabel="Sair da conta"
+        testID="tab-nav-sair"
       >
         <Ionicons name="log-out-outline" size={22} color="#ef4444" />
         <Text style={[styles.navLabel, styles.navLabelSair]}>

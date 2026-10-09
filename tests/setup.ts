@@ -32,3 +32,27 @@ jest.mock('@expo/vector-icons', () => {
     };
 
 });
+
+// Mock expo-location para testes unitários
+jest.mock('expo-location', () => ({
+    requestForegroundPermissionsAsync: jest.fn(async () => ({ status: 'granted' })),
+    getCurrentPositionAsync: jest.fn(async () => ({
+        coords: {
+            latitude: -21.1850,
+            longitude: -45.4350,
+            altitude: 0,
+            accuracy: 5,
+            altitudeAccuracy: 5,
+            heading: 0,
+            speed: 0,
+        },
+        timestamp: Date.now(),
+    })),
+    Accuracy: {
+        Balanced: 3,
+        High: 4,
+        Highest: 5,
+        Low: 2,
+        Lowest: 1,
+    },
+}));

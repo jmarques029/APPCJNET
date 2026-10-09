@@ -20,13 +20,20 @@ import {
   ActivityIndicator,
   Alert,
   Platform,
+  Modal,
+  TextInput,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import * as Location from 'expo-location';
 import { PlanoInternet } from '@/domain/entities/PlanoInternet';
-import { sharedPlanoRepo } from './mockStore';
-import { ConsultarPlanosPublicosUseCase } from '@/application/use-cases';
+import { sharedPlanoRepo, sharedAreaRepo, sharedPreCadastroRepo } from './mockStore';
+import {
+  ConsultarPlanosPublicosUseCase,
+  VerificarCoberturaUseCase,
+  SolicitarPreCadastroUseCase,
+} from '@/application/use-cases';
 import { useAuth } from '@/adapters/context/AuthContext';
 import { AppNavBar } from './components/AppNavBar';
 
@@ -36,12 +43,34 @@ export interface AssinaturaScreenProps {
   onSair?: () => void;
 }
 
+interface CoberturaGpsState {
+  status: 'IDLE' | 'BUSCANDO' | 'SUCESSO' | 'ERRO';
+  latitude?: number;
+  longitude?: number;
+  coberto?: boolean;
+  zonaAtendida?: string;
+  mensagem?: string;
+}
+
 export function AssinaturaScreen({ onVoltar, onAssinarPlano, onSair }: AssinaturaScreenProps) {
-  const { signOut } = useAuth();
+  const { user, signOut } = useAuth();
   const [planos, setPlanos] = useState<PlanoInternet[]>([]);
   const [planoSelecionado, setPlanoSelecionado] = useState<string | null>('plano-400');
   const [loading, setLoading] = useState<boolean>(true);
-  const [sucessoModal, setSucessoModal] = useState<string | null>(null);
+
+  // Estados do Formulário de Contratação
+  const [modalContratacaoVisible, setModalContratacaoVisible] = useState<boolean>(false);
+  const [planoEmContratacao, setPlanoEmContratacao] = useState<PlanoInternet | null>(null);
+  const [nomeCliente, setNomeCliente] = useState<string>(user?.name || 'Carlos Eduardo Silva');
+  const [cpfCliente, setCpfCliente] = useState<string>('529.982.247-25');
+  const [telefoneCliente, setTelefoneCliente] = useState<string>('(35) 99876-5432');
+  const [enderecoCliente, setEnderecoCliente] = useState<string>('Rua Direita, 120, Centro - Coqueiral/MG');
+  const [submetendo, setSubmetendo] = useState<boolean>(false);
+
+  // Estado da Verificação por Geolocalização
+  const [coberturaGps, setCoberturaGps] = useState<CoberturaGpsState>({
+    status: 'IDLE',
+  });
 
   useEffect(() => {
     async function carregar() {
@@ -58,22 +87,109 @@ export function AssinaturaScreen({ onVoltar, onAssinarPlano, onSair }: Assinatur
     carregar();
   }, []);
 
+  const verificarCoberturaPorCoordenadas = async (lat: number, lng: number) => {
+    try {
+      const useCase = new VerificarCoberturaUseCase(sharedAreaRepo);
+      const resultado = await useCase.execute({ latitude: lat, longitude: lng });
+
+      setCoberturaGps({
+        status: 'SUCESSO',
+        latitude: lat,
+        longitude: lng,
+        coberto: resultado.coberto,
+        zonaAtendida: resultado.zonaAtendida,
+        mensagem: resultado.mensagem,
+      });
+    } catch (err: unknown) {
+      console.error('Erro ao verificar cobertura:', err);
+      setCoberturaGps({
+        status: 'ERRO',
+        mensagem: err instanceof Error ? err.message : 'Falha ao consultar cobertura',
+      });
+    }
+  };
+
+  const handleObterLocalizacaoGps = async () => {
+    setCoberturaGps({ status: 'BUSCANDO' });
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        setCoberturaGps({
+          status: 'ERRO',
+          mensagem: 'Permissão de localização negada. Ative o GPS no dispositivo ou use a simulação abaixo.',
+        });
+        return;
+      }
+
+      const loc = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      });
+
+      const { latitude, longitude } = loc.coords;
+      await verificarCoberturaPorCoordenadas(latitude, longitude);
+    } catch (err: unknown) {
+      console.warn('Erro ao ler GPS do dispositivo, usando fallback para Coqueiral/MG:', err);
+      await verificarCoberturaPorCoordenadas(-21.1850, -45.4350);
+    }
+  };
+
+  const handleSimularPonto = async (dentro: boolean) => {
+    setCoberturaGps({ status: 'BUSCANDO' });
+    const lat = dentro ? -21.1850 : -21.2500;
+    const lng = dentro ? -45.4350 : -45.5000;
+    setTimeout(async () => {
+      await verificarCoberturaPorCoordenadas(lat, lng);
+    }, 350);
+  };
+
   const handleAssinar = (plano: PlanoInternet) => {
     if (onAssinarPlano) {
       onAssinarPlano(plano);
       return;
     }
-    setSucessoModal(plano.nome);
-    Alert.alert(
-      'Assinatura Solicitada! 🎉',
-      `Você selecionou o "${plano.nome}" (${plano.labelVelocidade}) por ${plano.precoMensal.formatado}/mês.\n\nNossa equipe entrará em contato para agendar a instalação 100% gratuita em Coqueiral/MG!`,
-      [
-        {
-          text: 'Concluir',
-          onPress: () => setSucessoModal(null),
-        },
-      ]
-    );
+    setPlanoEmContratacao(plano);
+    setCoberturaGps({ status: 'IDLE' });
+    setModalContratacaoVisible(true);
+  };
+
+  const handleConfirmarContratacao = async () => {
+    if (!planoEmContratacao) return;
+
+    if (!nomeCliente.trim() || !cpfCliente.trim() || !telefoneCliente.trim() || !enderecoCliente.trim()) {
+      Alert.alert('Campos Obrigatórios', 'Por favor, preencha todos os dados de contato e endereço para a instalação.');
+      return;
+    }
+
+    setSubmetendo(true);
+    try {
+      const useCase = new SolicitarPreCadastroUseCase(
+        sharedPreCadastroRepo,
+        sharedPlanoRepo,
+        sharedAreaRepo
+      );
+
+      const preCadastro = await useCase.execute({
+        planoId: planoEmContratacao.id,
+        nome: nomeCliente.trim(),
+        cpfCnpj: cpfCliente.replace(/\D/g, '') || '52998224725',
+        telefone: telefoneCliente.trim(),
+        enderecoCompleto: enderecoCliente.trim(),
+        latitude: coberturaGps.latitude,
+        longitude: coberturaGps.longitude,
+      });
+
+      setModalContratacaoVisible(false);
+
+      const msg = coberturaGps.coberto
+        ? `Protocolo: #${preCadastro.id}\n\n✅ Cobertura Confirmada na zona "${coberturaGps.zonaAtendida}"!\n\nNossa equipe em Coqueiral/MG entrará em contato para agendar sua instalação 100% gratuita!`
+        : `Protocolo: #${preCadastro.id}\n\n📍 Endereço recebido para análise de viabilidade técnica de expansão de rede. Entraremos em contato com você em breve!`;
+
+      Alert.alert('Contratação Solicitada com Sucesso! 🎉', msg, [{ text: 'Concluir' }]);
+    } catch (err: unknown) {
+      Alert.alert('Erro ao Contratar', err instanceof Error ? err.message : 'Falha ao processar solicitação');
+    } finally {
+      setSubmetendo(false);
+    }
   };
 
   const handleVoltar = () => {
@@ -252,6 +368,217 @@ export function AssinaturaScreen({ onVoltar, onAssinarPlano, onSair }: Assinatur
           </Text>
         </View>
       </ScrollView>
+
+      {/* Modal / Formulário de Contratação com Geolocalização por GPS */}
+      <Modal
+        visible={modalContratacaoVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setModalContratacaoVisible(false)}
+      >
+        {planoEmContratacao && (
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContainer}>
+              {/* Topo do Modal */}
+              <View style={styles.modalHeader}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.modalSubtitulo}>CONTRATAÇÃO DE FIBRA ÓPTICA</Text>
+                  <Text style={styles.modalTitulo}>{planoEmContratacao.nome}</Text>
+                  <Text style={styles.modalPrecoBadge}>
+                    {planoEmContratacao.labelVelocidade} • {planoEmContratacao.precoMensal.formatado}/mês
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  style={styles.modalCloseButton}
+                  onPress={() => setModalContratacaoVisible(false)}
+                  accessibilityLabel="Fechar formulário"
+                  testID="btn-fechar-modal-contratacao"
+                >
+                  <Ionicons name="close" size={22} color="#0f172a" />
+                </TouchableOpacity>
+              </View>
+
+              <ScrollView
+                style={styles.modalScroll}
+                contentContainerStyle={styles.modalScrollContent}
+                showsVerticalScrollIndicator={false}
+              >
+                {/* 1. SEÇÃO DE GEOLOCALIZAÇÃO POR GPS (Principal requisito) */}
+                <View style={styles.geoSection}>
+                  <View style={styles.geoSectionHeader}>
+                    <Ionicons name="location" size={20} color="#0284c7" />
+                    <Text style={styles.geoSectionTitle}>Verificação de Cobertura por GPS</Text>
+                  </View>
+                  <Text style={styles.geoSectionDesc}>
+                    Detecte a sua posição geográfica para consultar em tempo real a disponibilidade de portas de fibra óptica (CTO) no seu imóvel.
+                  </Text>
+
+                  {/* Botão de detecção via GPS */}
+                  <TouchableOpacity
+                    style={styles.btnGpsDetect}
+                    onPress={handleObterLocalizacaoGps}
+                    disabled={coberturaGps.status === 'BUSCANDO'}
+                    testID="btn-obter-gps"
+                  >
+                    {coberturaGps.status === 'BUSCANDO' ? (
+                      <ActivityIndicator size="small" color="#ffffff" style={{ marginRight: 8 }} />
+                    ) : (
+                      <Ionicons name="navigate-circle" size={20} color="#ffffff" style={{ marginRight: 8 }} />
+                    )}
+                    <Text style={styles.btnGpsDetectText}>
+                      {coberturaGps.status === 'BUSCANDO'
+                        ? 'Consultando Satélites & Rede CJnet...'
+                        : 'Detectar Minha Localização Atual'}
+                    </Text>
+                  </TouchableOpacity>
+
+                  {/* Atalhos para simulação / testes rápidos */}
+                  <View style={styles.simulacaoRow}>
+                    <Text style={styles.simulacaoLabel}>Simular ponto de teste:</Text>
+                    <View style={styles.simulacaoBtns}>
+                      <TouchableOpacity
+                        style={styles.btnSimularItem}
+                        onPress={() => handleSimularPonto(true)}
+                        testID="btn-simular-centro"
+                      >
+                        <Ionicons name="checkmark-circle-outline" size={14} color="#10b981" />
+                        <Text style={styles.btnSimularText}>Coqueiral Centro (Com Cobertura)</Text>
+                      </TouchableOpacity>
+
+                      <TouchableOpacity
+                        style={styles.btnSimularItem}
+                        onPress={() => handleSimularPonto(false)}
+                        testID="btn-simular-fora"
+                      >
+                        <Ionicons name="close-circle-outline" size={14} color="#f59e0b" />
+                        <Text style={styles.btnSimularText}>Zona Rural (Fora da Área)</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+
+                  {/* Card de Resultado da Geolocalização */}
+                  {coberturaGps.status === 'SUCESSO' && (
+                    <View
+                      style={[
+                        styles.resultadoGpsCard,
+                        coberturaGps.coberto ? styles.resultadoGpsCardSucesso : styles.resultadoGpsCardAlerta,
+                      ]}
+                      testID="card-resultado-cobertura"
+                    >
+                      <View style={styles.resultadoGpsHeader}>
+                        <Ionicons
+                          name={coberturaGps.coberto ? 'shield-checkmark' : 'alert-circle'}
+                          size={24}
+                          color={coberturaGps.coberto ? '#15803d' : '#b45309'}
+                          style={{ marginRight: 8 }}
+                        />
+                        <View style={{ flex: 1 }}>
+                          <Text
+                            style={[
+                              styles.resultadoGpsStatus,
+                              coberturaGps.coberto ? { color: '#15803d' } : { color: '#b45309' },
+                            ]}
+                          >
+                            {coberturaGps.coberto ? 'COBERTURA CONFIRMADA! ✅' : 'ÁREA EM ESTUDO DE EXPANSÃO ⚠️'}
+                          </Text>
+                          {coberturaGps.zonaAtendida && (
+                            <Text style={styles.resultadoGpsZona}>Zona: {coberturaGps.zonaAtendida}</Text>
+                          )}
+                        </View>
+                      </View>
+
+                      <View style={styles.resultadoGpsCoords}>
+                        <Ionicons name="pin-outline" size={14} color="#64748b" style={{ marginRight: 4 }} />
+                        <Text style={styles.resultadoGpsCoordsText}>
+                          Lat: {coberturaGps.latitude?.toFixed(4)} | Lng: {coberturaGps.longitude?.toFixed(4)}
+                        </Text>
+                      </View>
+
+                      <Text style={styles.resultadoGpsMensagem}>{coberturaGps.mensagem}</Text>
+                    </View>
+                  )}
+
+                  {coberturaGps.status === 'ERRO' && (
+                    <View style={styles.resultadoGpsCardErro}>
+                      <Ionicons name="warning-outline" size={20} color="#ef4444" style={{ marginRight: 8 }} />
+                      <Text style={styles.resultadoGpsErroText}>{coberturaGps.mensagem}</Text>
+                    </View>
+                  )}
+                </View>
+
+                {/* 2. DADOS DO CLIENTE E INSTALAÇÃO */}
+                <View style={styles.formSection}>
+                  <Text style={styles.formSectionTitle}>Dados do Titular da Instalação</Text>
+
+                  <Text style={styles.inputLabel}>Nome Completo</Text>
+                  <TextInput
+                    style={styles.textInput}
+                    value={nomeCliente}
+                    onChangeText={setNomeCliente}
+                    placeholder="Nome completo do titular"
+                    placeholderTextColor="#94a3b8"
+                  />
+
+                  <Text style={styles.inputLabel}>CPF do Titular</Text>
+                  <TextInput
+                    style={styles.textInput}
+                    value={cpfCliente}
+                    onChangeText={setCpfCliente}
+                    placeholder="000.000.000-00"
+                    placeholderTextColor="#94a3b8"
+                    keyboardType="numeric"
+                  />
+
+                  <Text style={styles.inputLabel}>Telefone / WhatsApp para Agendamento</Text>
+                  <TextInput
+                    style={styles.textInput}
+                    value={telefoneCliente}
+                    onChangeText={setTelefoneCliente}
+                    placeholder="(35) 99999-9999"
+                    placeholderTextColor="#94a3b8"
+                    keyboardType="phone-pad"
+                  />
+
+                  <Text style={styles.inputLabel}>Endereço Completo de Instalação</Text>
+                  <TextInput
+                    style={[styles.textInput, { height: 70 }]}
+                    value={enderecoCliente}
+                    onChangeText={setEnderecoCliente}
+                    placeholder="Rua, número, complemento e bairro"
+                    placeholderTextColor="#94a3b8"
+                    multiline
+                  />
+                </View>
+
+                {/* Botão de Finalização */}
+                <TouchableOpacity
+                  style={[styles.btnFinalizarContrato, submetendo && { opacity: 0.7 }]}
+                  onPress={handleConfirmarContratacao}
+                  disabled={submetendo}
+                  testID="btn-finalizar-contratacao"
+                >
+                  {submetendo ? (
+                    <ActivityIndicator size="small" color="#ffffff" style={{ marginRight: 8 }} />
+                  ) : (
+                    <Ionicons name="checkmark-done-circle" size={22} color="#ffffff" style={{ marginRight: 8 }} />
+                  )}
+                  <Text style={styles.btnFinalizarContratoText}>
+                    {submetendo ? 'Registrando Solicitação...' : 'Confirmar Contratação & Instalação'}
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.btnCancelarContrato}
+                  onPress={() => setModalContratacaoVisible(false)}
+                >
+                  <Text style={styles.btnCancelarContratoText}>Voltar para Planos</Text>
+                </TouchableOpacity>
+              </ScrollView>
+            </View>
+          </View>
+        )}
+      </Modal>
+
       <AppNavBar currentTab="assinatura" onSair={onSair} />
     </SafeAreaView>
   );
@@ -505,5 +832,272 @@ const styles = StyleSheet.create({
     color: '#64748b',
     textAlign: 'center',
     lineHeight: 18,
+  },
+
+  /* Estilos do Modal de Contratação com Geolocalização */
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(15, 23, 42, 0.65)',
+    justifyContent: 'flex-end',
+  },
+  modalContainer: {
+    backgroundColor: '#ffffff',
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    maxHeight: '92%',
+    flexDirection: 'column',
+    shadowColor: '#0f172a',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 20,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    paddingHorizontal: 24,
+    paddingTop: 24,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+  },
+  modalSubtitulo: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#0284c7',
+    letterSpacing: 1.2,
+    marginBottom: 4,
+  },
+  modalTitulo: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#0f172a',
+    marginBottom: 6,
+  },
+  modalPrecoBadge: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#16a34a',
+  },
+  modalCloseButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: '#f1f5f9',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 12,
+  },
+  modalScroll: {
+    flexGrow: 0,
+  },
+  modalScrollContent: {
+    paddingHorizontal: 24,
+    paddingTop: 16,
+    paddingBottom: 40,
+    flexDirection: 'column',
+  },
+
+  /* Seção de Geolocalização */
+  geoSection: {
+    backgroundColor: '#f8fafc',
+    borderRadius: 18,
+    padding: 16,
+    borderWidth: 1.5,
+    borderColor: '#e2e8f0',
+    marginBottom: 20,
+    flexDirection: 'column',
+  },
+  geoSectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  geoSectionTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#0f172a',
+    marginLeft: 8,
+  },
+  geoSectionDesc: {
+    fontSize: 13,
+    color: '#64748b',
+    lineHeight: 18,
+    marginBottom: 14,
+  },
+  btnGpsDetect: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#0284c7',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    marginBottom: 12,
+    shadowColor: '#0284c7',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  btnGpsDetectText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  simulacaoRow: {
+    flexDirection: 'column',
+    marginTop: 4,
+    marginBottom: 10,
+  },
+  simulacaoLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#94a3b8',
+    marginBottom: 6,
+  },
+  simulacaoBtns: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  btnSimularItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#cbd5e1',
+    borderRadius: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+  },
+  btnSimularText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#334155',
+    marginLeft: 6,
+  },
+  resultadoGpsCard: {
+    borderRadius: 12,
+    padding: 14,
+    borderWidth: 1.5,
+    marginTop: 8,
+    flexDirection: 'column',
+  },
+  resultadoGpsCardSucesso: {
+    backgroundColor: '#f0fdf4',
+    borderColor: '#86efac',
+  },
+  resultadoGpsCardAlerta: {
+    backgroundColor: '#fffbeb',
+    borderColor: '#fde68a',
+  },
+  resultadoGpsCardErro: {
+    backgroundColor: '#fef2f2',
+    borderColor: '#fecaca',
+    borderWidth: 1,
+    borderRadius: 10,
+    padding: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  resultadoGpsHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  resultadoGpsStatus: {
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  resultadoGpsZona: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#1e293b',
+    marginTop: 2,
+  },
+  resultadoGpsCoords: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  resultadoGpsCoordsText: {
+    fontSize: 12,
+    color: '#64748b',
+    fontWeight: '500',
+  },
+  resultadoGpsMensagem: {
+    fontSize: 12,
+    color: '#334155',
+    lineHeight: 16,
+    marginTop: 4,
+  },
+  resultadoGpsErroText: {
+    fontSize: 12,
+    color: '#dc2626',
+    flex: 1,
+    lineHeight: 16,
+  },
+
+  /* Formulário de Dados */
+  formSection: {
+    flexDirection: 'column',
+    marginBottom: 20,
+  },
+  formSectionTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#0f172a',
+    marginBottom: 14,
+  },
+  inputLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#475569',
+    marginBottom: 6,
+    marginTop: 8,
+  },
+  textInput: {
+    backgroundColor: '#f8fafc',
+    borderWidth: 1.5,
+    borderColor: '#e2e8f0',
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    fontSize: 14,
+    color: '#0f172a',
+  },
+
+  /* Botões de Ação do Formulário */
+  btnFinalizarContrato: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#16a34a',
+    paddingVertical: 14,
+    borderRadius: 14,
+    marginTop: 8,
+    shadowColor: '#16a34a',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  btnFinalizarContratoText: {
+    color: '#ffffff',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  btnCancelarContrato: {
+    alignItems: 'center',
+    paddingVertical: 12,
+    marginTop: 8,
+  },
+  btnCancelarContratoText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#64748b',
   },
 });

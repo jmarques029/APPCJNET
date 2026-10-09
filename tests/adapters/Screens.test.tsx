@@ -73,6 +73,66 @@ describe('Camada de Interface do Usuário e Rotas (adapters/screens/)', () => {
       fireEvent.press(btnSair);
       expect(mockSair).toHaveBeenCalled();
     });
+
+    it('deve abrir formulário de contratação e verificar cobertura por geolocalização GPS com sucesso', async () => {
+      const { getAllByText, getByText, getByTestId } = await render(
+        <AuthProvider autoRestore={false}>
+          <AssinaturaScreen />
+        </AuthProvider>
+      );
+
+      await waitFor(() => {
+        expect(getByText('CJnet Fibra 400 Mega Ultra')).toBeTruthy();
+      });
+
+      // Toca em assinar para abrir o formulário
+      const botoesAssinar = getAllByText('Assinar Este Plano');
+      fireEvent.press(botoesAssinar[0]);
+
+      // Verifica abertura do modal de contratação com seção de GPS
+      await waitFor(() => {
+        expect(getByText('CONTRATAÇÃO DE FIBRA ÓPTICA')).toBeTruthy();
+        expect(getByText('Verificação de Cobertura por GPS')).toBeTruthy();
+      });
+
+      // Dispara detecção de GPS
+      const btnGps = getByTestId('btn-obter-gps');
+      fireEvent.press(btnGps);
+
+      // Aguarda confirmação de cobertura pela regra de geolocalização
+      await waitFor(() => {
+        expect(getByText('COBERTURA CONFIRMADA! ✅')).toBeTruthy();
+        expect(getAllByText(/Centro e Bairros Adjacentes/).length).toBeGreaterThan(0);
+      });
+
+      // Conclui a contratação
+      const btnFinalizar = getByTestId('btn-finalizar-contratacao');
+      fireEvent.press(btnFinalizar);
+    });
+
+    it('deve indicar ponto em estudo de expansão ao simular coordenada fora da área de cobertura', async () => {
+      const { getAllByText, getByText, getByTestId } = await render(
+        <AuthProvider autoRestore={false}>
+          <AssinaturaScreen />
+        </AuthProvider>
+      );
+
+      await waitFor(() => {
+        const botoesAssinar = getAllByText('Assinar Este Plano');
+        fireEvent.press(botoesAssinar[0]);
+      });
+
+      await waitFor(() => {
+        expect(getByTestId('btn-simular-fora')).toBeTruthy();
+      });
+
+      // Simula ponto rural fora da cobertura
+      fireEvent.press(getByTestId('btn-simular-fora'));
+
+      await waitFor(() => {
+        expect(getByText('ÁREA EM ESTUDO DE EXPANSÃO ⚠️')).toBeTruthy();
+      });
+    });
   });
 
   describe('AtividadesFormScreen (Formulário de Abertura de Chamado Técnico / OS)', () => {

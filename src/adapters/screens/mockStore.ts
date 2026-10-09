@@ -18,10 +18,17 @@ import { Preco } from '@/domain/value-objects/Preco';
 import { StatusOS } from '@/domain/value-objects/StatusOS';
 import { TipoProblema } from '@/domain/value-objects/TipoProblema';
 
+import { FakeAreaCoberturaRepository } from '@/infra/fakes/FakeAreaCoberturaRepository';
+import { FakePreCadastroRepository } from '@/infra/fakes/FakePreCadastroRepository';
+import { AreaCobertura } from '@/domain/entities/AreaCobertura';
+import { GeoCoordenadas } from '@/domain/value-objects/GeoCoordenadas';
+
 // Instâncias compartilhadas
 export const sharedPlanoRepo = new FakePlanoRepository();
 export const sharedOsRepo = new FakeOrdemServicoRepository();
 export const sharedClienteRepo = new FakeClienteRepository();
+export const sharedAreaRepo = new FakeAreaCoberturaRepository();
+export const sharedPreCadastroRepo = new FakePreCadastroRepository();
 
 export const DEMO_CLIENTE_ID = 'cli-cjnet-01';
 export const DEMO_CLIENTE_NOME = 'Carlos Eduardo Silva';
@@ -29,9 +36,16 @@ export const DEMO_CLIENTE_EMAIL = 'carlos.silva@cjnet.com.br';
 
 let seeded = false;
 
-export function initializeSharedStore(): void {
-  if (seeded) return;
+export function initializeSharedStore(force = false): void {
+  if (seeded && !force) return;
   seeded = true;
+
+  sharedPlanoRepo.limpar();
+  sharedOsRepo.limpar();
+  sharedClienteRepo.limpar();
+  sharedAreaRepo.limpar();
+  sharedPreCadastroRepo.limpar();
+  sharedMensagens.length = 0;
 
   // 1. Clientes e Usuários do Sistema
   const cliente = new Cliente({
@@ -192,7 +206,113 @@ export function initializeSharedStore(): void {
   sharedOsRepo.salvar(os2);
   sharedOsRepo.salvar(os3);
   sharedOsRepo.salvar(osOutroCliente);
+
+  // 5. Zonas de Cobertura de Fibra Óptica CJnet (Coqueiral/MG)
+  const zonaCentro = new AreaCobertura({
+    id: 'area-centro',
+    nomeZona: 'Centro e Bairros Adjacentes (Coqueiral/MG)',
+    vertices: [
+      new GeoCoordenadas(-21.1800, -45.4450),
+      new GeoCoordenadas(-21.1800, -45.4300),
+      new GeoCoordenadas(-21.1950, -45.4300),
+      new GeoCoordenadas(-21.1950, -45.4450),
+    ],
+    ativo: true,
+  });
+
+  const zonaSul = new AreaCobertura({
+    id: 'area-sul',
+    nomeZona: 'Zona Sul e Parque das Águas (Coqueiral/MG)',
+    vertices: [
+      new GeoCoordenadas(-21.1950, -45.4500),
+      new GeoCoordenadas(-21.1950, -45.4250),
+      new GeoCoordenadas(-21.2100, -45.4250),
+      new GeoCoordenadas(-21.2100, -45.4500),
+    ],
+    ativo: true,
+  });
+
+  sharedAreaRepo.salvar(zonaCentro);
+  sharedAreaRepo.salvar(zonaSul);
+
+  // 6. Mensagens de Conversa / Suporte da OS
+  if (sharedMensagens.length === 0) {
+    sharedMensagens.push({
+      id: 'msg-01',
+      osId: 'OS-1002',
+      remetenteId: 'adm-01',
+      remetenteNome: 'Gerência CJnet',
+      papel: 'ADMIN',
+      texto: 'Olá Carlos! Seu chamado foi recebido e atribuído ao técnico João Santos. Ele chegará até as 16h.',
+      createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2),
+    });
+    sharedMensagens.push({
+      id: 'msg-02',
+      osId: 'OS-1002',
+      remetenteId: DEMO_CLIENTE_ID,
+      remetenteNome: DEMO_CLIENTE_NOME,
+      papel: 'CLIENTE',
+      texto: 'Perfeito! Estarei em casa aguardando o técnico.',
+      createdAt: new Date(Date.now() - 1000 * 60 * 50),
+    });
+  }
 }
+
+// ─── Mensagens entre Central Admin e Cliente ─────────────────────────────────
+
+export interface MensagemOS {
+  id: string;
+  osId: string;
+  remetenteId: string;
+  remetenteNome: string;
+  papel: 'CLIENTE' | 'ADMIN' | 'TECNICO';
+  texto: string;
+  createdAt: Date;
+}
+
+export const sharedMensagens: MensagemOS[] = [];
+
+export function obterMensagensPorOS(osId: string): MensagemOS[] {
+  return sharedMensagens.filter((m) => m.osId === osId);
+}
+
+export function enviarMensagemOS(
+  osId: string,
+  remetenteId: string,
+  remetenteNome: string,
+  papel: 'CLIENTE' | 'ADMIN' | 'TECNICO',
+  texto: string
+): MensagemOS {
+  const novaMsg: MensagemOS = {
+    id: `msg-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+    osId,
+    remetenteId,
+    remetenteNome,
+    papel,
+    texto: texto.trim(),
+    createdAt: new Date(),
+  };
+  sharedMensagens.push(novaMsg);
+  return novaMsg;
+}
+
+export const TECNICOS_DISPONIVEIS = [
+  {
+    id: 'tec-joao-01',
+    nome: 'João Santos',
+    telefone: '(35) 99811-2233',
+    funcao: 'Técnico de Campo - Fibra Óptica',
+    especialidade: 'Conexões residenciais e ONU',
+  },
+  {
+    id: 'tec-marcos-02',
+    nome: 'Marcos Oliveira',
+    telefone: '(35) 99744-5566',
+    funcao: 'Especialista em Redes & Fusão Óptica',
+    especialidade: 'Caixas de Emenda (CTO) e Fusão',
+  },
+];
 
 // Inicializa imediatamente para garantir dados disponíveis
 initializeSharedStore();
+

@@ -91,6 +91,13 @@ export class OrdemServico {
     this._fotos.push(foto);
   }
 
+  public atribuirTecnico(tecnicoId: string): void {
+    if (!tecnicoId) {
+      throw new Error('É necessário informar o técnico responsável para atribuição.');
+    }
+    this._tecnicoId = tecnicoId;
+  }
+
   public iniciarAtendimento(tecnicoId: string): void {
     if (!tecnicoId) {
       throw new Error('É necessário informar o técnico responsável para iniciar o atendimento.');

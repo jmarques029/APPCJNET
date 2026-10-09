@@ -14,4 +14,8 @@ export * from './AssinaturaScreen';
 export * from './AtividadesFormScreen';
 export * from './HistoricoRelatoriosScreen';
 export * from './LoginScreen';
+export * from './ClienteTabScreen';
+export * from './TecnicoTabScreen';
+export * from './AdminTabScreen';
 export * from './mockStore';
+
