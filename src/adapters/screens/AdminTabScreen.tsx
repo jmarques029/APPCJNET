@@ -14,7 +14,7 @@
  *  - Análise cronológica e auditoria completa do histórico da OS até a conclusão.
  */
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -77,15 +77,30 @@ export function AdminTabScreen({
   const [modalHistorico, setModalHistorico] = useState<boolean>(false);
   const [osHistorico, setOsHistorico] = useState<OrdemServico | null>(null);
 
+  const isMountedRef = useRef(true);
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
   const carregarTodasOrdens = useCallback(async () => {
+    if (!isMountedRef.current) return;
     setLoading(true);
     try {
       const todas = await sharedOsRepo.listarTodas();
-      setOrdens(todas);
+      if (isMountedRef.current) {
+        setOrdens(todas);
+      }
     } catch (err: unknown) {
-      console.error('Erro ao listar OSs no Admin:', err);
+      if (isMountedRef.current) {
+        console.error('Erro ao listar OSs no Admin:', err);
+      }
     } finally {
-      setLoading(false);
+      if (isMountedRef.current) {
+        setLoading(false);
+      }
     }
   }, []);
 
@@ -155,17 +170,23 @@ export function AdminTabScreen({
         `Olá! Sua ordem de serviço #${osParaAtribuir.idLocal} foi atribuída ao técnico ${tecInfo.nome} (${tecInfo.telefone}).`
       );
 
-      setModalAtribuir(false);
-      setOsParaAtribuir(null);
-      await carregarTodasOrdens();
+      if (isMountedRef.current) {
+        setOrdens((prev) =>
+          prev.map((item) => (item.idLocal === osParaAtribuir.idLocal ? osParaAtribuir : item))
+        );
+        setModalAtribuir(false);
+        setOsParaAtribuir(null);
 
-      Alert.alert(
-        'Técnico Atribuído com Sucesso! 👷',
-        `A OS foi atribuída a ${tecInfo.nome} e o status avançou para Em Atendimento.`
-      );
+        Alert.alert(
+          'Técnico Atribuído com Sucesso! 👷',
+          `A OS foi atribuída a ${tecInfo.nome} e o status avançou para Em Atendimento.`
+        );
+      }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Falha ao atribuir técnico';
-      Alert.alert('Erro', msg);
+      if (isMountedRef.current) {
+        Alert.alert('Erro', msg);
+      }
     }
   };
 

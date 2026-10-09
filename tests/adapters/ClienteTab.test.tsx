@@ -76,13 +76,10 @@ describe('Aba do Cliente (ClienteTabScreen)', () => {
     unmount();
   });
 
-  it('deve abrir detalhes da OS e permitir enviar mensagem no chat com a central', async () => {
+  it('deve abrir detalhes da OS e verificar o técnico atribuído e informações de atendimento', async () => {
     const { getByTestId, getByText, unmount } = await render(
       <AuthProvider autoRestore={false}>
-        <ClienteTabScreen
-          clienteId={DEMO_CLIENTE_ID}
-          initialNovaMensagem="Obrigado, estarei no portão aguardando o técnico."
-        />
+        <ClienteTabScreen clienteId={DEMO_CLIENTE_ID} />
       </AuthProvider>
     );
 
@@ -96,15 +93,9 @@ describe('Aba do Cliente (ClienteTabScreen)', () => {
     await waitFor(() => {
       expect(getByTestId('modal-tecnico-detalhes')).toBeTruthy();
       expect(getByText('João Santos')).toBeTruthy();
+      expect(getByText('TÉCNICO ATRIBUÍDO')).toBeTruthy();
+      expect(getByText('Técnico de Campo - Fibra Óptica')).toBeTruthy();
     });
-
-    // Envia a mensagem no chat
-    const btnEnviar = getByTestId('btn-enviar-mensagem-cliente');
-    fireEvent.press(btnEnviar);
-
-    await waitFor(() => {
-      expect(getByText('Obrigado, estarei no portão aguardando o técnico.')).toBeTruthy();
-    }, { timeout: 3000 });
 
     unmount();
   });

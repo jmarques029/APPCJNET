@@ -129,8 +129,27 @@ export function ClienteTabScreen({
   }, [activeClienteId]);
 
   useEffect(() => {
-    carregarOrdens();
-  }, [carregarOrdens]);
+    let isMounted = true;
+    const carregar = async () => {
+      setLoading(true);
+      try {
+        const todas = await sharedOsRepo.listarPorCliente(activeClienteId);
+        if (isMounted) {
+          setOrdens(todas);
+        }
+      } catch (err: unknown) {
+        if (isMounted) console.error('Erro ao listar OS do cliente:', err);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+    carregar();
+    return () => {
+      isMounted = false;
+    };
+  }, [activeClienteId]);
 
   // Atualizar mensagens quando uma OS for selecionada
   useEffect(() => {

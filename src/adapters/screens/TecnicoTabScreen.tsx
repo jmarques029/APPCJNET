@@ -76,7 +76,6 @@ export function TecnicoTabScreen({
     setLoading(true);
     try {
       const todas = await sharedOsRepo.listarTodas();
-      // Filtrar OSs atribuídas ao técnico ativo ou com status EM_ATENDIMENTO / PENDENTE para visualização
       const atribuidas = todas.filter(
         (os) => os.tecnicoId === activeTecnicoId || (os.status.value === 'EM_ATENDIMENTO' && !os.tecnicoId)
       );
@@ -89,8 +88,30 @@ export function TecnicoTabScreen({
   }, [activeTecnicoId]);
 
   useEffect(() => {
-    carregarOrdensTecnico();
-  }, [carregarOrdensTecnico]);
+    let isMounted = true;
+    const carregar = async () => {
+      setLoading(true);
+      try {
+        const todas = await sharedOsRepo.listarTodas();
+        const atribuidas = todas.filter(
+          (os) => os.tecnicoId === activeTecnicoId || (os.status.value === 'EM_ATENDIMENTO' && !os.tecnicoId)
+        );
+        if (isMounted) {
+          setOrdens(atribuidas);
+        }
+      } catch (err: unknown) {
+        if (isMounted) console.error('Erro ao listar OS do técnico:', err);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+    carregar();
+    return () => {
+      isMounted = false;
+    };
+  }, [activeTecnicoId]);
 
   // Separação entre OSs abertas (para atender/fechar) e concluídas
   const osAbertas = useMemo(() => {
