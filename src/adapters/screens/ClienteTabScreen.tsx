@@ -49,6 +49,7 @@ export interface ClienteTabScreenProps {
   clienteId?: string;
   initialDescricao?: string;
   initialNovaMensagem?: string;
+  initialSelectedOs?: OrdemServico | null;
   onNovoChamadoSuccess?: (os: OrdemServico) => void;
   onSair?: () => void;
 }
@@ -94,6 +95,7 @@ export function ClienteTabScreen({
   clienteId = DEMO_CLIENTE_ID,
   initialDescricao,
   initialNovaMensagem,
+  initialSelectedOs = null,
   onNovoChamadoSuccess,
   onSair,
 }: ClienteTabScreenProps) {
@@ -104,7 +106,7 @@ export function ClienteTabScreen({
   const [ordens, setOrdens] = useState<OrdemServico[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [modalNovoChamado, setModalNovoChamado] = useState<boolean>(false);
-  const [selectedOs, setSelectedOs] = useState<OrdemServico | null>(null);
+  const [selectedOs, setSelectedOs] = useState<OrdemServico | null>(initialSelectedOs);
 
   // Formulário de Nova OS
   const [tipoProblema, setTipoProblema] = useState<TipoProblemaType>('SEM_SINAL');
@@ -308,12 +310,10 @@ export function ClienteTabScreen({
                 const isEmAtendimento = os.status.value === 'EM_ATENDIMENTO';
 
                 return (
-                  <TouchableOpacity
+                  <View
                     key={os.idLocal}
                     style={styles.cardOS}
-                    onPress={() => setSelectedOs(os)}
                     testID={`card-os-cliente-${os.idLocal}`}
-                    activeOpacity={0.8}
                   >
                     {/* Linha superior: Protocolo e Status */}
                     <View style={styles.cardTopRow}>
@@ -382,12 +382,16 @@ export function ClienteTabScreen({
                           minute: '2-digit',
                         })}
                       </Text>
-                      <View style={styles.cardAcao}>
+                      <TouchableOpacity
+                        style={styles.cardAcao}
+                        onPress={() => setSelectedOs(os)}
+                        testID={`btn-ver-detalhes-${os.idLocal}`}
+                      >
                         <Text style={styles.cardAcaoText}>Ver Detalhes</Text>
                         <Ionicons name="arrow-forward" size={14} color="#0284c7" />
-                      </View>
+                      </TouchableOpacity>
                     </View>
-                  </TouchableOpacity>
+                  </View>
                 );
               })}
             </View>

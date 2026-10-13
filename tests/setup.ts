@@ -56,3 +56,14 @@ jest.mock('expo-location', () => ({
         Lowest: 1,
     },
 }));
+
+// Mock expo-sqlite para ambiente Jest/Node
+jest.mock('expo-sqlite', () => {
+    const { createMockSQLiteDatabase } = require('./mocks/mockSQLite');
+    const mockDb = createMockSQLiteDatabase();
+    return {
+        openDatabaseAsync: jest.fn(async () => mockDb),
+        openDatabaseSync: jest.fn(() => mockDb),
+    };
+});
+

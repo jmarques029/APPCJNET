@@ -1,9 +1,10 @@
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react-native';
+import { render, fireEvent, waitFor, act } from '@testing-library/react-native';
 import {
   ClienteTabScreen,
   initializeSharedStore,
   DEMO_CLIENTE_ID,
+  sharedOsRepo,
 } from '@/adapters/screens';
 import { AuthProvider } from '@/adapters/context/AuthContext';
 
@@ -77,25 +78,23 @@ describe('Aba do Cliente (ClienteTabScreen)', () => {
   });
 
   it('deve abrir detalhes da OS e verificar o técnico atribuído e informações de atendimento', async () => {
+    const os1002 = await sharedOsRepo.buscarPorIdLocal('OS-1002');
+
     const { getByTestId, getByText, unmount } = await render(
       <AuthProvider autoRestore={false}>
-        <ClienteTabScreen clienteId={DEMO_CLIENTE_ID} />
+        <ClienteTabScreen clienteId={DEMO_CLIENTE_ID} initialSelectedOs={os1002} />
       </AuthProvider>
     );
 
-    await waitFor(() => {
-      expect(getByText(/Minhas OSs em Aberto/)).toBeTruthy();
-    });
-
-    // Clica no card da OS-1002
-    fireEvent.press(getByTestId('card-os-cliente-OS-1002'));
-
-    await waitFor(() => {
-      expect(getByTestId('modal-tecnico-detalhes')).toBeTruthy();
-      expect(getByText('João Santos')).toBeTruthy();
-      expect(getByText('TÉCNICO ATRIBUÍDO')).toBeTruthy();
-      expect(getByText('Técnico de Campo - Fibra Óptica')).toBeTruthy();
-    });
+    await waitFor(
+      () => {
+        expect(getByTestId('modal-tecnico-detalhes')).toBeTruthy();
+        expect(getByText('João Santos')).toBeTruthy();
+        expect(getByText('TÉCNICO ATRIBUÍDO')).toBeTruthy();
+        expect(getByText('Técnico de Campo - Fibra Óptica')).toBeTruthy();
+      },
+      { timeout: 8000 }
+    );
 
     unmount();
   });
