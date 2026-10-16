@@ -8,9 +8,16 @@
     "scheme": "ecofield",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "O app CJnet necessita da sua localização para verificar a viabilidade técnica e cobertura de fibra óptica no seu endereço."
+      }
     },
     "android": {
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION"
+      ],
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -43,7 +50,13 @@
       "expo-image",
       "expo-status-bar",
       "expo-web-browser",
-      "expo-sqlite"
+      "expo-sqlite",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "O app CJnet necessita da sua localização para verificar a viabilidade técnica e cobertura de fibra óptica no seu endereço."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

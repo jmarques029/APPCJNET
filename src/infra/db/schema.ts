@@ -7,7 +7,6 @@
  */
 
 export const CREATE_TABLES_SQL = `
-  PRAGMA journal_mode = WAL;
   PRAGMA foreign_keys = ON;
 
   -- 1. Clientes e Usuários Locais

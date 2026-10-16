@@ -5,6 +5,7 @@
  * Utiliza a API moderna do Expo SDK 57 (expo-sqlite).
  */
 
+import { Platform } from 'react-native';
 import * as SQLite from 'expo-sqlite';
 import { CREATE_TABLES_SQL } from './schema';
 
@@ -29,7 +30,16 @@ export async function getDatabaseConnection(): Promise<SQLite.SQLiteDatabase> {
 export async function initDatabase(db?: SQLite.SQLiteDatabase): Promise<SQLite.SQLiteDatabase> {
   const targetDb = db ?? (await getDatabaseConnection());
 
-  // 1. Configurar WAL mode e migração com user_version
+  // 1. Configurar WAL mode (plataformas nativas) com fallback seguro
+  try {
+    if (Platform.OS !== 'web') {
+      await targetDb.execAsync('PRAGMA journal_mode = WAL;');
+    }
+  } catch {
+    // Silencia se o driver VFS não suportar WAL
+  }
+
+  // 2. Configurar integridade e migração com user_version
   const versionRow = await targetDb.getFirstAsync<{ user_version: number }>('PRAGMA user_version');
   const currentVersion = versionRow?.user_version ?? 0;
 
