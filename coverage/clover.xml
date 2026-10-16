@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1790897048226" clover="3.2.0">
-  <project timestamp="1790897048226" name="All files">
-    <metrics statements="849" coveredstatements="649" conditionals="549" coveredconditionals="374" methods="270" coveredmethods="189" elements="1668" coveredelements="1212" complexity="0" loc="849" ncloc="849" packages="16" files="45" classes="45"/>
-    <package name="adapters.context">
+<coverage generated="1792181181035" clover="3.2.0">
+  <project timestamp="1792181181035" name="All files">
+    <metrics statements="1538" coveredstatements="1180" conditionals="1225" coveredconditionals="806" methods="470" coveredmethods="338" elements="3233" coveredelements="2324" complexity="0" loc="1538" ncloc="1538" packages="22" files="64" classes="64"/>
+    <package name="src.adapters.context">
       <metrics statements="90" coveredstatements="81" conditionals="50" coveredconditionals="32" methods="14" coveredmethods="14"/>
       <file name="AuthContext.tsx" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\adapters\context\AuthContext.tsx">
         <metrics statements="59" coveredstatements="52" conditionals="35" coveredconditionals="24" methods="9" coveredmethods="9"/>
-        <line num="58" count="2" type="stmt"/>
-        <line num="60" count="2" type="stmt"/>
-        <line num="67" count="16" type="cond" truecount="2" falsecount="0"/>
-        <line num="68" count="16" type="cond" truecount="2" falsecount="0"/>
-        <line num="69" count="16" type="stmt"/>
-        <line num="72" count="16" type="stmt"/>
-        <line num="73" count="11" type="cond" truecount="2" falsecount="0"/>
-        <line num="74" count="3" type="stmt"/>
-        <line num="81" count="16" type="cond" truecount="2" falsecount="0"/>
-        <line num="82" count="16" type="cond" truecount="2" falsecount="0"/>
-        <line num="87" count="16" type="stmt"/>
+        <line num="58" count="5" type="stmt"/>
+        <line num="60" count="5" type="stmt"/>
+        <line num="67" count="39" type="cond" truecount="2" falsecount="0"/>
+        <line num="68" count="39" type="cond" truecount="2" falsecount="0"/>
+        <line num="69" count="39" type="stmt"/>
+        <line num="72" count="39" type="stmt"/>
+        <line num="73" count="34" type="cond" truecount="2" falsecount="0"/>
+        <line num="74" count="4" type="stmt"/>
+        <line num="81" count="39" type="cond" truecount="2" falsecount="0"/>
+        <line num="82" count="39" type="cond" truecount="2" falsecount="0"/>
+        <line num="87" count="39" type="stmt"/>
         <line num="88" count="2" type="stmt"/>
         <line num="89" count="2" type="stmt"/>
         <line num="90" count="2" type="stmt"/>
@@ -25,10 +25,10 @@
         <line num="94" count="0" type="cond" truecount="0" falsecount="2"/>
         <line num="95" count="0" type="stmt"/>
         <line num="97" count="2" type="stmt"/>
-        <line num="101" count="16" type="stmt"/>
-        <line num="102" count="8" type="cond" truecount="4" falsecount="0"/>
+        <line num="101" count="39" type="stmt"/>
+        <line num="102" count="31" type="cond" truecount="4" falsecount="0"/>
         <line num="103" count="2" type="stmt"/>
-        <line num="110" count="16" type="stmt"/>
+        <line num="110" count="39" type="stmt"/>
         <line num="112" count="3" type="stmt"/>
         <line num="113" count="3" type="stmt"/>
         <line num="114" count="3" type="stmt"/>
@@ -48,7 +48,7 @@
         <line num="142" count="0" type="stmt"/>
         <line num="143" count="0" type="stmt"/>
         <line num="145" count="3" type="stmt"/>
-        <line num="154" count="16" type="stmt"/>
+        <line num="154" count="39" type="stmt"/>
         <line num="155" count="1" type="stmt"/>
         <line num="156" count="1" type="stmt"/>
         <line num="157" count="1" type="stmt"/>
@@ -56,15 +56,15 @@
         <line num="159" count="1" type="stmt"/>
         <line num="161" count="0" type="cond" truecount="0" falsecount="2"/>
         <line num="163" count="1" type="stmt"/>
-        <line num="167" count="16" type="stmt"/>
+        <line num="167" count="39" type="stmt"/>
         <line num="168" count="1" type="stmt"/>
-        <line num="171" count="16" type="stmt"/>
-        <line num="172" count="16" type="stmt"/>
-        <line num="187" count="16" type="stmt"/>
-        <line num="194" count="19" type="stmt"/>
-        <line num="195" count="18" type="cond" truecount="2" falsecount="0"/>
+        <line num="171" count="39" type="stmt"/>
+        <line num="172" count="39" type="stmt"/>
+        <line num="187" count="39" type="stmt"/>
+        <line num="194" count="158" type="stmt"/>
+        <line num="195" count="157" type="cond" truecount="2" falsecount="0"/>
         <line num="196" count="2" type="stmt"/>
-        <line num="198" count="16" type="stmt"/>
+        <line num="198" count="155" type="stmt"/>
       </file>
       <file name="SyncContext.tsx" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\adapters\context\SyncContext.tsx">
         <metrics statements="31" coveredstatements="29" conditionals="15" coveredconditionals="8" methods="5" coveredmethods="5"/>
@@ -101,26 +101,28 @@
         <line num="107" count="6" type="stmt"/>
       </file>
     </package>
-    <package name="adapters.gateways.auth">
-      <metrics statements="13" coveredstatements="0" conditionals="10" coveredconditionals="0" methods="6" coveredmethods="0"/>
+    <package name="src.adapters.gateways.auth">
+      <metrics statements="15" coveredstatements="0" conditionals="22" coveredconditionals="0" methods="6" coveredmethods="0"/>
       <file name="authService.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\adapters\gateways\auth\authService.ts">
-        <metrics statements="13" coveredstatements="0" conditionals="10" coveredconditionals="0" methods="6" coveredmethods="0"/>
+        <metrics statements="15" coveredstatements="0" conditionals="22" coveredconditionals="0" methods="6" coveredmethods="0"/>
         <line num="48" count="0" type="stmt"/>
         <line num="66" count="0" type="cond" truecount="0" falsecount="4"/>
         <line num="67" count="0" type="stmt"/>
         <line num="68" count="0" type="cond" truecount="0" falsecount="2"/>
-        <line num="74" count="0" type="stmt"/>
-        <line num="82" count="0" type="stmt"/>
-        <line num="85" count="0" type="stmt"/>
-        <line num="87" count="0" type="stmt"/>
-        <line num="101" count="0" type="stmt"/>
-        <line num="111" count="0" type="stmt"/>
-        <line num="123" count="0" type="stmt"/>
-        <line num="133" count="0" type="stmt"/>
-        <line num="144" count="0" type="stmt"/>
+        <line num="75" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="84" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="92" count="0" type="stmt"/>
+        <line num="100" count="0" type="stmt"/>
+        <line num="103" count="0" type="stmt"/>
+        <line num="105" count="0" type="stmt"/>
+        <line num="119" count="0" type="stmt"/>
+        <line num="129" count="0" type="stmt"/>
+        <line num="141" count="0" type="stmt"/>
+        <line num="151" count="0" type="stmt"/>
+        <line num="162" count="0" type="stmt"/>
       </file>
     </package>
-    <package name="adapters.hooks">
+    <package name="src.adapters.hooks">
       <metrics statements="21" coveredstatements="21" conditionals="8" coveredconditionals="4" methods="7" coveredmethods="7"/>
       <file name="useUseCase.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\adapters\hooks\useUseCase.ts">
         <metrics statements="21" coveredstatements="21" conditionals="8" coveredconditionals="4" methods="7" coveredmethods="7"/>
@@ -147,134 +149,443 @@
         <line num="70" count="7" type="stmt"/>
       </file>
     </package>
-    <package name="adapters.screens">
-      <metrics statements="173" coveredstatements="117" conditionals="102" coveredconditionals="69" methods="45" coveredmethods="28"/>
-      <file name="AssinaturaScreen.tsx" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\adapters\screens\AssinaturaScreen.tsx">
-        <metrics statements="31" coveredstatements="23" conditionals="18" coveredconditionals="15" methods="10" coveredmethods="7"/>
-        <line num="36" count="4" type="stmt"/>
-        <line num="37" count="4" type="stmt"/>
-        <line num="38" count="4" type="stmt"/>
-        <line num="39" count="4" type="stmt"/>
-        <line num="41" count="4" type="stmt"/>
-        <line num="43" count="2" type="stmt"/>
-        <line num="44" count="2" type="stmt"/>
-        <line num="45" count="2" type="stmt"/>
-        <line num="46" count="2" type="stmt"/>
-        <line num="48" count="0" type="stmt"/>
-        <line num="50" count="2" type="stmt"/>
-        <line num="53" count="2" type="stmt"/>
-        <line num="56" count="4" type="stmt"/>
-        <line num="57" count="1" type="cond" truecount="1" falsecount="1"/>
-        <line num="58" count="1" type="stmt"/>
-        <line num="59" count="1" type="stmt"/>
-        <line num="61" count="0" type="stmt"/>
-        <line num="62" count="0" type="stmt"/>
-        <line num="68" count="0" type="stmt"/>
-        <line num="74" count="4" type="stmt"/>
-        <line num="75" count="0" type="cond" truecount="0" falsecount="2"/>
-        <line num="76" count="0" type="stmt"/>
-        <line num="78" count="0" type="stmt"/>
+    <package name="src.adapters.screens">
+      <metrics statements="585" coveredstatements="444" conditionals="550" coveredconditionals="379" methods="153" coveredmethods="107"/>
+      <file name="AdminTabScreen.tsx" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\adapters\screens\AdminTabScreen.tsx">
+        <metrics statements="109" coveredstatements="92" conditionals="118" coveredconditionals="87" methods="38" coveredmethods="28"/>
+        <line num="59" count="15" type="stmt"/>
+        <line num="60" count="15" type="stmt"/>
+        <line num="61" count="15" type="stmt"/>
+        <line num="62" count="15" type="stmt"/>
+        <line num="63" count="15" type="stmt"/>
+        <line num="66" count="15" type="stmt"/>
+        <line num="67" count="15" type="stmt"/>
+        <line num="68" count="15" type="stmt"/>
+        <line num="71" count="15" type="stmt"/>
+        <line num="72" count="15" type="stmt"/>
+        <line num="73" count="15" type="stmt"/>
+        <line num="74" count="15" type="cond" truecount="2" falsecount="0"/>
+        <line num="77" count="15" type="stmt"/>
+        <line num="78" count="15" type="stmt"/>
+        <line num="80" count="15" type="stmt"/>
+        <line num="81" count="15" type="stmt"/>
         <line num="82" count="4" type="stmt"/>
-        <line num="116" count="8" type="stmt"/>
-        <line num="117" count="8" type="stmt"/>
-        <line num="119" count="8" type="stmt"/>
-        <line num="123" count="0" type="stmt"/>
-        <line num="164" count="32" type="stmt"/>
+        <line num="83" count="4" type="stmt"/>
+        <line num="84" count="4" type="stmt"/>
+        <line num="88" count="15" type="stmt"/>
+        <line num="89" count="4" type="cond" truecount="1" falsecount="1"/>
+        <line num="90" count="4" type="stmt"/>
+        <line num="91" count="4" type="stmt"/>
+        <line num="92" count="4" type="stmt"/>
+        <line num="93" count="4" type="cond" truecount="1" falsecount="1"/>
+        <line num="94" count="4" type="stmt"/>
+        <line num="97" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="98" count="0" type="stmt"/>
+        <line num="101" count="4" type="cond" truecount="1" falsecount="1"/>
+        <line num="102" count="4" type="stmt"/>
+        <line num="107" count="15" type="stmt"/>
+        <line num="108" count="4" type="stmt"/>
+        <line num="112" count="15" type="stmt"/>
+        <line num="113" count="9" type="stmt"/>
+        <line num="114" count="20" type="stmt"/>
+        <line num="115" count="9" type="stmt"/>
+        <line num="116" count="20" type="cond" truecount="2" falsecount="0"/>
+        <line num="118" count="20" type="stmt"/>
+        <line num="119" count="9" type="stmt"/>
+        <line num="123" count="15" type="stmt"/>
+        <line num="124" count="9" type="stmt"/>
+        <line num="126" count="9" type="cond" truecount="2" falsecount="0"/>
+        <line num="127" count="16" type="stmt"/>
+        <line num="128" count="2" type="cond" truecount="1" falsecount="1"/>
+        <line num="129" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="130" count="2" type="cond" truecount="1" falsecount="1"/>
+        <line num="131" count="0" type="stmt"/>
+        <line num="134" count="9" type="cond" truecount="1" falsecount="1"/>
+        <line num="135" count="0" type="stmt"/>
+        <line num="136" count="0" type="stmt"/>
+        <line num="138" count="0" type="cond" truecount="0" falsecount="3"/>
+        <line num="144" count="9" type="stmt"/>
+        <line num="149" count="15" type="stmt"/>
+        <line num="150" count="1" type="stmt"/>
+        <line num="151" count="1" type="cond" truecount="2" falsecount="0"/>
+        <line num="152" count="1" type="stmt"/>
+        <line num="155" count="15" type="stmt"/>
+        <line num="156" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="158" count="1" type="stmt"/>
+        <line num="160" count="1" type="stmt"/>
+        <line num="161" count="1" type="stmt"/>
+        <line num="164" count="1" type="stmt"/>
+        <line num="165" count="1" type="stmt"/>
+        <line num="173" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="174" count="1" type="stmt"/>
+        <line num="175" count="4" type="cond" truecount="2" falsecount="0"/>
         <line num="177" count="1" type="stmt"/>
-        <line num="212" count="1" type="stmt"/>
+        <line num="178" count="1" type="stmt"/>
+        <line num="180" count="1" type="stmt"/>
+        <line num="186" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="187" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="188" count="0" type="stmt"/>
+        <line num="195" count="15" type="stmt"/>
+        <line num="196" count="1" type="stmt"/>
+        <line num="197" count="1" type="stmt"/>
+        <line num="198" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="199" count="1" type="stmt"/>
+        <line num="202" count="15" type="stmt"/>
+        <line num="203" count="1" type="cond" truecount="3" falsecount="1"/>
+        <line num="205" count="1" type="stmt"/>
+        <line num="213" count="1" type="stmt"/>
+        <line num="214" count="1" type="stmt"/>
+        <line num="219" count="15" type="stmt"/>
+        <line num="220" count="1" type="stmt"/>
+        <line num="221" count="1" type="stmt"/>
+        <line num="224" count="15" type="stmt"/>
+        <line num="288" count="0" type="stmt"/>
+        <line num="305" count="60" type="stmt"/>
+        <line num="306" count="60" type="stmt"/>
+        <line num="310" count="1" type="stmt"/>
+        <line num="337" count="36" type="stmt"/>
+        <line num="338" count="36" type="stmt"/>
+        <line num="339" count="36" type="stmt"/>
+        <line num="341" count="36" type="stmt"/>
+        <line num="417" count="1" type="stmt"/>
+        <line num="431" count="1" type="stmt"/>
+        <line num="442" count="1" type="stmt"/>
+        <line num="463" count="0" type="stmt"/>
+        <line num="477" count="0" type="stmt"/>
+        <line num="491" count="4" type="stmt"/>
+        <line num="492" count="4" type="stmt"/>
+        <line num="499" count="1" type="stmt"/>
+        <line num="540" count="0" type="stmt"/>
+        <line num="554" count="0" type="stmt"/>
+        <line num="569" count="5" type="stmt"/>
+        <line num="570" count="5" type="stmt"/>
+        <line num="623" count="0" type="stmt"/>
+        <line num="637" count="0" type="stmt"/>
+        <line num="758" count="4" type="stmt"/>
+      </file>
+      <file name="AssinaturaScreen.tsx" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\adapters\screens\AssinaturaScreen.tsx">
+        <metrics statements="94" coveredstatements="69" conditionals="80" coveredconditionals="58" methods="21" coveredmethods="14"/>
+        <line num="56" count="18" type="stmt"/>
+        <line num="57" count="18" type="stmt"/>
+        <line num="58" count="18" type="stmt"/>
+        <line num="59" count="18" type="stmt"/>
+        <line num="62" count="18" type="stmt"/>
+        <line num="63" count="18" type="stmt"/>
+        <line num="64" count="18" type="cond" truecount="2" falsecount="0"/>
+        <line num="65" count="18" type="stmt"/>
+        <line num="66" count="18" type="stmt"/>
+        <line num="67" count="18" type="stmt"/>
+        <line num="68" count="18" type="stmt"/>
+        <line num="71" count="18" type="stmt"/>
+        <line num="75" count="18" type="stmt"/>
+        <line num="77" count="5" type="stmt"/>
+        <line num="78" count="5" type="stmt"/>
+        <line num="79" count="5" type="stmt"/>
+        <line num="80" count="5" type="stmt"/>
+        <line num="82" count="0" type="stmt"/>
+        <line num="84" count="5" type="stmt"/>
+        <line num="87" count="5" type="stmt"/>
+        <line num="90" count="18" type="stmt"/>
+        <line num="91" count="2" type="stmt"/>
+        <line num="92" count="2" type="stmt"/>
+        <line num="93" count="2" type="stmt"/>
+        <line num="95" count="2" type="stmt"/>
+        <line num="104" count="0" type="stmt"/>
+        <line num="105" count="0" type="stmt"/>
+        <line num="112" count="18" type="stmt"/>
+        <line num="113" count="1" type="stmt"/>
+        <line num="114" count="1" type="stmt"/>
+        <line num="115" count="1" type="stmt"/>
+        <line num="116" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="117" count="0" type="stmt"/>
+        <line num="121" count="0" type="stmt"/>
+        <line num="124" count="1" type="stmt"/>
+        <line num="128" count="1" type="stmt"/>
+        <line num="129" count="1" type="stmt"/>
+        <line num="131" count="0" type="stmt"/>
+        <line num="132" count="0" type="stmt"/>
+        <line num="136" count="18" type="stmt"/>
+        <line num="137" count="1" type="stmt"/>
+        <line num="138" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="139" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="140" count="1" type="stmt"/>
+        <line num="141" count="1" type="stmt"/>
+        <line num="145" count="18" type="stmt"/>
+        <line num="146" count="3" type="cond" truecount="2" falsecount="0"/>
+        <line num="147" count="1" type="stmt"/>
+        <line num="148" count="1" type="stmt"/>
+        <line num="150" count="2" type="stmt"/>
+        <line num="151" count="2" type="stmt"/>
+        <line num="152" count="2" type="stmt"/>
+        <line num="155" count="18" type="stmt"/>
+        <line num="156" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="158" count="1" type="cond" truecount="5" falsecount="1"/>
+        <line num="159" count="0" type="stmt"/>
+        <line num="160" count="0" type="stmt"/>
+        <line num="163" count="1" type="stmt"/>
+        <line num="164" count="1" type="stmt"/>
+        <line num="165" count="1" type="stmt"/>
+        <line num="171" count="1" type="stmt"/>
+        <line num="181" count="1" type="stmt"/>
+        <line num="183" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="187" count="1" type="stmt"/>
+        <line num="189" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="191" count="1" type="stmt"/>
+        <line num="195" count="18" type="stmt"/>
+        <line num="196" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="197" count="0" type="stmt"/>
+        <line num="199" count="0" type="stmt"/>
+        <line num="203" count="18" type="stmt"/>
+        <line num="204" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="205" count="1" type="stmt"/>
+        <line num="206" count="1" type="stmt"/>
+        <line num="208" count="0" type="stmt"/>
+        <line num="209" count="0" type="stmt"/>
+        <line num="210" count="0" type="stmt"/>
+        <line num="213" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="214" count="0" type="cond" truecount="0" falsecount="4"/>
+        <line num="215" count="0" type="stmt"/>
+        <line num="218" count="0" type="stmt"/>
+        <line num="233" count="18" type="stmt"/>
+        <line num="279" count="52" type="stmt"/>
+        <line num="280" count="52" type="stmt"/>
+        <line num="282" count="52" type="stmt"/>
+        <line num="286" count="0" type="stmt"/>
+        <line num="327" count="208" type="stmt"/>
+        <line num="340" count="3" type="stmt"/>
+        <line num="377" count="0" type="stmt"/>
+        <line num="393" count="0" type="stmt"/>
+        <line num="441" count="0" type="stmt"/>
+        <line num="450" count="1" type="stmt"/>
+        <line num="572" count="0" type="stmt"/>
+        <line num="587" count="4" type="stmt"/>
       </file>
       <file name="AtividadesFormScreen.tsx" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\adapters\screens\AtividadesFormScreen.tsx">
-        <metrics statements="40" coveredstatements="26" conditionals="41" coveredconditionals="33" methods="9" coveredmethods="5"/>
-        <line num="53" count="1" type="stmt"/>
-        <line num="90" count="5" type="stmt"/>
-        <line num="91" count="5" type="cond" truecount="2" falsecount="0"/>
+        <metrics statements="53" coveredstatements="32" conditionals="53" coveredconditionals="37" methods="11" coveredmethods="6"/>
+        <line num="57" count="4" type="stmt"/>
+        <line num="95" count="6" type="stmt"/>
+        <line num="96" count="6" type="cond" truecount="2" falsecount="0"/>
+        <line num="97" count="6" type="stmt"/>
+        <line num="98" count="6" type="cond" truecount="2" falsecount="0"/>
+        <line num="99" count="6" type="stmt"/>
+        <line num="100" count="6" type="stmt"/>
+        <line num="101" count="6" type="stmt"/>
+        <line num="102" count="6" type="stmt"/>
+        <line num="104" count="6" type="stmt"/>
+        <line num="105" count="1" type="stmt"/>
+        <line num="106" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="107" count="1" type="stmt"/>
+        <line num="115" count="6" type="stmt"/>
+        <line num="116" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="117" count="0" type="stmt"/>
+        <line num="118" count="0" type="stmt"/>
+        <line num="121" count="1" type="stmt"/>
+        <line num="122" count="1" type="stmt"/>
+        <line num="123" count="1" type="stmt"/>
+        <line num="125" count="1" type="stmt"/>
+        <line num="138" count="1" type="stmt"/>
+        <line num="140" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="141" count="1" type="stmt"/>
+        <line num="143" count="0" type="stmt"/>
+        <line num="149" count="0" type="stmt"/>
+        <line num="154" count="0" type="stmt"/>
+        <line num="155" count="0" type="stmt"/>
+        <line num="156" count="0" type="stmt"/>
+        <line num="163" count="0" type="stmt"/>
+        <line num="164" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="165" count="0" type="stmt"/>
+        <line num="167" count="1" type="stmt"/>
+        <line num="171" count="6" type="stmt"/>
+        <line num="172" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="173" count="0" type="stmt"/>
+        <line num="175" count="0" type="stmt"/>
+        <line num="179" count="6" type="stmt"/>
+        <line num="180" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="181" count="1" type="stmt"/>
+        <line num="182" count="1" type="stmt"/>
+        <line num="184" count="0" type="stmt"/>
+        <line num="185" count="0" type="stmt"/>
+        <line num="186" count="0" type="stmt"/>
+        <line num="189" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="190" count="0" type="cond" truecount="0" falsecount="4"/>
+        <line num="191" count="0" type="stmt"/>
+        <line num="194" count="0" type="stmt"/>
+        <line num="209" count="6" type="stmt"/>
+        <line num="251" count="24" type="stmt"/>
+        <line num="253" count="24" type="stmt"/>
+        <line num="261" count="0" type="stmt"/>
+        <line num="401" count="4" type="stmt"/>
+      </file>
+      <file name="ClienteTabScreen.tsx" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\adapters\screens\ClienteTabScreen.tsx">
+        <metrics statements="88" coveredstatements="69" conditionals="96" coveredconditionals="76" methods="27" coveredmethods="18"/>
+        <line num="63" count="4" type="stmt"/>
+        <line num="102" count="10" type="stmt"/>
+        <line num="103" count="10" type="cond" truecount="2" falsecount="0"/>
+        <line num="104" count="10" type="cond" truecount="2" falsecount="0"/>
+        <line num="106" count="10" type="stmt"/>
+        <line num="107" count="10" type="stmt"/>
+        <line num="108" count="10" type="stmt"/>
+        <line num="109" count="10" type="stmt"/>
+        <line num="112" count="10" type="stmt"/>
+        <line num="113" count="10" type="cond" truecount="2" falsecount="0"/>
+        <line num="114" count="10" type="stmt"/>
+        <line num="115" count="10" type="stmt"/>
+        <line num="118" count="10" type="stmt"/>
+        <line num="119" count="10" type="cond" truecount="2" falsecount="0"/>
+        <line num="121" count="10" type="stmt"/>
+        <line num="122" count="1" type="stmt"/>
+        <line num="123" count="1" type="stmt"/>
+        <line num="124" count="1" type="stmt"/>
+        <line num="125" count="1" type="stmt"/>
+        <line num="127" count="0" type="stmt"/>
+        <line num="129" count="1" type="stmt"/>
+        <line num="133" count="10" type="stmt"/>
+        <line num="134" count="3" type="stmt"/>
+        <line num="135" count="3" type="stmt"/>
+        <line num="136" count="3" type="stmt"/>
+        <line num="137" count="3" type="stmt"/>
+        <line num="138" count="3" type="stmt"/>
+        <line num="139" count="3" type="cond" truecount="1" falsecount="1"/>
+        <line num="140" count="3" type="stmt"/>
+        <line num="143" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="145" count="3" type="cond" truecount="1" falsecount="1"/>
+        <line num="146" count="3" type="stmt"/>
+        <line num="150" count="3" type="stmt"/>
+        <line num="151" count="3" type="stmt"/>
+        <line num="152" count="3" type="stmt"/>
+        <line num="157" count="10" type="stmt"/>
+        <line num="158" count="3" type="cond" truecount="2" falsecount="0"/>
+        <line num="159" count="1" type="stmt"/>
+        <line num="164" count="10" type="stmt"/>
+        <line num="165" count="7" type="stmt"/>
+        <line num="166" count="13" type="cond" truecount="2" falsecount="0"/>
+        <line num="170" count="10" type="stmt"/>
+        <line num="171" count="13" type="stmt"/>
+        <line num="174" count="10" type="stmt"/>
+        <line num="175" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="176" count="0" type="stmt"/>
+        <line num="177" count="0" type="stmt"/>
+        <line num="180" count="1" type="stmt"/>
+        <line num="181" count="1" type="stmt"/>
+        <line num="182" count="1" type="stmt"/>
+        <line num="183" count="1" type="stmt"/>
+        <line num="196" count="1" type="stmt"/>
+        <line num="197" count="1" type="stmt"/>
+        <line num="198" count="1" type="stmt"/>
+        <line num="199" count="1" type="stmt"/>
+        <line num="201" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="202" count="1" type="stmt"/>
+        <line num="204" count="0" type="stmt"/>
+        <line num="210" count="0" type="stmt"/>
+        <line num="211" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="212" count="0" type="stmt"/>
+        <line num="214" count="1" type="stmt"/>
+        <line num="218" count="10" type="stmt"/>
+        <line num="219" count="0" type="cond" truecount="0" falsecount="4"/>
+        <line num="220" count="0" type="stmt"/>
+        <line num="227" count="0" type="stmt"/>
+        <line num="228" count="0" type="stmt"/>
+        <line num="231" count="10" type="stmt"/>
+        <line num="266" count="1" type="stmt"/>
+        <line num="309" count="13" type="stmt"/>
+        <line num="310" count="13" type="stmt"/>
+        <line num="312" count="13" type="stmt"/>
+        <line num="387" count="0" type="stmt"/>
+        <line num="411" count="6" type="stmt"/>
+        <line num="414" count="0" type="stmt"/>
+        <line num="443" count="0" type="stmt"/>
+        <line num="453" count="0" type="stmt"/>
+        <line num="466" count="40" type="stmt"/>
+        <line num="467" count="40" type="stmt"/>
+        <line num="474" count="0" type="stmt"/>
+        <line num="506" count="1" type="stmt"/>
+        <line num="552" count="0" type="stmt"/>
+        <line num="564" count="0" type="stmt"/>
+        <line num="574" count="3" type="stmt"/>
+        <line num="575" count="3" type="stmt"/>
+        <line num="630" count="4" type="stmt"/>
+        <line num="631" count="4" type="stmt"/>
+        <line num="687" count="4" type="stmt"/>
+      </file>
+      <file name="HistoricoRelatoriosScreen.tsx" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\adapters\screens\HistoricoRelatoriosScreen.tsx">
+        <metrics statements="74" coveredstatements="57" conditionals="100" coveredconditionals="59" methods="23" coveredmethods="18"/>
+        <line num="46" count="4" type="stmt"/>
+        <line num="60" count="85" type="cond" truecount="2" falsecount="0"/>
+        <line num="61" count="42" type="stmt"/>
+        <line num="68" count="43" type="stmt"/>
+        <line num="69" count="43" type="stmt"/>
+        <line num="83" count="13" type="stmt"/>
+        <line num="84" count="13" type="cond" truecount="2" falsecount="0"/>
+        <line num="85" count="13" type="stmt"/>
+        <line num="86" count="13" type="stmt"/>
+        <line num="87" count="13" type="stmt"/>
+        <line num="88" count="13" type="stmt"/>
+        <line num="90" count="13" type="stmt"/>
+        <line num="91" count="5" type="stmt"/>
         <line num="92" count="5" type="stmt"/>
         <line num="93" count="5" type="stmt"/>
         <line num="94" count="5" type="stmt"/>
         <line num="95" count="5" type="stmt"/>
-        <line num="97" count="5" type="stmt"/>
-        <line num="98" count="1" type="stmt"/>
-        <line num="99" count="1" type="cond" truecount="1" falsecount="1"/>
-        <line num="100" count="1" type="stmt"/>
-        <line num="108" count="5" type="stmt"/>
-        <line num="109" count="1" type="cond" truecount="1" falsecount="1"/>
-        <line num="110" count="0" type="stmt"/>
-        <line num="111" count="0" type="stmt"/>
-        <line num="114" count="1" type="stmt"/>
-        <line num="115" count="1" type="stmt"/>
-        <line num="116" count="1" type="stmt"/>
-        <line num="118" count="1" type="stmt"/>
-        <line num="131" count="1" type="stmt"/>
-        <line num="133" count="1" type="cond" truecount="1" falsecount="1"/>
-        <line num="134" count="1" type="stmt"/>
-        <line num="136" count="0" type="stmt"/>
-        <line num="142" count="0" type="stmt"/>
-        <line num="147" count="0" type="stmt"/>
-        <line num="148" count="0" type="stmt"/>
-        <line num="149" count="0" type="stmt"/>
-        <line num="156" count="0" type="stmt"/>
-        <line num="157" count="0" type="cond" truecount="0" falsecount="2"/>
-        <line num="158" count="0" type="stmt"/>
-        <line num="160" count="1" type="stmt"/>
-        <line num="164" count="5" type="stmt"/>
-        <line num="165" count="0" type="cond" truecount="0" falsecount="2"/>
-        <line num="166" count="0" type="stmt"/>
-        <line num="168" count="0" type="stmt"/>
-        <line num="172" count="5" type="stmt"/>
-        <line num="202" count="20" type="stmt"/>
-        <line num="204" count="20" type="stmt"/>
-        <line num="212" count="0" type="stmt"/>
-        <line num="351" count="1" type="stmt"/>
-      </file>
-      <file name="HistoricoRelatoriosScreen.tsx" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\adapters\screens\HistoricoRelatoriosScreen.tsx">
-        <metrics statements="44" coveredstatements="36" conditionals="21" coveredconditionals="15" methods="15" coveredmethods="13"/>
-        <line num="44" count="5" type="stmt"/>
-        <line num="45" count="5" type="stmt"/>
-        <line num="46" count="5" type="stmt"/>
-        <line num="48" count="5" type="stmt"/>
-        <line num="49" count="2" type="stmt"/>
-        <line num="50" count="2" type="stmt"/>
-        <line num="51" count="2" type="stmt"/>
-        <line num="52" count="2" type="stmt"/>
-        <line num="53" count="2" type="stmt"/>
-        <line num="55" count="0" type="stmt"/>
-        <line num="57" count="2" type="stmt"/>
-        <line num="61" count="5" type="stmt"/>
-        <line num="62" count="2" type="stmt"/>
-        <line num="66" count="5" type="stmt"/>
-        <line num="67" count="4" type="stmt"/>
-        <line num="68" count="8" type="stmt"/>
-        <line num="69" count="8" type="stmt"/>
-        <line num="70" count="8" type="stmt"/>
-        <line num="71" count="4" type="stmt"/>
-        <line num="75" count="5" type="stmt"/>
-        <line num="76" count="5" type="cond" truecount="2" falsecount="0"/>
-        <line num="77" count="4" type="stmt"/>
-        <line num="80" count="5" type="stmt"/>
-        <line num="81" count="0" type="cond" truecount="0" falsecount="2"/>
-        <line num="82" count="0" type="stmt"/>
-        <line num="84" count="0" type="stmt"/>
-        <line num="88" count="5" type="stmt"/>
-        <line num="89" count="0" type="cond" truecount="0" falsecount="2"/>
-        <line num="90" count="0" type="stmt"/>
-        <line num="92" count="0" type="stmt"/>
-        <line num="96" count="5" type="stmt"/>
-        <line num="97" count="9" type="cond" truecount="3" falsecount="1"/>
-        <line num="99" count="4" type="stmt"/>
-        <line num="106" count="2" type="stmt"/>
-        <line num="113" count="3" type="stmt"/>
-        <line num="120" count="0" type="stmt"/>
-        <line num="129" count="5" type="stmt"/>
-        <line num="200" count="20" type="stmt"/>
-        <line num="201" count="20" type="stmt"/>
-        <line num="208" count="20" type="stmt"/>
-        <line num="213" count="1" type="stmt"/>
-        <line num="242" count="9" type="stmt"/>
-        <line num="244" count="9" type="stmt"/>
-        <line num="309" count="1" type="stmt"/>
+        <line num="97" count="0" type="stmt"/>
+        <line num="99" count="5" type="stmt"/>
+        <line num="103" count="13" type="stmt"/>
+        <line num="104" count="5" type="stmt"/>
+        <line num="108" count="13" type="stmt"/>
+        <line num="109" count="10" type="stmt"/>
+        <line num="110" count="20" type="stmt"/>
+        <line num="111" count="20" type="stmt"/>
+        <line num="112" count="20" type="stmt"/>
+        <line num="113" count="10" type="stmt"/>
+        <line num="117" count="13" type="stmt"/>
+        <line num="118" count="11" type="cond" truecount="2" falsecount="0"/>
+        <line num="119" count="4" type="stmt"/>
+        <line num="122" count="13" type="stmt"/>
+        <line num="123" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="124" count="0" type="stmt"/>
+        <line num="126" count="0" type="stmt"/>
+        <line num="130" count="13" type="stmt"/>
+        <line num="131" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="132" count="0" type="stmt"/>
+        <line num="134" count="0" type="stmt"/>
+        <line num="138" count="13" type="stmt"/>
+        <line num="139" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="140" count="1" type="stmt"/>
+        <line num="141" count="1" type="stmt"/>
+        <line num="143" count="0" type="stmt"/>
+        <line num="144" count="0" type="stmt"/>
+        <line num="145" count="0" type="stmt"/>
+        <line num="148" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="149" count="0" type="cond" truecount="0" falsecount="4"/>
+        <line num="150" count="0" type="stmt"/>
+        <line num="153" count="0" type="stmt"/>
+        <line num="168" count="13" type="stmt"/>
+        <line num="169" count="30" type="cond" truecount="3" falsecount="1"/>
+        <line num="171" count="14" type="stmt"/>
+        <line num="178" count="8" type="stmt"/>
+        <line num="185" count="8" type="stmt"/>
+        <line num="192" count="0" type="stmt"/>
+        <line num="201" count="13" type="stmt"/>
+        <line num="312" count="52" type="stmt"/>
+        <line num="313" count="52" type="stmt"/>
+        <line num="320" count="52" type="stmt"/>
+        <line num="325" count="1" type="stmt"/>
+        <line num="354" count="29" type="stmt"/>
+        <line num="355" count="29" type="stmt"/>
+        <line num="357" count="29" type="stmt"/>
+        <line num="363" count="1" type="stmt"/>
+        <line num="449" count="0" type="stmt"/>
+        <line num="452" count="1" type="stmt"/>
+        <line num="453" count="1" type="stmt"/>
+        <line num="454" count="1" type="stmt"/>
+        <line num="455" count="1" type="stmt"/>
+        <line num="456" count="1" type="stmt"/>
+        <line num="458" count="1" type="stmt"/>
+        <line num="469" count="1" type="stmt"/>
+        <line num="596" count="0" type="stmt"/>
+        <line num="611" count="4" type="stmt"/>
       </file>
       <file name="LoginScreen.tsx" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\adapters\screens\LoginScreen.tsx">
-        <metrics statements="37" coveredstatements="11" conditionals="20" coveredconditionals="4" methods="10" coveredmethods="2"/>
+        <metrics statements="42" coveredstatements="11" conditionals="24" coveredconditionals="4" methods="10" coveredmethods="2"/>
         <line num="35" count="2" type="stmt"/>
         <line num="36" count="2" type="stmt"/>
         <line num="37" count="2" type="stmt"/>
@@ -288,60 +599,198 @@
         <line num="48" count="0" type="cond" truecount="0" falsecount="2"/>
         <line num="49" count="0" type="stmt"/>
         <line num="51" count="0" type="stmt"/>
-        <line num="56" count="2" type="stmt"/>
-        <line num="57" count="1" type="cond" truecount="1" falsecount="1"/>
-        <line num="58" count="1" type="stmt"/>
-        <line num="60" count="0" type="stmt"/>
-        <line num="64" count="2" type="stmt"/>
-        <line num="65" count="0" type="stmt"/>
-        <line num="66" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="52" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="53" count="0" type="stmt"/>
+        <line num="54" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="55" count="0" type="stmt"/>
+        <line num="57" count="0" type="stmt"/>
+        <line num="63" count="2" type="stmt"/>
+        <line num="64" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="65" count="1" type="stmt"/>
         <line num="67" count="0" type="stmt"/>
-        <line num="68" count="0" type="stmt"/>
-        <line num="69" count="0" type="cond" truecount="0" falsecount="2"/>
-        <line num="70" count="0" type="stmt"/>
-        <line num="71" count="0" type="stmt"/>
-        <line num="73" count="0" type="stmt"/>
+        <line num="71" count="2" type="stmt"/>
+        <line num="72" count="0" type="stmt"/>
+        <line num="73" count="0" type="cond" truecount="0" falsecount="2"/>
         <line num="74" count="0" type="stmt"/>
-        <line num="78" count="2" type="stmt"/>
-        <line num="121" count="0" type="stmt"/>
-        <line num="122" count="0" type="stmt"/>
-        <line num="138" count="0" type="stmt"/>
-        <line num="139" count="0" type="stmt"/>
-        <line num="142" count="0" type="stmt"/>
-        <line num="187" count="0" type="stmt"/>
-        <line num="193" count="0" type="stmt"/>
-        <line num="199" count="0" type="stmt"/>
-        <line num="217" count="1" type="stmt"/>
+        <line num="75" count="0" type="stmt"/>
+        <line num="76" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="77" count="0" type="stmt"/>
+        <line num="78" count="0" type="stmt"/>
+        <line num="80" count="0" type="stmt"/>
+        <line num="81" count="0" type="stmt"/>
+        <line num="85" count="2" type="stmt"/>
+        <line num="128" count="0" type="stmt"/>
+        <line num="129" count="0" type="stmt"/>
+        <line num="145" count="0" type="stmt"/>
+        <line num="146" count="0" type="stmt"/>
+        <line num="149" count="0" type="stmt"/>
+        <line num="194" count="0" type="stmt"/>
+        <line num="200" count="0" type="stmt"/>
+        <line num="206" count="0" type="stmt"/>
+        <line num="224" count="4" type="stmt"/>
+      </file>
+      <file name="TecnicoTabScreen.tsx" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\adapters\screens\TecnicoTabScreen.tsx">
+        <metrics statements="75" coveredstatements="64" conditionals="72" coveredconditionals="52" methods="19" coveredmethods="17"/>
+        <line num="52" count="8" type="stmt"/>
+        <line num="53" count="8" type="cond" truecount="1" falsecount="1"/>
+        <line num="54" count="8" type="cond" truecount="2" falsecount="0"/>
+        <line num="56" count="8" type="stmt"/>
+        <line num="57" count="8" type="stmt"/>
+        <line num="58" count="8" type="stmt"/>
+        <line num="61" count="8" type="stmt"/>
+        <line num="62" count="8" type="stmt"/>
+        <line num="63" count="8" type="cond" truecount="2" falsecount="0"/>
+        <line num="64" count="8" type="stmt"/>
+        <line num="73" count="8" type="stmt"/>
+        <line num="75" count="8" type="stmt"/>
+        <line num="76" count="1" type="stmt"/>
+        <line num="77" count="1" type="stmt"/>
+        <line num="78" count="1" type="stmt"/>
+        <line num="79" count="1" type="stmt"/>
+        <line num="80" count="4" type="cond" truecount="2" falsecount="1"/>
+        <line num="82" count="1" type="stmt"/>
+        <line num="84" count="0" type="stmt"/>
+        <line num="86" count="1" type="stmt"/>
+        <line num="90" count="8" type="stmt"/>
+        <line num="91" count="2" type="stmt"/>
+        <line num="92" count="2" type="stmt"/>
+        <line num="93" count="2" type="stmt"/>
+        <line num="94" count="2" type="stmt"/>
+        <line num="95" count="2" type="stmt"/>
+        <line num="96" count="2" type="stmt"/>
+        <line num="97" count="8" type="cond" truecount="2" falsecount="1"/>
+        <line num="99" count="2" type="cond" truecount="1" falsecount="1"/>
+        <line num="100" count="2" type="stmt"/>
+        <line num="103" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="105" count="2" type="cond" truecount="1" falsecount="1"/>
+        <line num="106" count="2" type="stmt"/>
+        <line num="110" count="2" type="stmt"/>
+        <line num="111" count="2" type="stmt"/>
+        <line num="112" count="1" type="stmt"/>
+        <line num="117" count="8" type="stmt"/>
+        <line num="118" count="5" type="stmt"/>
+        <line num="121" count="8" type="stmt"/>
+        <line num="122" count="5" type="stmt"/>
+        <line num="125" count="8" type="stmt"/>
+        <line num="126" count="1" type="stmt"/>
+        <line num="127" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="128" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="129" count="1" type="stmt"/>
+        <line num="132" count="8" type="stmt"/>
+        <line num="134" count="1" type="stmt"/>
+        <line num="141" count="8" type="stmt"/>
+        <line num="142" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="144" count="1" type="cond" truecount="3" falsecount="1"/>
+        <line num="145" count="0" type="stmt"/>
+        <line num="149" count="0" type="stmt"/>
+        <line num="152" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="153" count="0" type="stmt"/>
+        <line num="157" count="0" type="stmt"/>
+        <line num="160" count="1" type="stmt"/>
+        <line num="161" count="1" type="stmt"/>
+        <line num="162" count="1" type="stmt"/>
+        <line num="163" count="1" type="stmt"/>
+        <line num="174" count="1" type="stmt"/>
+        <line num="175" count="1" type="stmt"/>
+        <line num="176" count="1" type="stmt"/>
+        <line num="178" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="179" count="1" type="stmt"/>
+        <line num="181" count="0" type="stmt"/>
+        <line num="187" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="188" count="0" type="stmt"/>
+        <line num="190" count="1" type="stmt"/>
+        <line num="194" count="8" type="stmt"/>
+        <line num="265" count="5" type="stmt"/>
+        <line num="298" count="1" type="stmt"/>
+        <line num="322" count="1" type="stmt"/>
+        <line num="350" count="0" type="stmt"/>
+        <line num="362" count="0" type="stmt"/>
+        <line num="461" count="4" type="stmt"/>
       </file>
       <file name="index.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\adapters\screens\index.ts">
         <metrics statements="0" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
       </file>
       <file name="mockStore.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\adapters\screens\mockStore.ts">
-        <metrics statements="21" coveredstatements="21" conditionals="2" coveredconditionals="2" methods="1" coveredmethods="1"/>
-        <line num="22" count="1" type="stmt"/>
-        <line num="23" count="1" type="stmt"/>
-        <line num="24" count="1" type="stmt"/>
-        <line num="26" count="1" type="stmt"/>
-        <line num="27" count="1" type="stmt"/>
-        <line num="28" count="1" type="stmt"/>
-        <line num="30" count="1" type="stmt"/>
-        <line num="33" count="9" type="cond" truecount="2" falsecount="0"/>
-        <line num="34" count="1" type="stmt"/>
-        <line num="37" count="1" type="stmt"/>
-        <line num="46" count="1" type="stmt"/>
-        <line num="49" count="1" type="stmt"/>
-        <line num="108" count="1" type="stmt"/>
-        <line num="109" count="4" type="stmt"/>
-        <line num="113" count="1" type="stmt"/>
-        <line num="122" count="1" type="stmt"/>
-        <line num="132" count="1" type="stmt"/>
-        <line num="144" count="1" type="stmt"/>
-        <line num="145" count="1" type="stmt"/>
-        <line num="146" count="1" type="stmt"/>
-        <line num="150" count="1" type="stmt"/>
+        <metrics statements="50" coveredstatements="50" conditionals="7" coveredconditionals="6" methods="4" coveredmethods="4"/>
+        <line num="27" count="4" type="stmt"/>
+        <line num="28" count="4" type="stmt"/>
+        <line num="29" count="4" type="stmt"/>
+        <line num="30" count="4" type="stmt"/>
+        <line num="31" count="4" type="stmt"/>
+        <line num="33" count="4" type="stmt"/>
+        <line num="34" count="4" type="stmt"/>
+        <line num="35" count="4" type="stmt"/>
+        <line num="37" count="4" type="stmt"/>
+        <line num="40" count="29" type="cond" truecount="4" falsecount="0"/>
+        <line num="41" count="14" type="stmt"/>
+        <line num="43" count="14" type="stmt"/>
+        <line num="44" count="14" type="stmt"/>
+        <line num="45" count="14" type="stmt"/>
+        <line num="46" count="14" type="stmt"/>
+        <line num="47" count="14" type="stmt"/>
+        <line num="48" count="14" type="stmt"/>
+        <line num="51" count="14" type="stmt"/>
+        <line num="60" count="14" type="stmt"/>
+        <line num="63" count="14" type="stmt"/>
+        <line num="72" count="14" type="stmt"/>
+        <line num="75" count="14" type="stmt"/>
+        <line num="84" count="14" type="stmt"/>
+        <line num="87" count="14" type="stmt"/>
+        <line num="96" count="14" type="stmt"/>
+        <line num="99" count="14" type="stmt"/>
+        <line num="158" count="14" type="stmt"/>
+        <line num="159" count="56" type="stmt"/>
+        <line num="163" count="14" type="stmt"/>
+        <line num="172" count="14" type="stmt"/>
+        <line num="182" count="14" type="stmt"/>
+        <line num="196" count="14" type="stmt"/>
+        <line num="205" count="14" type="stmt"/>
+        <line num="206" count="14" type="stmt"/>
+        <line num="207" count="14" type="stmt"/>
+        <line num="208" count="14" type="stmt"/>
+        <line num="211" count="14" type="stmt"/>
+        <line num="223" count="14" type="stmt"/>
+        <line num="235" count="14" type="stmt"/>
+        <line num="236" count="14" type="stmt"/>
+        <line num="239" count="14" type="cond" truecount="1" falsecount="1"/>
+        <line num="240" count="14" type="stmt"/>
+        <line num="249" count="14" type="stmt"/>
+        <line num="273" count="4" type="stmt"/>
+        <line num="276" count="4" type="stmt"/>
+        <line num="286" count="2" type="stmt"/>
+        <line num="295" count="2" type="stmt"/>
+        <line num="296" count="2" type="stmt"/>
+        <line num="299" count="4" type="stmt"/>
+        <line num="317" count="4" type="stmt"/>
       </file>
     </package>
-    <package name="adapters.storage">
+    <package name="src.adapters.screens.components">
+      <metrics statements="20" coveredstatements="10" conditionals="37" coveredconditionals="28" methods="6" coveredmethods="4"/>
+      <file name="AppNavBar.tsx" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\adapters\screens\components\AppNavBar.tsx">
+        <metrics statements="20" coveredstatements="10" conditionals="37" coveredconditionals="28" methods="6" coveredmethods="4"/>
+        <line num="27" count="69" type="stmt"/>
+        <line num="29" count="69" type="cond" truecount="3" falsecount="0"/>
+        <line num="30" count="69" type="stmt"/>
+        <line num="31" count="69" type="stmt"/>
+        <line num="33" count="69" type="stmt"/>
+        <line num="34" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="35" count="0" type="stmt"/>
+        <line num="36" count="0" type="stmt"/>
+        <line num="39" count="0" type="stmt"/>
+        <line num="40" count="0" type="stmt"/>
+        <line num="41" count="0" type="stmt"/>
+        <line num="44" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="45" count="0" type="cond" truecount="0" falsecount="4"/>
+        <line num="46" count="0" type="stmt"/>
+        <line num="49" count="0" type="stmt"/>
+        <line num="64" count="69" type="stmt"/>
+        <line num="69" count="1" type="stmt"/>
+        <line num="86" count="1" type="stmt"/>
+        <line num="103" count="1" type="stmt"/>
+        <line num="133" count="4" type="stmt"/>
+      </file>
+    </package>
+    <package name="src.adapters.storage">
       <metrics statements="7" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="6" coveredmethods="0"/>
       <file name="SessionStorageAdapter.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\adapters\storage\SessionStorageAdapter.ts">
         <metrics statements="7" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="6" coveredmethods="0"/>
@@ -351,10 +800,10 @@
         <line num="48" count="0" type="stmt"/>
         <line num="52" count="0" type="stmt"/>
         <line num="56" count="0" type="stmt"/>
-        <line num="63" count="2" type="stmt"/>
+        <line num="63" count="5" type="stmt"/>
       </file>
     </package>
-    <package name="application.errors">
+    <package name="src.application.errors">
       <metrics statements="8" coveredstatements="6" conditionals="3" coveredconditionals="0" methods="4" coveredmethods="3"/>
       <file name="ApplicationErrors.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\application\errors\ApplicationErrors.ts">
         <metrics statements="8" coveredstatements="6" conditionals="3" coveredconditionals="0" methods="4" coveredmethods="3"/>
@@ -368,77 +817,77 @@
         <line num="25" count="5" type="stmt"/>
       </file>
     </package>
-    <package name="application.use-cases">
+    <package name="src.application.use-cases">
       <metrics statements="0" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
       <file name="index.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\application\use-cases\index.ts">
         <metrics statements="0" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
       </file>
     </package>
-    <package name="application.use-cases.cobertura">
-      <metrics statements="18" coveredstatements="18" conditionals="16" coveredconditionals="13" methods="4" coveredmethods="4"/>
+    <package name="src.application.use-cases.cobertura">
+      <metrics statements="18" coveredstatements="18" conditionals="16" coveredconditionals="14" methods="4" coveredmethods="4"/>
       <file name="SolicitarPreCadastroUseCase.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\application\use-cases\cobertura\SolicitarPreCadastroUseCase.ts">
-        <metrics statements="15" coveredstatements="15" conditionals="16" coveredconditionals="13" methods="2" coveredmethods="2"/>
-        <line num="31" count="2" type="stmt"/>
-        <line num="32" count="2" type="cond" truecount="4" falsecount="0"/>
-        <line num="33" count="1" type="stmt"/>
-        <line num="36" count="1" type="stmt"/>
-        <line num="41" count="1" type="cond" truecount="3" falsecount="1"/>
-        <line num="42" count="1" type="stmt"/>
-        <line num="43" count="1" type="stmt"/>
-        <line num="44" count="1" type="stmt"/>
-        <line num="45" count="1" type="cond" truecount="3" falsecount="1"/>
-        <line num="46" count="1" type="stmt"/>
-        <line num="50" count="1" type="stmt"/>
-        <line num="63" count="1" type="stmt"/>
-        <line num="65" count="1" type="cond" truecount="1" falsecount="1"/>
-        <line num="66" count="1" type="stmt"/>
-        <line num="86" count="1" type="stmt"/>
-      </file>
-      <file name="VerificarCoberturaUseCase.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\application\use-cases\cobertura\VerificarCoberturaUseCase.ts">
-        <metrics statements="3" coveredstatements="3" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="2"/>
-        <line num="14" count="2" type="stmt"/>
-        <line num="15" count="2" type="stmt"/>
-        <line num="17" count="2" type="stmt"/>
-      </file>
-    </package>
-    <package name="application.use-cases.ordens-servico">
-      <metrics statements="69" coveredstatements="63" conditionals="58" coveredconditionals="48" methods="10" coveredmethods="10"/>
-      <file name="AbrirOrdemServicoUseCase.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\application\use-cases\ordens-servico\AbrirOrdemServicoUseCase.ts">
-        <metrics statements="16" coveredstatements="16" conditionals="14" coveredconditionals="14" methods="2" coveredmethods="2"/>
-        <line num="32" count="6" type="stmt"/>
-        <line num="33" count="6" type="cond" truecount="2" falsecount="0"/>
-        <line num="34" count="1" type="stmt"/>
-        <line num="37" count="5" type="cond" truecount="2" falsecount="0"/>
-        <line num="38" count="1" type="stmt"/>
-        <line num="41" count="4" type="cond" truecount="2" falsecount="0"/>
-        <line num="44" count="4" type="cond" truecount="4" falsecount="0"/>
-        <line num="45" count="1" type="stmt"/>
-        <line num="48" count="4" type="stmt"/>
-        <line num="58" count="4" type="cond" truecount="2" falsecount="0"/>
-        <line num="59" count="3" type="stmt"/>
-        <line num="66" count="2" type="stmt"/>
-        <line num="69" count="3" type="stmt"/>
-        <line num="71" count="3" type="cond" truecount="2" falsecount="0"/>
-        <line num="72" count="2" type="stmt"/>
-        <line num="92" count="3" type="stmt"/>
-      </file>
-      <file name="ConcluirAtendimentoUseCase.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\application\use-cases\ordens-servico\ConcluirAtendimentoUseCase.ts">
-        <metrics statements="15" coveredstatements="13" conditionals="12" coveredconditionals="9" methods="2" coveredmethods="2"/>
-        <line num="27" count="3" type="stmt"/>
-        <line num="28" count="3" type="cond" truecount="1" falsecount="1"/>
-        <line num="29" count="0" type="stmt"/>
+        <metrics statements="15" coveredstatements="15" conditionals="16" coveredconditionals="14" methods="2" coveredmethods="2"/>
+        <line num="31" count="3" type="stmt"/>
         <line num="32" count="3" type="cond" truecount="4" falsecount="0"/>
         <line num="33" count="1" type="stmt"/>
         <line num="36" count="2" type="stmt"/>
-        <line num="37" count="2" type="cond" truecount="1" falsecount="1"/>
+        <line num="41" count="2" type="cond" truecount="3" falsecount="1"/>
+        <line num="42" count="2" type="stmt"/>
+        <line num="43" count="2" type="stmt"/>
+        <line num="44" count="2" type="stmt"/>
+        <line num="45" count="2" type="cond" truecount="3" falsecount="1"/>
+        <line num="46" count="2" type="stmt"/>
+        <line num="50" count="2" type="stmt"/>
+        <line num="63" count="2" type="stmt"/>
+        <line num="65" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="66" count="1" type="stmt"/>
+        <line num="86" count="2" type="stmt"/>
+      </file>
+      <file name="VerificarCoberturaUseCase.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\application\use-cases\cobertura\VerificarCoberturaUseCase.ts">
+        <metrics statements="3" coveredstatements="3" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="2"/>
+        <line num="14" count="4" type="stmt"/>
+        <line num="15" count="4" type="stmt"/>
+        <line num="17" count="4" type="stmt"/>
+      </file>
+    </package>
+    <package name="src.application.use-cases.ordens-servico">
+      <metrics statements="69" coveredstatements="63" conditionals="58" coveredconditionals="49" methods="10" coveredmethods="10"/>
+      <file name="AbrirOrdemServicoUseCase.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\application\use-cases\ordens-servico\AbrirOrdemServicoUseCase.ts">
+        <metrics statements="16" coveredstatements="16" conditionals="14" coveredconditionals="14" methods="2" coveredmethods="2"/>
+        <line num="32" count="7" type="stmt"/>
+        <line num="33" count="7" type="cond" truecount="2" falsecount="0"/>
+        <line num="34" count="1" type="stmt"/>
+        <line num="37" count="6" type="cond" truecount="2" falsecount="0"/>
+        <line num="38" count="1" type="stmt"/>
+        <line num="41" count="5" type="cond" truecount="2" falsecount="0"/>
+        <line num="44" count="5" type="cond" truecount="4" falsecount="0"/>
+        <line num="45" count="1" type="stmt"/>
+        <line num="48" count="5" type="stmt"/>
+        <line num="58" count="5" type="cond" truecount="2" falsecount="0"/>
+        <line num="59" count="3" type="stmt"/>
+        <line num="66" count="2" type="stmt"/>
+        <line num="69" count="4" type="stmt"/>
+        <line num="71" count="4" type="cond" truecount="2" falsecount="0"/>
+        <line num="72" count="2" type="stmt"/>
+        <line num="92" count="4" type="stmt"/>
+      </file>
+      <file name="ConcluirAtendimentoUseCase.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\application\use-cases\ordens-servico\ConcluirAtendimentoUseCase.ts">
+        <metrics statements="15" coveredstatements="13" conditionals="12" coveredconditionals="10" methods="2" coveredmethods="2"/>
+        <line num="27" count="4" type="stmt"/>
+        <line num="28" count="4" type="cond" truecount="1" falsecount="1"/>
+        <line num="29" count="0" type="stmt"/>
+        <line num="32" count="4" type="cond" truecount="4" falsecount="0"/>
+        <line num="33" count="1" type="stmt"/>
+        <line num="36" count="3" type="stmt"/>
+        <line num="37" count="3" type="cond" truecount="1" falsecount="1"/>
         <line num="38" count="0" type="stmt"/>
-        <line num="42" count="2" type="cond" truecount="2" falsecount="0"/>
-        <line num="43" count="1" type="stmt"/>
-        <line num="52" count="2" type="stmt"/>
-        <line num="54" count="1" type="stmt"/>
-        <line num="56" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="42" count="3" type="cond" truecount="2" falsecount="0"/>
+        <line num="43" count="2" type="stmt"/>
+        <line num="52" count="3" type="stmt"/>
+        <line num="54" count="2" type="stmt"/>
+        <line num="56" count="2" type="cond" truecount="2" falsecount="0"/>
         <line num="57" count="1" type="stmt"/>
-        <line num="73" count="1" type="stmt"/>
+        <line num="73" count="2" type="stmt"/>
       </file>
       <file name="EmitirLaudoPdfUseCase.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\application\use-cases\ordens-servico\EmitirLaudoPdfUseCase.ts">
         <metrics statements="15" coveredstatements="13" conditionals="14" coveredconditionals="10" methods="2" coveredmethods="2"/>
@@ -476,11 +925,11 @@
       </file>
       <file name="ListarOrdensServicoUseCase.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\application\use-cases\ordens-servico\ListarOrdensServicoUseCase.ts">
         <metrics statements="10" coveredstatements="9" conditionals="8" coveredconditionals="7" methods="2" coveredmethods="2"/>
-        <line num="17" count="6" type="stmt"/>
-        <line num="18" count="6" type="cond" truecount="2" falsecount="0"/>
+        <line num="17" count="9" type="stmt"/>
+        <line num="18" count="9" type="cond" truecount="2" falsecount="0"/>
         <line num="19" count="1" type="stmt"/>
-        <line num="22" count="5" type="cond" truecount="2" falsecount="0"/>
-        <line num="23" count="3" type="stmt"/>
+        <line num="22" count="8" type="cond" truecount="2" falsecount="0"/>
+        <line num="23" count="6" type="stmt"/>
         <line num="26" count="2" type="cond" truecount="2" falsecount="0"/>
         <line num="27" count="1" type="stmt"/>
         <line num="30" count="1" type="cond" truecount="1" falsecount="1"/>
@@ -488,11 +937,11 @@
         <line num="34" count="0" type="stmt"/>
       </file>
     </package>
-    <package name="application.use-cases.planos">
+    <package name="src.application.use-cases.planos">
       <metrics statements="18" coveredstatements="15" conditionals="14" coveredconditionals="10" methods="4" coveredmethods="4"/>
       <file name="ConsultarPlanosPublicosUseCase.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\application\use-cases\planos\ConsultarPlanosPublicosUseCase.ts">
         <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="2"/>
-        <line num="8" count="3" type="stmt"/>
+        <line num="8" count="6" type="stmt"/>
       </file>
       <file name="GerenciarPlanosUseCase.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\application\use-cases\planos\GerenciarPlanosUseCase.ts">
         <metrics statements="17" coveredstatements="14" conditionals="14" coveredconditionals="10" methods="2" coveredmethods="2"/>
@@ -515,66 +964,66 @@
         <line num="67" count="1" type="stmt"/>
       </file>
     </package>
-    <package name="domain.entities">
-      <metrics statements="207" coveredstatements="156" conditionals="157" coveredconditionals="115" methods="81" coveredmethods="56"/>
+    <package name="src.domain.entities">
+      <metrics statements="210" coveredstatements="168" conditionals="159" coveredconditionals="117" methods="82" coveredmethods="67"/>
       <file name="AreaCobertura.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\domain\entities\AreaCobertura.ts">
-        <metrics statements="26" coveredstatements="23" conditionals="18" coveredconditionals="14" methods="7" coveredmethods="5"/>
-        <line num="19" count="7" type="cond" truecount="1" falsecount="1"/>
-        <line num="20" count="7" type="cond" truecount="1" falsecount="1"/>
-        <line num="21" count="7" type="cond" truecount="3" falsecount="1"/>
+        <metrics statements="26" coveredstatements="25" conditionals="18" coveredconditionals="14" methods="7" coveredmethods="7"/>
+        <line num="19" count="37" type="cond" truecount="1" falsecount="1"/>
+        <line num="20" count="37" type="cond" truecount="1" falsecount="1"/>
+        <line num="21" count="37" type="cond" truecount="3" falsecount="1"/>
         <line num="22" count="0" type="stmt"/>
-        <line num="25" count="7" type="stmt"/>
-        <line num="26" count="7" type="stmt"/>
-        <line num="27" count="7" type="stmt"/>
-        <line num="28" count="7" type="cond" truecount="2" falsecount="0"/>
-        <line num="29" count="7" type="cond" truecount="2" falsecount="0"/>
-        <line num="32" count="7" type="stmt"/>
-        <line num="33" count="6" type="stmt"/>
-        <line num="34" count="0" type="stmt"/>
-        <line num="35" count="5" type="stmt"/>
-        <line num="36" count="0" type="stmt"/>
-        <line num="42" count="7" type="cond" truecount="1" falsecount="1"/>
-        <line num="44" count="7" type="stmt"/>
-        <line num="45" count="7" type="stmt"/>
-        <line num="46" count="7" type="stmt"/>
-        <line num="48" count="7" type="stmt"/>
-        <line num="49" count="28" type="stmt"/>
-        <line num="50" count="28" type="stmt"/>
-        <line num="51" count="28" type="stmt"/>
-        <line num="52" count="28" type="stmt"/>
-        <line num="54" count="28" type="cond" truecount="2" falsecount="0"/>
-        <line num="55" count="28" type="cond" truecount="2" falsecount="0"/>
-        <line num="58" count="7" type="stmt"/>
+        <line num="25" count="37" type="stmt"/>
+        <line num="26" count="37" type="stmt"/>
+        <line num="27" count="37" type="stmt"/>
+        <line num="28" count="37" type="cond" truecount="2" falsecount="0"/>
+        <line num="29" count="37" type="cond" truecount="2" falsecount="0"/>
+        <line num="32" count="38" type="stmt"/>
+        <line num="33" count="12" type="stmt"/>
+        <line num="34" count="2" type="stmt"/>
+        <line num="35" count="10" type="stmt"/>
+        <line num="36" count="1" type="stmt"/>
+        <line num="42" count="11" type="cond" truecount="1" falsecount="1"/>
+        <line num="44" count="11" type="stmt"/>
+        <line num="45" count="11" type="stmt"/>
+        <line num="46" count="11" type="stmt"/>
+        <line num="48" count="11" type="stmt"/>
+        <line num="49" count="44" type="stmt"/>
+        <line num="50" count="44" type="stmt"/>
+        <line num="51" count="44" type="stmt"/>
+        <line num="52" count="44" type="stmt"/>
+        <line num="54" count="44" type="cond" truecount="2" falsecount="0"/>
+        <line num="55" count="44" type="cond" truecount="2" falsecount="0"/>
+        <line num="58" count="11" type="stmt"/>
       </file>
       <file name="Cliente.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\domain\entities\Cliente.ts">
-        <metrics statements="35" coveredstatements="22" conditionals="30" coveredconditionals="22" methods="16" coveredmethods="8"/>
-        <line num="37" count="57" type="cond" truecount="1" falsecount="1"/>
-        <line num="38" count="57" type="cond" truecount="1" falsecount="1"/>
-        <line num="39" count="57" type="cond" truecount="3" falsecount="1"/>
-        <line num="41" count="57" type="stmt"/>
-        <line num="42" count="57" type="stmt"/>
-        <line num="43" count="57" type="cond" truecount="2" falsecount="0"/>
-        <line num="44" count="57" type="stmt"/>
-        <line num="46" count="57" type="stmt"/>
-        <line num="51" count="57" type="stmt"/>
-        <line num="56" count="57" type="stmt"/>
-        <line num="58" count="57" type="stmt"/>
-        <line num="63" count="57" type="cond" truecount="2" falsecount="0"/>
-        <line num="64" count="57" type="cond" truecount="2" falsecount="0"/>
-        <line num="65" count="57" type="cond" truecount="2" falsecount="0"/>
-        <line num="66" count="57" type="cond" truecount="2" falsecount="0"/>
-        <line num="69" count="130" type="stmt"/>
-        <line num="70" count="0" type="stmt"/>
-        <line num="71" count="0" type="stmt"/>
-        <line num="72" count="4" type="stmt"/>
-        <line num="73" count="4" type="stmt"/>
-        <line num="74" count="3" type="stmt"/>
-        <line num="75" count="2" type="stmt"/>
-        <line num="76" count="23" type="stmt"/>
-        <line num="77" count="5" type="stmt"/>
-        <line num="78" count="0" type="stmt"/>
-        <line num="79" count="0" type="stmt"/>
-        <line num="80" count="0" type="stmt"/>
+        <metrics statements="35" coveredstatements="27" conditionals="30" coveredconditionals="23" methods="16" coveredmethods="13"/>
+        <line num="37" count="115" type="cond" truecount="1" falsecount="1"/>
+        <line num="38" count="115" type="cond" truecount="1" falsecount="1"/>
+        <line num="39" count="115" type="cond" truecount="3" falsecount="1"/>
+        <line num="41" count="115" type="stmt"/>
+        <line num="42" count="115" type="stmt"/>
+        <line num="43" count="115" type="cond" truecount="2" falsecount="0"/>
+        <line num="44" count="115" type="stmt"/>
+        <line num="46" count="115" type="stmt"/>
+        <line num="51" count="115" type="stmt"/>
+        <line num="56" count="115" type="stmt"/>
+        <line num="58" count="115" type="stmt"/>
+        <line num="63" count="115" type="cond" truecount="2" falsecount="0"/>
+        <line num="64" count="115" type="cond" truecount="2" falsecount="0"/>
+        <line num="65" count="115" type="cond" truecount="2" falsecount="0"/>
+        <line num="66" count="115" type="cond" truecount="2" falsecount="0"/>
+        <line num="69" count="191" type="stmt"/>
+        <line num="70" count="1" type="stmt"/>
+        <line num="71" count="1" type="stmt"/>
+        <line num="72" count="6" type="stmt"/>
+        <line num="73" count="5" type="stmt"/>
+        <line num="74" count="4" type="stmt"/>
+        <line num="75" count="3" type="stmt"/>
+        <line num="76" count="28" type="stmt"/>
+        <line num="77" count="7" type="stmt"/>
+        <line num="78" count="1" type="stmt"/>
+        <line num="79" count="1" type="stmt"/>
+        <line num="80" count="1" type="stmt"/>
         <line num="83" count="0" type="stmt"/>
         <line num="84" count="0" type="stmt"/>
         <line num="88" count="0" type="stmt"/>
@@ -586,17 +1035,17 @@
       </file>
       <file name="OSFoto.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\domain\entities\OSFoto.ts">
         <metrics statements="23" coveredstatements="19" conditionals="10" coveredconditionals="9" methods="10" coveredmethods="7"/>
-        <line num="26" count="4" type="stmt"/>
-        <line num="29" count="9" type="cond" truecount="2" falsecount="0"/>
+        <line num="26" count="8" type="stmt"/>
+        <line num="29" count="10" type="cond" truecount="2" falsecount="0"/>
         <line num="30" count="2" type="stmt"/>
-        <line num="33" count="7" type="stmt"/>
-        <line num="34" count="7" type="stmt"/>
-        <line num="35" count="7" type="stmt"/>
-        <line num="36" count="7" type="cond" truecount="2" falsecount="0"/>
-        <line num="37" count="7" type="stmt"/>
-        <line num="38" count="7" type="stmt"/>
-        <line num="39" count="7" type="cond" truecount="2" falsecount="0"/>
-        <line num="40" count="7" type="cond" truecount="2" falsecount="0"/>
+        <line num="33" count="8" type="stmt"/>
+        <line num="34" count="8" type="stmt"/>
+        <line num="35" count="8" type="stmt"/>
+        <line num="36" count="8" type="cond" truecount="2" falsecount="0"/>
+        <line num="37" count="8" type="stmt"/>
+        <line num="38" count="8" type="stmt"/>
+        <line num="39" count="8" type="cond" truecount="2" falsecount="0"/>
+        <line num="40" count="8" type="cond" truecount="2" falsecount="0"/>
         <line num="43" count="1" type="stmt"/>
         <line num="44" count="0" type="stmt"/>
         <line num="45" count="0" type="stmt"/>
@@ -611,85 +1060,88 @@
         <line num="57" count="1" type="stmt"/>
       </file>
       <file name="OrdemServico.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\domain\entities\OrdemServico.ts">
-        <metrics statements="52" coveredstatements="40" conditionals="43" coveredconditionals="32" methods="19" coveredmethods="16"/>
-        <line num="38" count="33" type="cond" truecount="1" falsecount="1"/>
+        <metrics statements="55" coveredstatements="43" conditionals="45" coveredconditionals="33" methods="20" coveredmethods="18"/>
+        <line num="38" count="95" type="cond" truecount="1" falsecount="1"/>
         <line num="39" count="0" type="stmt"/>
-        <line num="41" count="33" type="cond" truecount="1" falsecount="1"/>
+        <line num="41" count="95" type="cond" truecount="1" falsecount="1"/>
         <line num="42" count="0" type="stmt"/>
-        <line num="44" count="33" type="cond" truecount="3" falsecount="1"/>
+        <line num="44" count="95" type="cond" truecount="3" falsecount="1"/>
         <line num="45" count="0" type="stmt"/>
-        <line num="48" count="33" type="stmt"/>
-        <line num="49" count="33" type="cond" truecount="2" falsecount="0"/>
-        <line num="50" count="33" type="stmt"/>
-        <line num="51" count="33" type="cond" truecount="2" falsecount="0"/>
-        <line num="53" count="33" type="stmt"/>
-        <line num="58" count="33" type="stmt"/>
-        <line num="60" count="33" type="stmt"/>
-        <line num="65" count="33" type="cond" truecount="2" falsecount="0"/>
-        <line num="66" count="33" type="cond" truecount="2" falsecount="0"/>
-        <line num="67" count="33" type="cond" truecount="1" falsecount="1"/>
-        <line num="68" count="33" type="cond" truecount="2" falsecount="0"/>
-        <line num="69" count="33" type="cond" truecount="2" falsecount="0"/>
-        <line num="70" count="33" type="cond" truecount="2" falsecount="0"/>
-        <line num="73" count="75" type="stmt"/>
-        <line num="74" count="3" type="stmt"/>
-        <line num="75" count="22" type="stmt"/>
-        <line num="76" count="11" type="stmt"/>
-        <line num="77" count="14" type="stmt"/>
-        <line num="78" count="15" type="stmt"/>
-        <line num="79" count="50" type="stmt"/>
-        <line num="80" count="17" type="stmt"/>
-        <line num="81" count="5" type="stmt"/>
-        <line num="82" count="10" type="stmt"/>
-        <line num="83" count="22" type="stmt"/>
-        <line num="84" count="5" type="stmt"/>
-        <line num="85" count="0" type="stmt"/>
-        <line num="88" count="5" type="cond" truecount="1" falsecount="1"/>
+        <line num="48" count="95" type="stmt"/>
+        <line num="49" count="95" type="cond" truecount="2" falsecount="0"/>
+        <line num="50" count="95" type="stmt"/>
+        <line num="51" count="95" type="cond" truecount="2" falsecount="0"/>
+        <line num="53" count="95" type="stmt"/>
+        <line num="58" count="95" type="stmt"/>
+        <line num="60" count="95" type="stmt"/>
+        <line num="65" count="95" type="cond" truecount="2" falsecount="0"/>
+        <line num="66" count="95" type="cond" truecount="2" falsecount="0"/>
+        <line num="67" count="95" type="cond" truecount="2" falsecount="0"/>
+        <line num="68" count="95" type="cond" truecount="2" falsecount="0"/>
+        <line num="69" count="95" type="cond" truecount="2" falsecount="0"/>
+        <line num="70" count="95" type="cond" truecount="2" falsecount="0"/>
+        <line num="73" count="582" type="stmt"/>
+        <line num="74" count="11" type="stmt"/>
+        <line num="75" count="62" type="stmt"/>
+        <line num="76" count="168" type="stmt"/>
+        <line num="77" count="110" type="stmt"/>
+        <line num="78" count="110" type="stmt"/>
+        <line num="79" count="293" type="stmt"/>
+        <line num="80" count="67" type="stmt"/>
+        <line num="81" count="17" type="stmt"/>
+        <line num="82" count="15" type="stmt"/>
+        <line num="83" count="97" type="stmt"/>
+        <line num="84" count="13" type="stmt"/>
+        <line num="85" count="7" type="stmt"/>
+        <line num="88" count="6" type="cond" truecount="1" falsecount="1"/>
         <line num="89" count="0" type="stmt"/>
-        <line num="91" count="5" type="stmt"/>
-        <line num="95" count="8" type="cond" truecount="1" falsecount="1"/>
+        <line num="91" count="6" type="stmt"/>
+        <line num="95" count="0" type="cond" truecount="0" falsecount="2"/>
         <line num="96" count="0" type="stmt"/>
-        <line num="98" count="8" type="stmt"/>
-        <line num="99" count="7" type="stmt"/>
-        <line num="103" count="8" type="cond" truecount="4" falsecount="0"/>
-        <line num="104" count="1" type="stmt"/>
-        <line num="106" count="7" type="cond" truecount="2" falsecount="0"/>
-        <line num="107" count="2" type="stmt"/>
-        <line num="109" count="7" type="stmt"/>
-        <line num="110" count="7" type="stmt"/>
-        <line num="111" count="7" type="stmt"/>
-        <line num="115" count="0" type="stmt"/>
-        <line num="116" count="0" type="cond" truecount="0" falsecount="2"/>
-        <line num="117" count="0" type="stmt"/>
-        <line num="119" count="0" type="stmt"/>
-        <line num="123" count="0" type="stmt"/>
+        <line num="98" count="0" type="stmt"/>
+        <line num="102" count="9" type="cond" truecount="1" falsecount="1"/>
+        <line num="103" count="0" type="stmt"/>
+        <line num="105" count="9" type="stmt"/>
+        <line num="106" count="8" type="stmt"/>
+        <line num="110" count="9" type="cond" truecount="4" falsecount="0"/>
+        <line num="111" count="1" type="stmt"/>
+        <line num="113" count="8" type="cond" truecount="2" falsecount="0"/>
+        <line num="114" count="3" type="stmt"/>
+        <line num="116" count="8" type="stmt"/>
+        <line num="117" count="8" type="stmt"/>
+        <line num="118" count="8" type="stmt"/>
+        <line num="122" count="0" type="stmt"/>
+        <line num="123" count="0" type="cond" truecount="0" falsecount="2"/>
         <line num="124" count="0" type="stmt"/>
+        <line num="126" count="0" type="stmt"/>
+        <line num="130" count="1" type="stmt"/>
+        <line num="131" count="1" type="stmt"/>
       </file>
       <file name="PlanoInternet.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\domain\entities\PlanoInternet.ts">
-        <metrics statements="41" coveredstatements="28" conditionals="36" coveredconditionals="25" methods="16" coveredmethods="10"/>
-        <line num="27" count="18" type="cond" truecount="1" falsecount="1"/>
-        <line num="28" count="18" type="cond" truecount="3" falsecount="1"/>
-        <line num="29" count="18" type="cond" truecount="3" falsecount="1"/>
+        <metrics statements="41" coveredstatements="30" conditionals="36" coveredconditionals="25" methods="16" coveredmethods="12"/>
+        <line num="27" count="72" type="cond" truecount="1" falsecount="1"/>
+        <line num="28" count="72" type="cond" truecount="3" falsecount="1"/>
+        <line num="29" count="72" type="cond" truecount="3" falsecount="1"/>
         <line num="30" count="0" type="stmt"/>
-        <line num="33" count="18" type="stmt"/>
-        <line num="34" count="18" type="stmt"/>
-        <line num="35" count="18" type="stmt"/>
-        <line num="37" count="18" type="stmt"/>
-        <line num="42" count="18" type="cond" truecount="1" falsecount="1"/>
-        <line num="43" count="18" type="cond" truecount="2" falsecount="0"/>
-        <line num="44" count="18" type="cond" truecount="2" falsecount="0"/>
-        <line num="45" count="18" type="cond" truecount="2" falsecount="0"/>
-        <line num="46" count="18" type="cond" truecount="2" falsecount="0"/>
-        <line num="49" count="37" type="stmt"/>
-        <line num="50" count="11" type="stmt"/>
-        <line num="51" count="1" type="stmt"/>
-        <line num="52" count="11" type="stmt"/>
-        <line num="53" count="9" type="stmt"/>
-        <line num="54" count="12" type="stmt"/>
-        <line num="55" count="9" type="stmt"/>
-        <line num="56" count="0" type="stmt"/>
-        <line num="57" count="0" type="stmt"/>
-        <line num="60" count="9" type="stmt"/>
+        <line num="33" count="72" type="stmt"/>
+        <line num="34" count="72" type="stmt"/>
+        <line num="35" count="72" type="stmt"/>
+        <line num="37" count="72" type="stmt"/>
+        <line num="42" count="72" type="cond" truecount="1" falsecount="1"/>
+        <line num="43" count="72" type="cond" truecount="2" falsecount="0"/>
+        <line num="44" count="72" type="cond" truecount="2" falsecount="0"/>
+        <line num="45" count="72" type="cond" truecount="2" falsecount="0"/>
+        <line num="46" count="72" type="cond" truecount="2" falsecount="0"/>
+        <line num="49" count="180" type="stmt"/>
+        <line num="50" count="65" type="stmt"/>
+        <line num="51" count="2" type="stmt"/>
+        <line num="52" count="64" type="stmt"/>
+        <line num="53" count="55" type="stmt"/>
+        <line num="54" count="26" type="stmt"/>
+        <line num="55" count="54" type="stmt"/>
+        <line num="56" count="1" type="stmt"/>
+        <line num="57" count="1" type="stmt"/>
+        <line num="60" count="61" type="stmt"/>
         <line num="64" count="0" type="stmt"/>
         <line num="65" count="0" type="stmt"/>
         <line num="69" count="0" type="stmt"/>
@@ -711,25 +1163,25 @@
       </file>
       <file name="PreCadastro.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\domain\entities\PreCadastro.ts">
         <metrics statements="30" coveredstatements="24" conditionals="20" coveredconditionals="13" methods="13" coveredmethods="10"/>
-        <line num="32" count="1" type="cond" truecount="1" falsecount="1"/>
-        <line num="33" count="1" type="cond" truecount="1" falsecount="1"/>
-        <line num="34" count="1" type="cond" truecount="3" falsecount="1"/>
+        <line num="32" count="2" type="cond" truecount="1" falsecount="1"/>
+        <line num="33" count="2" type="cond" truecount="1" falsecount="1"/>
+        <line num="34" count="2" type="cond" truecount="3" falsecount="1"/>
         <line num="35" count="0" type="stmt"/>
-        <line num="37" count="1" type="cond" truecount="3" falsecount="1"/>
+        <line num="37" count="2" type="cond" truecount="3" falsecount="1"/>
         <line num="38" count="0" type="stmt"/>
-        <line num="40" count="1" type="cond" truecount="3" falsecount="1"/>
+        <line num="40" count="2" type="cond" truecount="3" falsecount="1"/>
         <line num="41" count="0" type="stmt"/>
-        <line num="44" count="1" type="stmt"/>
-        <line num="45" count="1" type="stmt"/>
-        <line num="46" count="1" type="stmt"/>
-        <line num="47" count="1" type="stmt"/>
-        <line num="48" count="1" type="stmt"/>
-        <line num="49" count="1" type="stmt"/>
-        <line num="50" count="1" type="stmt"/>
-        <line num="51" count="1" type="stmt"/>
-        <line num="52" count="1" type="cond" truecount="1" falsecount="1"/>
-        <line num="53" count="1" type="cond" truecount="1" falsecount="1"/>
-        <line num="56" count="4" type="stmt"/>
+        <line num="44" count="2" type="stmt"/>
+        <line num="45" count="2" type="stmt"/>
+        <line num="46" count="2" type="stmt"/>
+        <line num="47" count="2" type="stmt"/>
+        <line num="48" count="2" type="stmt"/>
+        <line num="49" count="2" type="stmt"/>
+        <line num="50" count="2" type="stmt"/>
+        <line num="51" count="2" type="stmt"/>
+        <line num="52" count="2" type="cond" truecount="1" falsecount="1"/>
+        <line num="53" count="2" type="cond" truecount="1" falsecount="1"/>
+        <line num="56" count="6" type="stmt"/>
         <line num="57" count="1" type="stmt"/>
         <line num="58" count="2" type="stmt"/>
         <line num="59" count="1" type="stmt"/>
@@ -743,7 +1195,7 @@
         <line num="72" count="0" type="stmt"/>
       </file>
     </package>
-    <package name="domain.errors">
+    <package name="src.domain.errors">
       <metrics statements="8" coveredstatements="8" conditionals="1" coveredconditionals="0" methods="6" coveredmethods="6"/>
       <file name="DomainError.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\domain\errors\DomainError.ts">
         <metrics statements="8" coveredstatements="8" conditionals="1" coveredconditionals="0" methods="6" coveredmethods="6"/>
@@ -757,7 +1209,7 @@
         <line num="35" count="1" type="stmt"/>
       </file>
     </package>
-    <package name="domain.services">
+    <package name="src.domain.services">
       <metrics statements="12" coveredstatements="12" conditionals="10" coveredconditionals="10" methods="2" coveredmethods="2"/>
       <file name="RegraGeracaoPdfService.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\domain\services\RegraGeracaoPdfService.ts">
         <metrics statements="8" coveredstatements="8" conditionals="6" coveredconditionals="6" methods="1" coveredmethods="1"/>
@@ -772,100 +1224,100 @@
       </file>
       <file name="ValidacaoCoberturaService.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\domain\services\ValidacaoCoberturaService.ts">
         <metrics statements="4" coveredstatements="4" conditionals="4" coveredconditionals="4" methods="1" coveredmethods="1"/>
-        <line num="13" count="5" type="stmt"/>
-        <line num="14" count="5" type="cond" truecount="4" falsecount="0"/>
-        <line num="15" count="3" type="stmt"/>
-        <line num="24" count="2" type="stmt"/>
+        <line num="13" count="8" type="stmt"/>
+        <line num="14" count="9" type="cond" truecount="4" falsecount="0"/>
+        <line num="15" count="5" type="stmt"/>
+        <line num="24" count="3" type="stmt"/>
       </file>
     </package>
-    <package name="domain.value-objects">
-      <metrics statements="140" coveredstatements="127" conditionals="87" coveredconditionals="67" methods="39" coveredmethods="35"/>
+    <package name="src.domain.value-objects">
+      <metrics statements="140" coveredstatements="129" conditionals="87" coveredconditionals="68" methods="39" coveredmethods="36"/>
       <file name="CpfCnpj.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\domain\value-objects\CpfCnpj.ts">
         <metrics statements="57" coveredstatements="56" conditionals="40" coveredconditionals="32" methods="9" coveredmethods="9"/>
-        <line num="8" count="67" type="cond" truecount="2" falsecount="0"/>
+        <line num="8" count="126" type="cond" truecount="2" falsecount="0"/>
         <line num="9" count="1" type="stmt"/>
-        <line num="12" count="66" type="stmt"/>
-        <line num="14" count="66" type="cond" truecount="2" falsecount="0"/>
-        <line num="15" count="64" type="cond" truecount="2" falsecount="0"/>
+        <line num="12" count="125" type="stmt"/>
+        <line num="14" count="125" type="cond" truecount="2" falsecount="0"/>
+        <line num="15" count="109" type="cond" truecount="2" falsecount="0"/>
         <line num="16" count="2" type="stmt"/>
-        <line num="18" count="62" type="stmt"/>
-        <line num="19" count="62" type="stmt"/>
-        <line num="20" count="2" type="cond" truecount="2" falsecount="0"/>
-        <line num="21" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="18" count="107" type="stmt"/>
+        <line num="19" count="107" type="stmt"/>
+        <line num="20" count="16" type="cond" truecount="2" falsecount="0"/>
+        <line num="21" count="15" type="cond" truecount="1" falsecount="1"/>
         <line num="22" count="0" type="stmt"/>
-        <line num="24" count="1" type="stmt"/>
-        <line num="25" count="1" type="stmt"/>
+        <line num="24" count="15" type="stmt"/>
+        <line num="25" count="15" type="stmt"/>
         <line num="27" count="1" type="stmt"/>
-        <line num="32" count="12" type="stmt"/>
-        <line num="36" count="3" type="stmt"/>
+        <line num="32" count="13" type="stmt"/>
+        <line num="36" count="4" type="stmt"/>
         <line num="40" count="1" type="stmt"/>
         <line num="44" count="3" type="stmt"/>
         <line num="48" count="6" type="cond" truecount="2" falsecount="0"/>
         <line num="49" count="1" type="stmt"/>
         <line num="51" count="5" type="stmt"/>
         <line num="55" count="1" type="stmt"/>
-        <line num="59" count="64" type="cond" truecount="2" falsecount="0"/>
-        <line num="61" count="63" type="stmt"/>
-        <line num="62" count="63" type="stmt"/>
-        <line num="63" count="567" type="stmt"/>
-        <line num="65" count="63" type="stmt"/>
-        <line num="66" count="63" type="cond" truecount="4" falsecount="0"/>
-        <line num="67" count="63" type="cond" truecount="1" falsecount="1"/>
-        <line num="69" count="63" type="stmt"/>
-        <line num="70" count="63" type="stmt"/>
-        <line num="71" count="630" type="stmt"/>
-        <line num="73" count="63" type="stmt"/>
-        <line num="74" count="63" type="cond" truecount="3" falsecount="1"/>
-        <line num="75" count="63" type="cond" truecount="2" falsecount="0"/>
-        <line num="77" count="62" type="stmt"/>
-        <line num="81" count="1" type="cond" truecount="1" falsecount="1"/>
-        <line num="83" count="1" type="stmt"/>
-        <line num="84" count="1" type="stmt"/>
-        <line num="85" count="1" type="stmt"/>
-        <line num="86" count="1" type="stmt"/>
-        <line num="87" count="1" type="stmt"/>
-        <line num="89" count="1" type="stmt"/>
-        <line num="90" count="12" type="stmt"/>
-        <line num="91" count="12" type="cond" truecount="2" falsecount="0"/>
-        <line num="94" count="1" type="cond" truecount="1" falsecount="1"/>
-        <line num="95" count="1" type="cond" truecount="1" falsecount="1"/>
-        <line num="97" count="1" type="stmt"/>
-        <line num="98" count="1" type="stmt"/>
-        <line num="99" count="1" type="stmt"/>
-        <line num="100" count="1" type="stmt"/>
-        <line num="102" count="1" type="stmt"/>
-        <line num="103" count="13" type="stmt"/>
-        <line num="104" count="13" type="cond" truecount="2" falsecount="0"/>
-        <line num="107" count="1" type="cond" truecount="1" falsecount="1"/>
-        <line num="108" count="1" type="cond" truecount="1" falsecount="1"/>
-        <line num="110" count="1" type="stmt"/>
+        <line num="59" count="109" type="cond" truecount="2" falsecount="0"/>
+        <line num="61" count="108" type="stmt"/>
+        <line num="62" count="108" type="stmt"/>
+        <line num="63" count="972" type="stmt"/>
+        <line num="65" count="108" type="stmt"/>
+        <line num="66" count="108" type="cond" truecount="4" falsecount="0"/>
+        <line num="67" count="108" type="cond" truecount="1" falsecount="1"/>
+        <line num="69" count="108" type="stmt"/>
+        <line num="70" count="108" type="stmt"/>
+        <line num="71" count="1080" type="stmt"/>
+        <line num="73" count="108" type="stmt"/>
+        <line num="74" count="108" type="cond" truecount="3" falsecount="1"/>
+        <line num="75" count="108" type="cond" truecount="2" falsecount="0"/>
+        <line num="77" count="107" type="stmt"/>
+        <line num="81" count="15" type="cond" truecount="1" falsecount="1"/>
+        <line num="83" count="15" type="stmt"/>
+        <line num="84" count="15" type="stmt"/>
+        <line num="85" count="15" type="stmt"/>
+        <line num="86" count="15" type="stmt"/>
+        <line num="87" count="15" type="stmt"/>
+        <line num="89" count="15" type="stmt"/>
+        <line num="90" count="180" type="stmt"/>
+        <line num="91" count="180" type="cond" truecount="2" falsecount="0"/>
+        <line num="94" count="15" type="cond" truecount="1" falsecount="1"/>
+        <line num="95" count="15" type="cond" truecount="1" falsecount="1"/>
+        <line num="97" count="15" type="stmt"/>
+        <line num="98" count="15" type="stmt"/>
+        <line num="99" count="15" type="stmt"/>
+        <line num="100" count="15" type="stmt"/>
+        <line num="102" count="15" type="stmt"/>
+        <line num="103" count="195" type="stmt"/>
+        <line num="104" count="195" type="cond" truecount="2" falsecount="0"/>
+        <line num="107" count="15" type="cond" truecount="1" falsecount="1"/>
+        <line num="108" count="15" type="cond" truecount="1" falsecount="1"/>
+        <line num="110" count="15" type="stmt"/>
       </file>
       <file name="Email.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\domain\value-objects\Email.ts">
         <metrics statements="10" coveredstatements="9" conditionals="4" coveredconditionals="4" methods="4" coveredmethods="3"/>
-        <line num="7" count="61" type="cond" truecount="2" falsecount="0"/>
+        <line num="7" count="119" type="cond" truecount="2" falsecount="0"/>
         <line num="8" count="1" type="stmt"/>
-        <line num="10" count="60" type="stmt"/>
-        <line num="11" count="60" type="stmt"/>
-        <line num="12" count="60" type="cond" truecount="2" falsecount="0"/>
+        <line num="10" count="118" type="stmt"/>
+        <line num="11" count="118" type="stmt"/>
+        <line num="12" count="118" type="cond" truecount="2" falsecount="0"/>
         <line num="13" count="2" type="stmt"/>
-        <line num="15" count="58" type="stmt"/>
-        <line num="19" count="7" type="stmt"/>
-        <line num="23" count="4" type="stmt"/>
+        <line num="15" count="116" type="stmt"/>
+        <line num="19" count="8" type="stmt"/>
+        <line num="23" count="5" type="stmt"/>
         <line num="27" count="0" type="stmt"/>
       </file>
       <file name="GeoCoordenadas.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\domain\value-objects\GeoCoordenadas.ts">
         <metrics statements="19" coveredstatements="17" conditionals="14" coveredconditionals="12" methods="5" coveredmethods="5"/>
-        <line num="8" count="39" type="cond" truecount="3" falsecount="1"/>
+        <line num="8" count="162" type="cond" truecount="3" falsecount="1"/>
         <line num="9" count="0" type="stmt"/>
-        <line num="11" count="39" type="cond" truecount="3" falsecount="1"/>
+        <line num="11" count="162" type="cond" truecount="3" falsecount="1"/>
         <line num="12" count="0" type="stmt"/>
-        <line num="14" count="39" type="cond" truecount="6" falsecount="0"/>
+        <line num="14" count="162" type="cond" truecount="6" falsecount="0"/>
         <line num="15" count="1" type="stmt"/>
-        <line num="17" count="38" type="stmt"/>
-        <line num="18" count="38" type="stmt"/>
+        <line num="17" count="161" type="stmt"/>
+        <line num="18" count="161" type="stmt"/>
         <line num="22" count="19" type="stmt"/>
-        <line num="26" count="65" type="stmt"/>
-        <line num="30" count="64" type="stmt"/>
+        <line num="26" count="106" type="stmt"/>
+        <line num="30" count="105" type="stmt"/>
         <line num="37" count="1" type="stmt"/>
         <line num="38" count="1" type="stmt"/>
         <line num="39" count="1" type="stmt"/>
@@ -876,78 +1328,84 @@
         <line num="48" count="1" type="stmt"/>
       </file>
       <file name="PapelUsuario.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\domain\value-objects\PapelUsuario.ts">
-        <metrics statements="12" coveredstatements="10" conditionals="5" coveredconditionals="4" methods="6" coveredmethods="5"/>
-        <line num="4" count="10" type="stmt"/>
-        <line num="5" count="10" type="stmt"/>
-        <line num="6" count="10" type="stmt"/>
-        <line num="11" count="59" type="stmt"/>
-        <line num="15" count="59" type="stmt"/>
-        <line num="16" count="59" type="cond" truecount="4" falsecount="1"/>
+        <metrics statements="12" coveredstatements="11" conditionals="5" coveredconditionals="4" methods="6" coveredmethods="6"/>
+        <line num="4" count="14" type="stmt"/>
+        <line num="5" count="14" type="stmt"/>
+        <line num="6" count="14" type="stmt"/>
+        <line num="11" count="117" type="stmt"/>
+        <line num="15" count="117" type="stmt"/>
+        <line num="16" count="117" type="cond" truecount="4" falsecount="1"/>
         <line num="17" count="0" type="stmt"/>
-        <line num="19" count="59" type="stmt"/>
-        <line num="23" count="0" type="stmt"/>
-        <line num="27" count="9" type="stmt"/>
-        <line num="31" count="10" type="stmt"/>
+        <line num="19" count="117" type="stmt"/>
+        <line num="23" count="1" type="stmt"/>
+        <line num="27" count="12" type="stmt"/>
+        <line num="31" count="11" type="stmt"/>
         <line num="35" count="7" type="stmt"/>
       </file>
       <file name="Preco.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\domain\value-objects\Preco.ts">
         <metrics statements="7" coveredstatements="5" conditionals="5" coveredconditionals="4" methods="5" coveredmethods="4"/>
-        <line num="5" count="20" type="cond" truecount="4" falsecount="1"/>
+        <line num="5" count="74" type="cond" truecount="4" falsecount="1"/>
         <line num="6" count="0" type="stmt"/>
-        <line num="8" count="20" type="stmt"/>
-        <line num="12" count="16" type="stmt"/>
+        <line num="8" count="74" type="stmt"/>
+        <line num="12" count="70" type="stmt"/>
         <line num="16" count="0" type="stmt"/>
-        <line num="20" count="13" type="stmt"/>
-        <line num="24" count="3" type="stmt"/>
+        <line num="20" count="66" type="stmt"/>
+        <line num="24" count="11" type="stmt"/>
       </file>
       <file name="StatusOS.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\domain\value-objects\StatusOS.ts">
         <metrics statements="17" coveredstatements="15" conditionals="12" coveredconditionals="7" methods="6" coveredmethods="5"/>
-        <line num="6" count="9" type="stmt"/>
-        <line num="7" count="9" type="stmt"/>
-        <line num="8" count="9" type="stmt"/>
-        <line num="9" count="9" type="stmt"/>
-        <line num="11" count="9" type="stmt"/>
-        <line num="21" count="50" type="stmt"/>
-        <line num="25" count="35" type="stmt"/>
-        <line num="26" count="35" type="cond" truecount="4" falsecount="2"/>
+        <line num="6" count="13" type="stmt"/>
+        <line num="7" count="13" type="stmt"/>
+        <line num="8" count="13" type="stmt"/>
+        <line num="9" count="13" type="stmt"/>
+        <line num="11" count="13" type="stmt"/>
+        <line num="21" count="114" type="stmt"/>
+        <line num="25" count="97" type="stmt"/>
+        <line num="26" count="97" type="cond" truecount="4" falsecount="2"/>
         <line num="27" count="0" type="stmt"/>
-        <line num="29" count="35" type="stmt"/>
-        <line num="33" count="51" type="stmt"/>
-        <line num="37" count="17" type="cond" truecount="1" falsecount="1"/>
-        <line num="38" count="17" type="stmt"/>
-        <line num="42" count="17" type="cond" truecount="2" falsecount="0"/>
+        <line num="29" count="97" type="stmt"/>
+        <line num="33" count="294" type="stmt"/>
+        <line num="37" count="19" type="cond" truecount="1" falsecount="1"/>
+        <line num="38" count="19" type="stmt"/>
+        <line num="42" count="19" type="cond" truecount="2" falsecount="0"/>
         <line num="43" count="2" type="stmt"/>
-        <line num="45" count="15" type="stmt"/>
+        <line num="45" count="17" type="stmt"/>
         <line num="49" count="0" type="cond" truecount="0" falsecount="2"/>
       </file>
       <file name="TipoProblema.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\domain\value-objects\TipoProblema.ts">
-        <metrics statements="18" coveredstatements="15" conditionals="7" coveredconditionals="4" methods="4" coveredmethods="4"/>
-        <line num="4" count="9" type="stmt"/>
-        <line num="5" count="9" type="stmt"/>
-        <line num="6" count="9" type="stmt"/>
-        <line num="7" count="9" type="stmt"/>
-        <line num="8" count="9" type="stmt"/>
-        <line num="13" count="34" type="stmt"/>
-        <line num="17" count="34" type="stmt"/>
-        <line num="18" count="34" type="stmt"/>
-        <line num="19" count="34" type="cond" truecount="1" falsecount="1"/>
+        <metrics statements="18" coveredstatements="16" conditionals="7" coveredconditionals="5" methods="4" coveredmethods="4"/>
+        <line num="4" count="13" type="stmt"/>
+        <line num="5" count="13" type="stmt"/>
+        <line num="6" count="13" type="stmt"/>
+        <line num="7" count="13" type="stmt"/>
+        <line num="8" count="13" type="stmt"/>
+        <line num="13" count="96" type="stmt"/>
+        <line num="17" count="96" type="stmt"/>
+        <line num="18" count="96" type="stmt"/>
+        <line num="19" count="96" type="cond" truecount="1" falsecount="1"/>
         <line num="20" count="0" type="stmt"/>
-        <line num="22" count="34" type="stmt"/>
-        <line num="26" count="4" type="stmt"/>
-        <line num="30" count="12" type="cond" truecount="3" falsecount="2"/>
-        <line num="31" count="7" type="stmt"/>
-        <line num="32" count="2" type="stmt"/>
-        <line num="33" count="3" type="stmt"/>
+        <line num="22" count="96" type="stmt"/>
+        <line num="26" count="9" type="stmt"/>
+        <line num="30" count="103" type="cond" truecount="4" falsecount="1"/>
+        <line num="31" count="37" type="stmt"/>
+        <line num="32" count="37" type="stmt"/>
+        <line num="33" count="18" type="stmt"/>
         <line num="34" count="0" type="stmt"/>
-        <line num="35" count="0" type="stmt"/>
+        <line num="35" count="11" type="stmt"/>
       </file>
     </package>
-    <package name="infra.auth">
+    <package name="src.infra">
+      <metrics statements="0" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+      <file name="index.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\infra\index.ts">
+        <metrics statements="0" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+      </file>
+    </package>
+    <package name="src.infra.auth">
       <metrics statements="11" coveredstatements="2" conditionals="11" coveredconditionals="0" methods="6" coveredmethods="0"/>
       <file name="SecureTokenStore.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\infra\auth\SecureTokenStore.ts">
         <metrics statements="11" coveredstatements="2" conditionals="11" coveredconditionals="0" methods="6" coveredmethods="0"/>
-        <line num="17" count="2" type="stmt"/>
-        <line num="27" count="2" type="stmt"/>
+        <line num="17" count="5" type="stmt"/>
+        <line num="27" count="5" type="stmt"/>
         <line num="50" count="0" type="stmt"/>
         <line num="64" count="0" type="stmt"/>
         <line num="72" count="0" type="cond" truecount="0" falsecount="5"/>
@@ -959,21 +1417,173 @@
         <line num="109" count="0" type="stmt"/>
       </file>
     </package>
-    <package name="infra.fakes">
-      <metrics statements="54" coveredstatements="22" conditionals="22" coveredconditionals="6" methods="36" coveredmethods="20"/>
+    <package name="src.infra.db">
+      <metrics statements="39" coveredstatements="36" conditionals="12" coveredconditionals="5" methods="3" coveredmethods="2"/>
+      <file name="database.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\infra\db\database.ts">
+        <metrics statements="38" coveredstatements="35" conditionals="12" coveredconditionals="5" methods="3" coveredmethods="2"/>
+        <line num="11" count="1" type="stmt"/>
+        <line num="12" count="1" type="stmt"/>
+        <line num="14" count="1" type="stmt"/>
+        <line num="20" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="21" count="0" type="stmt"/>
+        <line num="23" count="0" type="stmt"/>
+        <line num="30" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="33" count="1" type="stmt"/>
+        <line num="34" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="36" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="37" count="1" type="stmt"/>
+        <line num="38" count="1" type="stmt"/>
+        <line num="39" count="1" type="stmt"/>
+        <line num="42" count="1" type="stmt"/>
+        <line num="49" count="1" type="stmt"/>
+        <line num="53" count="1" type="cond" truecount="2" falsecount="2"/>
+        <line num="54" count="1" type="stmt"/>
+        <line num="57" count="1" type="stmt"/>
+        <line num="72" count="1" type="stmt"/>
+        <line num="87" count="1" type="stmt"/>
+        <line num="102" count="1" type="stmt"/>
+        <line num="118" count="1" type="stmt"/>
+        <line num="173" count="1" type="stmt"/>
+        <line num="174" count="4" type="stmt"/>
+        <line num="190" count="1" type="stmt"/>
+        <line num="197" count="1" type="stmt"/>
+        <line num="204" count="1" type="stmt"/>
+        <line num="214" count="1" type="stmt"/>
+        <line num="225" count="1" type="stmt"/>
+        <line num="226" count="1" type="stmt"/>
+        <line num="227" count="1" type="stmt"/>
+        <line num="228" count="1" type="stmt"/>
+        <line num="230" count="1" type="stmt"/>
+        <line num="241" count="1" type="stmt"/>
+        <line num="253" count="1" type="stmt"/>
+        <line num="267" count="1" type="stmt"/>
+        <line num="279" count="1" type="stmt"/>
+        <line num="291" count="1" type="stmt"/>
+      </file>
+      <file name="index.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\infra\db\index.ts">
+        <metrics statements="0" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+      </file>
+      <file name="schema.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\infra\db\schema.ts">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="9" count="1" type="stmt"/>
+      </file>
+    </package>
+    <package name="src.infra.db.repositories">
+      <metrics statements="77" coveredstatements="44" conditionals="78" coveredconditionals="38" methods="52" coveredmethods="27"/>
+      <file name="SqliteAreaCoberturaRepository.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\infra\db\repositories\SqliteAreaCoberturaRepository.ts">
+        <metrics statements="13" coveredstatements="10" conditionals="8" coveredconditionals="4" methods="8" coveredmethods="6"/>
+        <line num="24" count="0" type="stmt"/>
+        <line num="27" count="0" type="stmt"/>
+        <line num="31" count="1" type="stmt"/>
+        <line num="35" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="39" count="3" type="stmt"/>
+        <line num="44" count="1" type="stmt"/>
+        <line num="57" count="1" type="stmt"/>
+        <line num="58" count="1" type="stmt"/>
+        <line num="59" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="60" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="61" count="3" type="stmt"/>
+        <line num="64" count="0" type="stmt"/>
+        <line num="67" count="1" type="stmt"/>
+      </file>
+      <file name="SqliteClienteRepository.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\infra\db\repositories\SqliteClienteRepository.ts">
+        <metrics statements="11" coveredstatements="6" conditionals="10" coveredconditionals="6" methods="8" coveredmethods="5"/>
+        <line num="33" count="1" type="stmt"/>
+        <line num="53" count="1" type="stmt"/>
+        <line num="57" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="61" count="1" type="stmt"/>
+        <line num="65" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="69" count="0" type="stmt"/>
+        <line num="70" count="0" type="stmt"/>
+        <line num="75" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="79" count="0" type="stmt"/>
+        <line num="80" count="0" type="stmt"/>
+        <line num="84" count="2" type="stmt"/>
+      </file>
+      <file name="SqliteMensagemSuporteRepository.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\infra\db\repositories\SqliteMensagemSuporteRepository.ts">
+        <metrics statements="3" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="4" coveredmethods="0"/>
+        <line num="33" count="0" type="stmt"/>
+        <line num="48" count="0" type="stmt"/>
+        <line num="52" count="0" type="stmt"/>
+      </file>
+      <file name="SqliteOrdemServicoRepository.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\infra\db\repositories\SqliteOrdemServicoRepository.ts">
+        <metrics statements="23" coveredstatements="15" conditionals="34" coveredconditionals="25" methods="13" coveredmethods="6"/>
+        <line num="37" count="5" type="stmt"/>
+        <line num="48" count="5" type="stmt"/>
+        <line num="70" count="3" type="stmt"/>
+        <line num="74" count="3" type="cond" truecount="1" falsecount="1"/>
+        <line num="78" count="0" type="stmt"/>
+        <line num="82" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="86" count="1" type="stmt"/>
+        <line num="90" count="1" type="stmt"/>
+        <line num="94" count="0" type="stmt"/>
+        <line num="98" count="0" type="stmt"/>
+        <line num="102" count="0" type="stmt"/>
+        <line num="105" count="0" type="stmt"/>
+        <line num="109" count="4" type="stmt"/>
+        <line num="110" count="4" type="cond" truecount="2" falsecount="0"/>
+        <line num="116" count="1" type="stmt"/>
+        <line num="119" count="4" type="stmt"/>
+        <line num="120" count="4" type="stmt"/>
+        <line num="121" count="4" type="cond" truecount="1" falsecount="1"/>
+        <line num="122" count="4" type="cond" truecount="1" falsecount="1"/>
+        <line num="123" count="4" type="stmt"/>
+        <line num="125" count="0" type="stmt"/>
+        <line num="138" count="0" type="stmt"/>
+        <line num="141" count="4" type="stmt"/>
+      </file>
+      <file name="SqlitePlanoRepository.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\infra\db\repositories\SqlitePlanoRepository.ts">
+        <metrics statements="10" coveredstatements="7" conditionals="8" coveredconditionals="3" methods="6" coveredmethods="5"/>
+        <line num="28" count="1" type="stmt"/>
+        <line num="31" count="1" type="stmt"/>
+        <line num="35" count="0" type="stmt"/>
+        <line num="39" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="43" count="1" type="stmt"/>
+        <line num="60" count="1" type="stmt"/>
+        <line num="61" count="1" type="stmt"/>
+        <line num="62" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="64" count="0" type="stmt"/>
+        <line num="67" count="1" type="stmt"/>
+      </file>
+      <file name="SqlitePreCadastroRepository.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\infra\db\repositories\SqlitePreCadastroRepository.ts">
+        <metrics statements="8" coveredstatements="0" conditionals="16" coveredconditionals="0" methods="6" coveredmethods="0"/>
+        <line num="31" count="0" type="stmt"/>
+        <line num="50" count="0" type="stmt"/>
+        <line num="54" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="58" count="0" type="stmt"/>
+        <line num="61" count="0" type="stmt"/>
+        <line num="66" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="72" count="0" type="stmt"/>
+        <line num="75" count="0" type="stmt"/>
+      </file>
+      <file name="SqliteSyncQueueRepository.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\infra\db\repositories\SqliteSyncQueueRepository.ts">
+        <metrics statements="9" coveredstatements="6" conditionals="2" coveredconditionals="0" methods="7" coveredmethods="5"/>
+        <line num="30" count="2" type="stmt"/>
+        <line num="31" count="2" type="stmt"/>
+        <line num="47" count="5" type="stmt"/>
+        <line num="51" count="5" type="stmt"/>
+        <line num="63" count="1" type="stmt"/>
+        <line num="64" count="1" type="stmt"/>
+        <line num="72" count="0" type="stmt"/>
+        <line num="73" count="0" type="stmt"/>
+        <line num="87" count="0" type="stmt"/>
+      </file>
+    </package>
+    <package name="src.infra.fakes">
+      <metrics statements="54" coveredstatements="27" conditionals="22" coveredconditionals="6" methods="36" coveredmethods="25"/>
       <file name="FakeAreaCoberturaRepository.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\infra\fakes\FakeAreaCoberturaRepository.ts">
-        <metrics statements="5" coveredstatements="3" conditionals="2" coveredconditionals="0" methods="4" coveredmethods="2"/>
-        <line num="5" count="4" type="stmt"/>
-        <line num="8" count="3" type="stmt"/>
+        <metrics statements="5" coveredstatements="4" conditionals="2" coveredconditionals="0" methods="4" coveredmethods="3"/>
+        <line num="5" count="8" type="stmt"/>
+        <line num="8" count="6" type="stmt"/>
         <line num="12" count="0" type="cond" truecount="0" falsecount="2"/>
-        <line num="16" count="4" type="stmt"/>
-        <line num="20" count="0" type="stmt"/>
+        <line num="16" count="32" type="stmt"/>
+        <line num="20" count="14" type="stmt"/>
       </file>
       <file name="FakeClienteRepository.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\infra\fakes\FakeClienteRepository.ts">
-        <metrics statements="13" coveredstatements="3" conditionals="6" coveredconditionals="2" methods="6" coveredmethods="2"/>
-        <line num="5" count="24" type="stmt"/>
-        <line num="8" count="54" type="stmt"/>
-        <line num="12" count="27" type="cond" truecount="2" falsecount="0"/>
+        <metrics statements="13" coveredstatements="4" conditionals="6" coveredconditionals="2" methods="6" coveredmethods="3"/>
+        <line num="5" count="27" type="stmt"/>
+        <line num="8" count="109" type="stmt"/>
+        <line num="12" count="32" type="cond" truecount="2" falsecount="0"/>
         <line num="16" count="0" type="stmt"/>
         <line num="17" count="0" type="cond" truecount="0" falsecount="2"/>
         <line num="18" count="0" type="stmt"/>
@@ -983,38 +1593,38 @@
         <line num="27" count="0" type="stmt"/>
         <line num="30" count="0" type="stmt"/>
         <line num="34" count="0" type="stmt"/>
-        <line num="38" count="0" type="stmt"/>
+        <line num="38" count="14" type="stmt"/>
       </file>
       <file name="FakeOrdemServicoRepository.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\infra\fakes\FakeOrdemServicoRepository.ts">
-        <metrics statements="11" coveredstatements="6" conditionals="4" coveredconditionals="2" methods="9" coveredmethods="7"/>
-        <line num="5" count="20" type="stmt"/>
-        <line num="8" count="31" type="stmt"/>
-        <line num="12" count="10" type="cond" truecount="2" falsecount="0"/>
+        <metrics statements="11" coveredstatements="7" conditionals="4" coveredconditionals="2" methods="9" coveredmethods="8"/>
+        <line num="5" count="23" type="stmt"/>
+        <line num="8" count="87" type="stmt"/>
+        <line num="12" count="13" type="cond" truecount="2" falsecount="0"/>
         <line num="16" count="0" type="stmt"/>
         <line num="17" count="0" type="cond" truecount="0" falsecount="2"/>
         <line num="18" count="0" type="stmt"/>
         <line num="21" count="0" type="stmt"/>
-        <line num="25" count="11" type="stmt"/>
+        <line num="25" count="45" type="stmt"/>
         <line num="29" count="3" type="stmt"/>
-        <line num="33" count="1" type="stmt"/>
-        <line num="37" count="0" type="stmt"/>
+        <line num="33" count="8" type="stmt"/>
+        <line num="37" count="14" type="stmt"/>
       </file>
       <file name="FakePlanoRepository.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\infra\fakes\FakePlanoRepository.ts">
-        <metrics statements="6" coveredstatements="5" conditionals="2" coveredconditionals="2" methods="6" coveredmethods="5"/>
-        <line num="5" count="9" type="stmt"/>
-        <line num="8" count="10" type="stmt"/>
-        <line num="12" count="3" type="cond" truecount="2" falsecount="0"/>
-        <line num="16" count="18" type="stmt"/>
+        <metrics statements="6" coveredstatements="6" conditionals="2" coveredconditionals="2" methods="6" coveredmethods="6"/>
+        <line num="5" count="12" type="stmt"/>
+        <line num="8" count="22" type="stmt"/>
+        <line num="12" count="4" type="cond" truecount="2" falsecount="0"/>
+        <line num="16" count="70" type="stmt"/>
         <line num="20" count="1" type="stmt"/>
-        <line num="24" count="0" type="stmt"/>
+        <line num="24" count="14" type="stmt"/>
       </file>
       <file name="FakePreCadastroRepository.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\infra\fakes\FakePreCadastroRepository.ts">
-        <metrics statements="5" coveredstatements="2" conditionals="2" coveredconditionals="0" methods="4" coveredmethods="1"/>
-        <line num="5" count="4" type="stmt"/>
-        <line num="8" count="1" type="stmt"/>
+        <metrics statements="5" coveredstatements="3" conditionals="2" coveredconditionals="0" methods="4" coveredmethods="2"/>
+        <line num="5" count="8" type="stmt"/>
+        <line num="8" count="2" type="stmt"/>
         <line num="12" count="0" type="cond" truecount="0" falsecount="2"/>
         <line num="16" count="0" type="stmt"/>
-        <line num="20" count="0" type="stmt"/>
+        <line num="20" count="14" type="stmt"/>
       </file>
       <file name="FakeSyncQueueRepository.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\infra\fakes\FakeSyncQueueRepository.ts">
         <metrics statements="14" coveredstatements="3" conditionals="6" coveredconditionals="0" methods="7" coveredmethods="3"/>
@@ -1032,6 +1642,160 @@
         <line num="27" count="0" type="stmt"/>
         <line num="32" count="0" type="stmt"/>
         <line num="36" count="0" type="stmt"/>
+      </file>
+      <file name="index.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\infra\fakes\index.ts">
+        <metrics statements="0" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+      </file>
+    </package>
+    <package name="src.infra.sync">
+      <metrics statements="47" coveredstatements="34" conditionals="15" coveredconditionals="8" methods="7" coveredmethods="5"/>
+      <file name="OfflineSyncManager.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\infra\sync\OfflineSyncManager.ts">
+        <metrics statements="47" coveredstatements="34" conditionals="15" coveredconditionals="8" methods="7" coveredmethods="5"/>
+        <line num="35" count="2" type="stmt"/>
+        <line num="36" count="2" type="stmt"/>
+        <line num="45" count="0" type="stmt"/>
+        <line num="46" count="0" type="stmt"/>
+        <line num="50" count="2" type="stmt"/>
+        <line num="51" count="0" type="stmt"/>
+        <line num="59" count="1" type="stmt"/>
+        <line num="60" count="1" type="stmt"/>
+        <line num="68" count="2" type="cond" truecount="1" falsecount="1"/>
+        <line num="69" count="0" type="stmt"/>
+        <line num="72" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="73" count="1" type="stmt"/>
+        <line num="76" count="1" type="stmt"/>
+        <line num="77" count="1" type="stmt"/>
+        <line num="78" count="1" type="stmt"/>
+        <line num="80" count="1" type="stmt"/>
+        <line num="87" count="1" type="stmt"/>
+        <line num="88" count="1" type="stmt"/>
+        <line num="89" count="1" type="stmt"/>
+        <line num="90" count="1" type="stmt"/>
+        <line num="91" count="1" type="stmt"/>
+        <line num="92" count="1" type="stmt"/>
+        <line num="94" count="0" type="stmt"/>
+        <line num="95" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="96" count="0" type="stmt"/>
+        <line num="97" count="0" type="stmt"/>
+        <line num="101" count="1" type="stmt"/>
+        <line num="102" count="1" type="stmt"/>
+        <line num="103" count="1" type="stmt"/>
+        <line num="106" count="1" type="stmt"/>
+        <line num="110" count="1" type="stmt"/>
+        <line num="112" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="114" count="1" type="stmt"/>
+        <line num="115" count="1" type="stmt"/>
+        <line num="117" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="118" count="0" type="stmt"/>
+        <line num="122" count="1" type="stmt"/>
+        <line num="123" count="1" type="stmt"/>
+        <line num="125" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="126" count="0" type="stmt"/>
+        <line num="127" count="0" type="stmt"/>
+        <line num="128" count="0" type="stmt"/>
+        <line num="131" count="1" type="cond" truecount="2" falsecount="0"/>
+        <line num="134" count="1" type="stmt"/>
+        <line num="135" count="1" type="stmt"/>
+        <line num="136" count="1" type="stmt"/>
+        <line num="141" count="0" type="stmt"/>
+      </file>
+      <file name="index.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\src\infra\sync\index.ts">
+        <metrics statements="0" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+      </file>
+    </package>
+    <package name="tests.mocks">
+      <metrics statements="89" coveredstatements="61" conditionals="72" coveredconditionals="38" methods="23" coveredmethods="15"/>
+      <file name="mockSQLite.ts" path="C:\Users\jmarq\Documents\BSI\6º periodo\Lab Mobilr\ecofield\tests\mocks\mockSQLite.ts">
+        <metrics statements="89" coveredstatements="61" conditionals="72" coveredconditionals="38" methods="23" coveredmethods="15"/>
+        <line num="9" count="9" type="stmt"/>
+        <line num="20" count="9" type="stmt"/>
+        <line num="24" count="2" type="stmt"/>
+        <line num="25" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="26" count="1" type="stmt"/>
+        <line num="31" count="8" type="stmt"/>
+        <line num="32" count="8" type="cond" truecount="1" falsecount="1"/>
+        <line num="37" count="15" type="cond" truecount="2" falsecount="0"/>
+        <line num="38" count="1" type="stmt"/>
+        <line num="42" count="14" type="stmt"/>
+        <line num="43" count="14" type="cond" truecount="2" falsecount="0"/>
+        <line num="44" count="1" type="stmt"/>
+        <line num="45" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="46" count="1" type="stmt"/>
+        <line num="50" count="13" type="stmt"/>
+        <line num="51" count="13" type="cond" truecount="1" falsecount="1"/>
+        <line num="53" count="13" type="stmt"/>
+        <line num="54" count="13" type="cond" truecount="1" falsecount="1"/>
+        <line num="57" count="13" type="cond" truecount="2" falsecount="0"/>
+        <line num="58" count="3" type="stmt"/>
+        <line num="59" count="10" type="cond" truecount="1" falsecount="1"/>
+        <line num="60" count="0" type="stmt"/>
+        <line num="61" count="10" type="cond" truecount="2" falsecount="0"/>
+        <line num="62" count="2" type="stmt"/>
+        <line num="63" count="9" type="cond" truecount="1" falsecount="1"/>
+        <line num="64" count="0" type="stmt"/>
+        <line num="65" count="9" type="cond" truecount="2" falsecount="0"/>
+        <line num="66" count="2" type="stmt"/>
+        <line num="67" count="7" type="cond" truecount="2" falsecount="0"/>
+        <line num="68" count="1" type="stmt"/>
+        <line num="69" count="6" type="cond" truecount="1" falsecount="1"/>
+        <line num="70" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="71" count="6" type="cond" truecount="2" falsecount="0"/>
+        <line num="72" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="73" count="5" type="cond" truecount="1" falsecount="1"/>
+        <line num="74" count="5" type="stmt"/>
+        <line num="75" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="76" count="0" type="stmt"/>
+        <line num="80" count="13" type="cond" truecount="2" falsecount="0"/>
+        <line num="81" count="1" type="stmt"/>
+        <line num="82" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="83" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="84" count="0" type="stmt"/>
+        <line num="86" count="12" type="cond" truecount="2" falsecount="0"/>
+        <line num="87" count="5" type="stmt"/>
+        <line num="88" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="89" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="90" count="0" type="stmt"/>
+        <line num="94" count="13" type="stmt"/>
+        <line num="99" count="27" type="stmt"/>
+        <line num="100" count="27" type="cond" truecount="2" falsecount="0"/>
+        <line num="101" count="26" type="stmt"/>
+        <line num="102" count="244" type="stmt"/>
+        <line num="104" count="26" type="stmt"/>
+        <line num="105" count="26" type="stmt"/>
+        <line num="106" count="244" type="stmt"/>
+        <line num="109" count="26" type="cond" truecount="1" falsecount="1"/>
+        <line num="110" count="0" type="stmt"/>
+        <line num="114" count="26" type="cond" truecount="2" falsecount="0"/>
+        <line num="115" count="26" type="stmt"/>
+        <line num="117" count="26" type="cond" truecount="2" falsecount="0"/>
+        <line num="118" count="1" type="stmt"/>
+        <line num="120" count="25" type="stmt"/>
+        <line num="123" count="26" type="stmt"/>
+        <line num="127" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="128" count="1" type="stmt"/>
+        <line num="129" count="1" type="stmt"/>
+        <line num="130" count="1" type="stmt"/>
+        <line num="131" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="132" count="1" type="stmt"/>
+        <line num="133" count="1" type="stmt"/>
+        <line num="135" count="1" type="stmt"/>
+        <line num="139" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="140" count="0" type="stmt"/>
+        <line num="141" count="0" type="stmt"/>
+        <line num="142" count="0" type="stmt"/>
+        <line num="143" count="0" type="stmt"/>
+        <line num="144" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="145" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="146" count="0" type="stmt"/>
+        <line num="147" count="0" type="stmt"/>
+        <line num="148" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="150" count="0" type="stmt"/>
+        <line num="154" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="155" count="0" type="stmt"/>
+        <line num="156" count="0" type="stmt"/>
+        <line num="157" count="0" type="stmt"/>
+        <line num="160" count="0" type="stmt"/>
+        <line num="165" count="9" type="stmt"/>
       </file>
     </package>
   </project>
