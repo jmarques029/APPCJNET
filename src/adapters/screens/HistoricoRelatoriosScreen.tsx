@@ -24,6 +24,7 @@ import {
   Platform,
   Modal,
   RefreshControl,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -578,6 +579,41 @@ export function HistoricoRelatoriosScreen({
                       <Text style={styles.detalheDescricao}>{selectedOs.descricao}</Text>
                     </View>
                   </View>
+
+                  {/* Localização GPS do Ponto de Atendimento */}
+                  {selectedOs.coordenadas && (
+                    <>
+                      <Text style={styles.modalSectionTitle}>Localização do Chamado (GPS)</Text>
+                      <View style={styles.detalhesBox}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                          <Ionicons name="location" size={16} color="#0284c7" />
+                          <Text style={{ fontSize: 13, color: '#0f172a', fontWeight: '600' }}>
+                            Lat: {selectedOs.coordenadas.latitude.toFixed(4)} | Lng: {selectedOs.coordenadas.longitude.toFixed(4)} • Coqueiral/MG
+                          </Text>
+                        </View>
+                      </View>
+                    </>
+                  )}
+
+                  {/* Fotos Registradas na Ordem de Serviço */}
+                  {selectedOs.fotos && selectedOs.fotos.length > 0 && (
+                    <>
+                      <Text style={styles.modalSectionTitle}>
+                        Fotos Arquivadas na OS ({selectedOs.fotos.length})
+                      </Text>
+                      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexDirection: 'row', marginBottom: 16 }}>
+                        {selectedOs.fotos.map((f) => (
+                          <View key={f.id} style={styles.fotoThumbHistorico}>
+                            <Image source={{ uri: f.fotoLocalPath }} style={styles.fotoThumbHistoricoImg} resizeMode="cover" />
+                            <Text style={styles.fotoThumbHistoricoLabel}>
+                              {f.tipo === 'CLIENTE_ROTEADOR' ? 'Foto da ONU' : 'Foto da Resolução'}
+                            </Text>
+                            <Text style={styles.fotoThumbHistoricoSub}>{f.tamanhoKb} KB</Text>
+                          </View>
+                        ))}
+                      </ScrollView>
+                    </>
+                  )}
 
                   {/* Parecer Técnico (se houver) */}
                   {selectedOs.parecerTecnico && (
@@ -1155,5 +1191,33 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 15,
     fontWeight: '700',
+  },
+  fotoThumbHistorico: {
+    width: 110,
+    backgroundColor: '#ffffff',
+    borderRadius: 10,
+    padding: 6,
+    marginRight: 10,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    alignItems: 'center',
+  },
+  fotoThumbHistoricoImg: {
+    width: 98,
+    height: 80,
+    borderRadius: 6,
+    backgroundColor: '#0f172a',
+    marginBottom: 6,
+  },
+  fotoThumbHistoricoLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#0f172a',
+    textAlign: 'center',
+  },
+  fotoThumbHistoricoSub: {
+    fontSize: 9,
+    color: '#64748b',
+    marginTop: 2,
   },
 });

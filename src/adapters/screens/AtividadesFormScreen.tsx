@@ -23,6 +23,7 @@ import {
   ActivityIndicator,
   Alert,
   Platform,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -37,6 +38,8 @@ import {
 import { AbrirOrdemServicoUseCase } from '@/application/use-cases';
 import { useAuth } from '@/adapters/context/AuthContext';
 import { AppNavBar } from './components/AppNavBar';
+import { CameraCaptureModal, CapturedPhoto } from '@/adapters/components/CameraCaptureModal';
+import { LocationService } from '@/infra/device/LocationService';
 
 export interface AtividadesFormScreenProps {
   clienteId?: string;
@@ -98,16 +101,61 @@ export function AtividadesFormScreen({
   const [descricao, setDescricao] = useState<string>(initialDescricao ?? '');
   const [endereco, setEndereco] = useState<string>('Rua Direita, 120, Centro - Coqueiral/MG');
   const [fotoAnexada, setFotoAnexada] = useState<boolean>(false);
+  const [modalCameraVisible, setModalCameraVisible] = useState<boolean>(false);
+  const [fotoCapturada, setFotoCapturada] = useState<CapturedPhoto | null>(null);
+  const [coordenadasGps, setCoordenadasGps] = useState<{
+    latitude: number;
+    longitude: number;
+    precisao?: number | null;
+    status: 'IDLE' | 'BUSCANDO' | 'OBTIDO' | 'ERRO';
+    mensagem?: string;
+  }>({
+    latitude: -21.1850,
+    longitude: -45.4350,
+    status: 'IDLE',
+  });
   const [loading, setLoading] = useState<boolean>(false);
   const [chamadoCriado, setChamadoCriado] = useState<OrdemServico | null>(null);
 
   const handleSimularFoto = () => {
-    setFotoAnexada((prev) => !prev);
-    if (!fotoAnexada) {
+    if (fotoAnexada) {
+      setFotoAnexada(false);
+      setFotoCapturada(null);
+    } else {
+      setFotoAnexada(true);
+      setFotoCapturada({
+        uri: 'file:///storage/emulated/0/cjnet/onu-pon.jpg',
+        tamanhoKb: 840,
+      });
       Alert.alert(
         'Foto das Luzes do Roteador Anexada! 📸',
         'Imagem comprimida para 840 KB (em conformidade com o limite de 1 MB - RNF09). O técnico poderá visualizar o status das luzes PON/LOS antes da visita.',
         [{ text: 'Entendido' }]
+      );
+    }
+  };
+
+  const handleFotoCapturada = (photo: CapturedPhoto) => {
+    setFotoCapturada(photo);
+    setFotoAnexada(true);
+  };
+
+  const handleObterGps = async () => {
+    setCoordenadasGps((prev) => ({ ...prev, status: 'BUSCANDO' }));
+    const resultado = await LocationService.obterLocalizacaoAtual();
+    setCoordenadasGps({
+      latitude: resultado.latitude,
+      longitude: resultado.longitude,
+      precisao: resultado.precisao,
+      status: resultado.isFallback ? 'ERRO' : 'OBTIDO',
+      mensagem: resultado.mensagem,
+    });
+    if (resultado.isFallback) {
+      Alert.alert('Geolocalização CJnet 📍', resultado.mensagem || 'Posição definida para o centro de Coqueiral/MG.');
+    } else {
+      Alert.alert(
+        'GPS CJnet 📍',
+        `Coordenadas capturadas com sucesso!\nLat: ${resultado.latitude.toFixed(4)} | Lng: ${resultado.longitude.toFixed(4)}`
       );
     }
   };
@@ -126,11 +174,13 @@ export function AtividadesFormScreen({
         clienteId: activeClienteId,
         tipoProblema,
         descricao: descricao.trim(),
+        latitude: coordenadasGps.latitude,
+        longitude: coordenadasGps.longitude,
         foto: fotoAnexada
           ? {
               id: `foto-${Date.now()}`,
-              fotoLocalPath: 'file:///storage/emulated/0/cjnet/onu-pon.jpg',
-              tamanhoKb: 840,
+              fotoLocalPath: fotoCapturada?.uri || 'file:///storage/emulated/0/cjnet/onu-pon.jpg',
+              tamanhoKb: fotoCapturada?.tamanhoKb || 840,
             }
           : undefined,
       });
@@ -342,7 +392,9 @@ export function AtividadesFormScreen({
                   fotoAnexada ? { color: '#065f46' } : { color: '#0f172a' },
                 ]}
               >
-                {fotoAnexada ? 'Foto da ONU Anexada (840 KB)' : 'Tirar Foto das Luzes do Roteador'}
+                {fotoAnexada
+                  ? `Foto da ONU Anexada (${fotoCapturada?.tamanhoKb || 840} KB)`
+                  : 'Tirar Foto das Luzes do Roteador'}
               </Text>
               <Text style={styles.fotoSubtitulo}>
                 {fotoAnexada
@@ -351,11 +403,40 @@ export function AtividadesFormScreen({
               </Text>
             </View>
           </TouchableOpacity>
+
+          {/* Botão de Câmera em Tempo Real (Expo Camera) */}
+          <TouchableOpacity
+            testID="btn-abrir-camera-real"
+            style={styles.btnCameraReal}
+            onPress={() => setModalCameraVisible(true)}
+          >
+            <Ionicons name="camera" size={18} color="#0284c7" />
+            <Text style={styles.btnCameraRealText}>
+              {fotoAnexada ? 'Fotografar Novamente com a Câmera' : 'Abrir Câmera do Dispositivo'}
+            </Text>
+          </TouchableOpacity>
+
+          {/* Preview da Imagem Anexada */}
+          {fotoAnexada && fotoCapturada?.uri && (
+            <View style={styles.previewContainer}>
+              <Image
+                source={{ uri: fotoCapturada.uri }}
+                style={styles.previewImage}
+                resizeMode="cover"
+              />
+              <View style={styles.previewOverlay}>
+                <Ionicons name="image" size={14} color="#ffffff" />
+                <Text style={styles.previewOverlayText}>
+                  {fotoCapturada.tamanhoKb} KB • Salva na OS
+                </Text>
+              </View>
+            </View>
+          )}
         </View>
 
-        {/* 4. Endereço da Instalação */}
+        {/* 4. Endereço da Instalação e Geolocalização GPS */}
         <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>4. Ponto de Atendimento</Text>
+          <Text style={styles.sectionTitle}>4. Ponto de Atendimento & Geolocalização</Text>
           <View style={styles.enderecoContainer}>
             <Ionicons name="location-outline" size={20} color="#0284c7" />
             <TextInput
@@ -365,6 +446,39 @@ export function AtividadesFormScreen({
               placeholder="Endereço em Coqueiral/MG"
               placeholderTextColor="#94a3b8"
             />
+          </View>
+
+          {/* Coordenadas GPS */}
+          <View style={styles.gpsContainer} testID="box-gps-os">
+            <View style={styles.gpsTopRow}>
+              <View style={styles.gpsInfo}>
+                <Ionicons
+                  name={coordenadasGps.status === 'OBTIDO' ? 'navigate' : 'navigate-outline'}
+                  size={18}
+                  color={coordenadasGps.status === 'OBTIDO' ? '#10b981' : '#0284c7'}
+                />
+                <Text style={styles.gpsCoordenadasText}>
+                  Lat: {coordenadasGps.latitude.toFixed(4)} | Lng: {coordenadasGps.longitude.toFixed(4)}
+                </Text>
+              </View>
+              <TouchableOpacity
+                testID="btn-obter-gps-chamado"
+                style={styles.btnAtualizarGps}
+                onPress={handleObterGps}
+              >
+                {coordenadasGps.status === 'BUSCANDO' ? (
+                  <ActivityIndicator size="small" color="#0284c7" />
+                ) : (
+                  <>
+                    <Ionicons name="locate" size={14} color="#0284c7" />
+                    <Text style={styles.btnAtualizarGpsText}>Capturar GPS</Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.gpsHelpText}>
+              Coordenadas de Coqueiral/MG vinculadas ao chamado para roteamento da equipe de campo.
+            </Text>
           </View>
         </View>
 
@@ -393,6 +507,18 @@ export function AtividadesFormScreen({
           </Text>
         </View>
       </ScrollView>
+
+      {/* Modal de Câmera Nativa Expo v57 */}
+      <CameraCaptureModal
+        visible={modalCameraVisible}
+        onClose={() => setModalCameraVisible(false)}
+        onCapture={handleFotoCapturada}
+        titulo="Foto do Roteador / ONU"
+        subtitulo="Enquadre as luzes PON e LOS do equipamento de fibra"
+        fallbackFilename="onu-pon.jpg"
+        fallbackTamanhoKb={840}
+      />
+
       <AppNavBar currentTab="atividades" onSair={onSair} />
     </SafeAreaView>
   );
@@ -619,5 +745,97 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     flex: 1,
     lineHeight: 16,
+  },
+  btnCameraReal: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(2, 132, 199, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(2, 132, 199, 0.3)',
+    borderRadius: 12,
+    paddingVertical: 10,
+    marginTop: 10,
+    gap: 8,
+  },
+  btnCameraRealText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#0284c7',
+  },
+  previewContainer: {
+    marginTop: 12,
+    borderRadius: 14,
+    overflow: 'hidden',
+    position: 'relative',
+    height: 140,
+    backgroundColor: '#0f172a',
+    borderWidth: 1,
+    borderColor: '#cbd5e1',
+  },
+  previewImage: {
+    width: '100%',
+    height: '100%',
+  },
+  previewOverlay: {
+    position: 'absolute',
+    bottom: 8,
+    left: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(15, 23, 42, 0.75)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    gap: 4,
+  },
+  previewOverlayText: {
+    color: '#ffffff',
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  gpsContainer: {
+    marginTop: 12,
+    backgroundColor: '#ffffff',
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1.5,
+    borderColor: '#e2e8f0',
+  },
+  gpsTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  gpsInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    flex: 1,
+  },
+  gpsCoordenadasText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#0f172a',
+  },
+  btnAtualizarGps: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#e0f2fe',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    gap: 4,
+  },
+  btnAtualizarGpsText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#0284c7',
+  },
+  gpsHelpText: {
+    fontSize: 11,
+    color: '#64748b',
+    marginTop: 6,
+    lineHeight: 15,
   },
 });

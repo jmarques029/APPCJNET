@@ -26,6 +26,7 @@ import {
   TextInput,
   RefreshControl,
   Platform,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -44,6 +45,8 @@ import { AbrirOrdemServicoUseCase } from '@/application/use-cases';
 import { useAuth } from '@/adapters/context/AuthContext';
 import { AppNavBar } from './components/AppNavBar';
 import { getTecnicoInfo } from './HistoricoRelatoriosScreen';
+import { CameraCaptureModal, CapturedPhoto } from '@/adapters/components/CameraCaptureModal';
+import { LocationService } from '@/infra/device/LocationService';
 
 export interface ClienteTabScreenProps {
   clienteId?: string;
@@ -112,7 +115,43 @@ export function ClienteTabScreen({
   const [tipoProblema, setTipoProblema] = useState<TipoProblemaType>('SEM_SINAL');
   const [descricao, setDescricao] = useState<string>(initialDescricao ?? '');
   const [fotoAnexada, setFotoAnexada] = useState<boolean>(false);
+  const [modalCameraVisible, setModalCameraVisible] = useState<boolean>(false);
+  const [fotoCapturada, setFotoCapturada] = useState<CapturedPhoto | null>(null);
+  const [coordenadasGps, setCoordenadasGps] = useState<{
+    latitude: number;
+    longitude: number;
+    precisao?: number | null;
+    status: 'IDLE' | 'BUSCANDO' | 'OBTIDO' | 'ERRO';
+    mensagem?: string;
+  }>({
+    latitude: -21.1850,
+    longitude: -45.4350,
+    status: 'IDLE',
+  });
   const [criandoOS, setCriandoOS] = useState<boolean>(false);
+
+  const handleObterGps = async () => {
+    setCoordenadasGps((prev) => ({ ...prev, status: 'BUSCANDO' }));
+    const resultado = await LocationService.obterLocalizacaoAtual();
+    setCoordenadasGps({
+      latitude: resultado.latitude,
+      longitude: resultado.longitude,
+      precisao: resultado.precisao,
+      status: resultado.isFallback ? 'ERRO' : 'OBTIDO',
+      mensagem: resultado.mensagem,
+    });
+    if (!resultado.isFallback) {
+      Alert.alert(
+        'GPS CJnet 📍',
+        `Coordenadas capturadas com sucesso!\nLat: ${resultado.latitude.toFixed(4)} | Lng: ${resultado.longitude.toFixed(4)}`
+      );
+    }
+  };
+
+  const handleFotoCapturada = (photo: CapturedPhoto) => {
+    setFotoCapturada(photo);
+    setFotoAnexada(true);
+  };
 
   // Chat com a Central dentro da OS
   const [mensagensOS, setMensagensOS] = useState<MensagemOS[]>([]);
@@ -184,11 +223,13 @@ export function ClienteTabScreen({
         clienteId: activeClienteId,
         tipoProblema,
         descricao: descricao.trim(),
+        latitude: coordenadasGps.latitude,
+        longitude: coordenadasGps.longitude,
         foto: fotoAnexada
           ? {
               id: `foto-${Date.now()}`,
-              fotoLocalPath: 'file:///storage/emulated/0/cjnet/onu.jpg',
-              tamanhoKb: 620,
+              fotoLocalPath: fotoCapturada?.uri || 'file:///storage/emulated/0/cjnet/onu.jpg',
+              tamanhoKb: fotoCapturada?.tamanhoKb || 620,
             }
           : undefined,
       });
@@ -196,6 +237,7 @@ export function ClienteTabScreen({
       setModalNovoChamado(false);
       setDescricao('');
       setFotoAnexada(false);
+      setFotoCapturada(null);
       await carregarOrdens();
 
       if (onNovoChamadoSuccess) {
@@ -500,10 +542,21 @@ export function ClienteTabScreen({
               />
 
               {/* Anexo de Foto do Roteador / ONU (Autodiagnóstico) */}
-              <Text style={styles.formLabel}>Foto do Roteador / ONU (Opcional):</Text>
+              <Text style={styles.formLabel}>Foto do Roteador / ONU (Autodiagnóstico):</Text>
               <TouchableOpacity
                 style={[styles.btnAnexarFoto, fotoAnexada && styles.btnAnexarFotoAtivo]}
-                onPress={() => setFotoAnexada(!fotoAnexada)}
+                onPress={() => {
+                  if (fotoAnexada) {
+                    setFotoAnexada(false);
+                    setFotoCapturada(null);
+                  } else {
+                    setFotoAnexada(true);
+                    setFotoCapturada({
+                      uri: 'file:///storage/emulated/0/cjnet/onu.jpg',
+                      tamanhoKb: 620,
+                    });
+                  }
+                }}
                 testID="btn-anexar-foto-roteador"
               >
                 <Ionicons
@@ -518,10 +571,69 @@ export function ClienteTabScreen({
                   ]}
                 >
                   {fotoAnexada
-                    ? 'Foto do Roteador Anexada (onu-pon.jpg • 620 KB)'
+                    ? `Foto do Roteador Anexada (onu-pon.jpg • ${fotoCapturada?.tamanhoKb || 620} KB)`
                     : 'Tirar Foto das Luzes do Roteador / ONU'}
                 </Text>
               </TouchableOpacity>
+
+              {/* Botão para Câmera Real do Celular */}
+              <TouchableOpacity
+                style={styles.btnCameraClienteReal}
+                onPress={() => setModalCameraVisible(true)}
+                testID="btn-abrir-camera-cliente"
+              >
+                <Ionicons name="camera" size={16} color="#0284c7" />
+                <Text style={styles.btnCameraClienteRealText}>
+                  {fotoAnexada ? 'Fotografar Novamente com a Câmera' : 'Abrir Câmera do Dispositivo'}
+                </Text>
+              </TouchableOpacity>
+
+              {/* Miniatura da Foto Anexada */}
+              {fotoAnexada && fotoCapturada?.uri && (
+                <View style={styles.previewFotoContainer}>
+                  <Image source={{ uri: fotoCapturada.uri }} style={styles.previewFotoMini} />
+                  <View style={{ flex: 1, marginLeft: 10 }}>
+                    <Text style={styles.previewFotoTitulo}>Foto Anexada para Diagnóstico</Text>
+                    <Text style={styles.previewFotoSub}>
+                      {fotoCapturada.tamanhoKb} KB (Limite RNF09 &lt;= 1 MB)
+                    </Text>
+                  </View>
+                </View>
+              )}
+
+              {/* Geolocalização GPS do Ponto de Atendimento */}
+              <Text style={styles.formLabel}>Ponto de Atendimento (Geolocalização GPS):</Text>
+              <View style={styles.gpsCardCliente} testID="box-gps-cliente">
+                <View style={styles.gpsRowCliente}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1 }}>
+                    <Ionicons
+                      name={coordenadasGps.status === 'OBTIDO' ? 'navigate' : 'navigate-outline'}
+                      size={18}
+                      color={coordenadasGps.status === 'OBTIDO' ? '#10b981' : '#0284c7'}
+                    />
+                    <Text style={styles.gpsCoordenadasClienteText}>
+                      Lat: {coordenadasGps.latitude.toFixed(4)} | Lng: {coordenadasGps.longitude.toFixed(4)}
+                    </Text>
+                  </View>
+                  <TouchableOpacity
+                    style={styles.btnGpsCliente}
+                    onPress={handleObterGps}
+                    testID="btn-obter-gps-cliente"
+                  >
+                    {coordenadasGps.status === 'BUSCANDO' ? (
+                      <ActivityIndicator size="small" color="#0284c7" />
+                    ) : (
+                      <>
+                        <Ionicons name="locate" size={14} color="#0284c7" />
+                        <Text style={styles.btnGpsClienteText}>Atualizar GPS</Text>
+                      </>
+                    )}
+                  </TouchableOpacity>
+                </View>
+                <Text style={styles.gpsSubCliente}>
+                  Coordenadas em Coqueiral/MG vinculadas ao chamado para atendimento de campo.
+                </Text>
+              </View>
 
               {/* Botão de Enviar */}
               <TouchableOpacity
@@ -603,6 +715,46 @@ export function ClienteTabScreen({
                     <Text style={styles.blocoDetalheTexto}>{selectedOs.descricao}</Text>
                   </View>
 
+                  {/* Localização GPS do Chamado */}
+                  {selectedOs.coordenadas && (
+                    <View style={styles.blocoDetalhe}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                        <Ionicons name="location" size={16} color="#0284c7" />
+                        <Text style={styles.blocoDetalheTitulo}>Localização do Atendimento (GPS):</Text>
+                      </View>
+                      <Text style={styles.blocoDetalheTexto}>
+                        Lat: {selectedOs.coordenadas.latitude.toFixed(4)} | Lng: {selectedOs.coordenadas.longitude.toFixed(4)} • Coqueiral/MG
+                      </Text>
+                    </View>
+                  )}
+
+                  {/* Fotos Registradas na Ordem de Serviço */}
+                  {selectedOs.fotos && selectedOs.fotos.length > 0 && (
+                    <View style={styles.blocoDetalhe}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+                        <Ionicons name="images" size={16} color="#0284c7" />
+                        <Text style={styles.blocoDetalheTitulo}>
+                          Fotos Registradas na OS ({selectedOs.fotos.length}):
+                        </Text>
+                      </View>
+                      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexDirection: 'row' }}>
+                        {selectedOs.fotos.map((f) => (
+                          <View key={f.id} style={styles.fotoThumbCard}>
+                            <Image
+                              source={{ uri: f.fotoLocalPath }}
+                              style={styles.fotoThumbImage}
+                              resizeMode="cover"
+                            />
+                            <Text style={styles.fotoThumbTipo}>
+                              {f.tipo === 'CLIENTE_ROTEADOR' ? 'Foto da ONU' : 'Foto do Reparo'}
+                            </Text>
+                            <Text style={styles.fotoThumbKb}>{f.tamanhoKb} KB</Text>
+                          </View>
+                        ))}
+                      </ScrollView>
+                    </View>
+                  )}
+
                   {/* Se houver laudo de fechamento */}
                   {selectedOs.parecerTecnico && (
                     <View style={[styles.blocoDetalhe, { backgroundColor: '#f0fdf4', borderColor: '#bbf7d0' }]}>
@@ -677,6 +829,17 @@ export function ClienteTabScreen({
           </View>
         </View>
       </Modal>
+
+      {/* Modal de Câmera Nativa Expo v57 */}
+      <CameraCaptureModal
+        visible={modalCameraVisible}
+        onClose={() => setModalCameraVisible(false)}
+        onCapture={handleFotoCapturada}
+        titulo="Foto do Roteador / ONU"
+        subtitulo="Fotografe as luzes PON e LOS do equipamento"
+        fallbackFilename="onu.jpg"
+        fallbackTamanhoKb={620}
+      />
 
       {/* Barra de Navegação Inferior */}
       <AppNavBar currentTab="cliente" onSair={onSair} />
@@ -1186,5 +1349,113 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  btnCameraClienteReal: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(2, 132, 199, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(2, 132, 199, 0.3)',
+    borderRadius: 10,
+    paddingVertical: 9,
+    marginTop: 8,
+    gap: 6,
+  },
+  btnCameraClienteRealText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#0284c7',
+  },
+  previewFotoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f8fafc',
+    borderRadius: 10,
+    padding: 8,
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  previewFotoMini: {
+    width: 50,
+    height: 50,
+    borderRadius: 8,
+    backgroundColor: '#0f172a',
+  },
+  previewFotoTitulo: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#0f172a',
+  },
+  previewFotoSub: {
+    fontSize: 11,
+    color: '#64748b',
+    marginTop: 2,
+  },
+  gpsCardCliente: {
+    backgroundColor: '#f8fafc',
+    borderRadius: 10,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    marginBottom: 16,
+  },
+  gpsRowCliente: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  gpsCoordenadasClienteText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#0f172a',
+  },
+  btnGpsCliente: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#e0f2fe',
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+    borderRadius: 6,
+    gap: 4,
+  },
+  btnGpsClienteText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#0284c7',
+  },
+  gpsSubCliente: {
+    fontSize: 10,
+    color: '#64748b',
+    marginTop: 4,
+  },
+  fotoThumbCard: {
+    width: 110,
+    backgroundColor: '#f8fafc',
+    borderRadius: 10,
+    padding: 6,
+    marginRight: 10,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    alignItems: 'center',
+  },
+  fotoThumbImage: {
+    width: 98,
+    height: 80,
+    borderRadius: 6,
+    backgroundColor: '#0f172a',
+    marginBottom: 6,
+  },
+  fotoThumbTipo: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#0f172a',
+    textAlign: 'center',
+  },
+  fotoThumbKb: {
+    fontSize: 9,
+    color: '#64748b',
+    marginTop: 2,
   },
 });

@@ -25,6 +25,7 @@ import {
   Modal,
   TextInput,
   RefreshControl,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -33,6 +34,7 @@ import { sharedOsRepo, sharedClienteRepo } from './mockStore';
 import { ConcluirAtendimentoUseCase } from '@/application/use-cases';
 import { useAuth } from '@/adapters/context/AuthContext';
 import { AppNavBar } from './components/AppNavBar';
+import { CameraCaptureModal, CapturedPhoto } from '@/adapters/components/CameraCaptureModal';
 
 export interface TecnicoTabScreenProps {
   tecnicoId?: string;
@@ -70,7 +72,16 @@ export function TecnicoTabScreen({
     caminho: initialFotoResolucao ? 'file:///storage/emulated/0/cjnet/reparo-fibra-cto04.jpg' : '',
     tamanhoKb: initialFotoResolucao ? 450 : 0,
   });
+  const [modalCameraVisible, setModalCameraVisible] = useState<boolean>(false);
   const [concluindo, setConcluindo] = useState<boolean>(false);
+
+  const handleFotoCapturada = (photo: CapturedPhoto) => {
+    setFotoResolucao({
+      anexada: true,
+      caminho: photo.uri,
+      tamanhoKb: photo.tamanhoKb,
+    });
+  };
 
   const carregarOrdensTecnico = useCallback(async () => {
     setLoading(true);
@@ -288,8 +299,21 @@ export function TecnicoTabScreen({
                       <Ionicons name="location-outline" size={16} color="#64748b" />
                       <Text style={styles.infoClienteText}>
                         Cliente: Carlos Eduardo Silva • Coqueiral/MG
+                        {os.coordenadas
+                          ? ` (Lat: ${os.coordenadas.latitude.toFixed(4)}, Lng: ${os.coordenadas.longitude.toFixed(4)})`
+                          : ''}
                       </Text>
                     </View>
+
+                    {/* Badge de Fotos do Cliente (se houver) */}
+                    {os.fotos && os.fotos.length > 0 && (
+                      <View style={styles.badgeFotosCliente}>
+                        <Ionicons name="image-outline" size={14} color="#0284c7" />
+                        <Text style={styles.badgeFotosClienteText}>
+                          {os.fotos.length} foto(s) do roteador anexada(s) pelo cliente
+                        </Text>
+                      </View>
+                    )}
 
                     {/* Ação: Fechar OS e Tirar Foto da Resolução */}
                     <View style={styles.acoesContainer}>
@@ -335,6 +359,14 @@ export function TecnicoTabScreen({
                       <Text style={styles.parecerTexto}>{os.parecerTecnico}</Text>
                     </View>
                   )}
+                  {os.fotos && os.fotos.length > 0 && (
+                    <View style={{ marginTop: 8, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <Ionicons name="images-outline" size={14} color="#10b981" />
+                      <Text style={{ fontSize: 11, color: '#047857', fontWeight: '600' }}>
+                        {os.fotos.length} foto(s) arquivada(s) com sucesso na OS
+                      </Text>
+                    </View>
+                  )}
                 </View>
               ))}
             </View>
@@ -373,6 +405,27 @@ export function TecnicoTabScreen({
                     <Text style={styles.blocoProblemaTexto}>{osParaFechar.descricao}</Text>
                   </View>
 
+                  {/* Foto prévia do cliente (autodiagnóstico da ONU) */}
+                  {osParaFechar.fotos && osParaFechar.fotos.length > 0 && (
+                    <View style={styles.blocoProblema}>
+                      <Text style={styles.blocoProblemaTitulo}>Foto Anexada pelo Cliente:</Text>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 6, gap: 10 }}>
+                        <Image
+                          source={{ uri: osParaFechar.fotos[0].fotoLocalPath }}
+                          style={{ width: 64, height: 64, borderRadius: 8, backgroundColor: '#0f172a' }}
+                        />
+                        <View style={{ flex: 1 }}>
+                          <Text style={{ fontSize: 12, fontWeight: '700', color: '#0f172a' }}>
+                            Luzes da ONU / Roteador
+                          </Text>
+                          <Text style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>
+                            {osParaFechar.fotos[0].tamanhoKb} KB • Enviada no chamado
+                          </Text>
+                        </View>
+                      </View>
+                    </View>
+                  )}
+
                   {/* 1. Tirar Foto da Resolução do Problema (Requisito Explícito) */}
                   <Text style={styles.formLabel}>
                     1. Foto da Resolução do Problema (Obrigatório):
@@ -408,6 +461,35 @@ export function TecnicoTabScreen({
                       </Text>
                     </View>
                   </TouchableOpacity>
+
+                  {/* Botão Câmera Real do Celular para o Técnico */}
+                  <TouchableOpacity
+                    style={styles.btnCameraTecnicoReal}
+                    onPress={() => setModalCameraVisible(true)}
+                    testID="btn-abrir-camera-tecnico"
+                  >
+                    <Ionicons name="camera" size={16} color="#0284c7" />
+                    <Text style={styles.btnCameraTecnicoRealText}>
+                      {fotoResolucao.anexada ? 'Fotografar Novamente com a Câmera' : 'Abrir Câmera do Dispositivo'}
+                    </Text>
+                  </TouchableOpacity>
+
+                  {/* Preview da Foto de Resolução Anexada */}
+                  {fotoResolucao.anexada && fotoResolucao.caminho && (
+                    <View style={styles.previewFotoReparoContainer}>
+                      <Image
+                        source={{ uri: fotoResolucao.caminho }}
+                        style={styles.previewFotoReparo}
+                        resizeMode="cover"
+                      />
+                      <View style={styles.previewFotoReparoBadge}>
+                        <Ionicons name="shield-checkmark" size={14} color="#10b981" />
+                        <Text style={styles.previewFotoReparoBadgeText}>
+                          Comprovante de Reparo • {fotoResolucao.tamanhoKb} KB
+                        </Text>
+                      </View>
+                    </View>
+                  )}
 
                   {/* 2. Parecer Técnico da Resolução */}
                   <Text style={styles.formLabel}>2. Parecer Técnico da Solução:</Text>
@@ -451,6 +533,17 @@ export function TecnicoTabScreen({
           </View>
         </View>
       </Modal>
+
+      {/* Modal de Câmera Nativa Expo v57 */}
+      <CameraCaptureModal
+        visible={modalCameraVisible}
+        onClose={() => setModalCameraVisible(false)}
+        onCapture={handleFotoCapturada}
+        titulo="Foto da Resolução do Problema"
+        subtitulo="Fotografe o conector óptico ou equipamento consertado"
+        fallbackFilename="reparo-fibra-cto04.jpg"
+        fallbackTamanhoKb={450}
+      />
 
       {/* Barra de Navegação Inferior */}
       <AppNavBar currentTab="tecnico" onSair={onSair} />
@@ -826,5 +919,71 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 15,
     fontWeight: '700',
+  },
+  badgeFotosCliente: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f0f9ff',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 8,
+    marginTop: 6,
+    gap: 6,
+    borderWidth: 1,
+    borderColor: '#bae6fd',
+    alignSelf: 'flex-start',
+  },
+  badgeFotosClienteText: {
+    fontSize: 11,
+    color: '#0284c7',
+    fontWeight: '600',
+  },
+  btnCameraTecnicoReal: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(2, 132, 199, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(2, 132, 199, 0.3)',
+    borderRadius: 10,
+    paddingVertical: 9,
+    marginTop: 8,
+    gap: 6,
+  },
+  btnCameraTecnicoRealText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#0284c7',
+  },
+  previewFotoReparoContainer: {
+    marginTop: 10,
+    borderRadius: 12,
+    overflow: 'hidden',
+    position: 'relative',
+    height: 120,
+    backgroundColor: '#0f172a',
+    borderWidth: 1,
+    borderColor: '#cbd5e1',
+  },
+  previewFotoReparo: {
+    width: '100%',
+    height: '100%',
+  },
+  previewFotoReparoBadge: {
+    position: 'absolute',
+    bottom: 8,
+    left: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(15, 23, 42, 0.8)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 10,
+    gap: 4,
+  },
+  previewFotoReparoBadgeText: {
+    color: '#ffffff',
+    fontSize: 11,
+    fontWeight: '600',
   },
 });

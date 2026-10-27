@@ -36,6 +36,7 @@ jest.mock('@expo/vector-icons', () => {
 // Mock expo-location para testes unitários
 jest.mock('expo-location', () => ({
     requestForegroundPermissionsAsync: jest.fn(async () => ({ status: 'granted' })),
+    getForegroundPermissionsAsync: jest.fn(async () => ({ status: 'granted' })),
     getCurrentPositionAsync: jest.fn(async () => ({
         coords: {
             latitude: -21.1850,
@@ -64,6 +65,37 @@ jest.mock('expo-sqlite', () => {
     return {
         openDatabaseAsync: jest.fn(async () => mockDb),
         openDatabaseSync: jest.fn(() => mockDb),
+    };
+});
+
+// Mock expo-camera para testes unitários
+jest.mock('expo-camera', () => {
+    const React = require('react');
+    const { View } = require('react-native');
+
+    const CameraView = React.forwardRef((props: any, ref: any) => {
+        React.useImperativeHandle(ref, () => ({
+            takePictureAsync: jest.fn(async (options?: any) => ({
+                uri: 'file:///storage/emulated/0/cjnet/camera-captured.jpg',
+                width: 1080,
+                height: 1920,
+            })),
+            resumePreview: jest.fn(async () => {}),
+            pausePreview: jest.fn(async () => {}),
+        }));
+        return React.createElement(View, { testID: 'mock-camera-view', ...props }, props.children);
+    });
+
+    return {
+        CameraView,
+        useCameraPermissions: () => [
+            { granted: true, canAskAgain: true, status: 'granted' },
+            jest.fn(async () => ({ granted: true, status: 'granted' })),
+        ],
+        Camera: {
+            requestCameraPermissionsAsync: jest.fn(async () => ({ granted: true, status: 'granted' })),
+            getCameraPermissionsAsync: jest.fn(async () => ({ granted: true, status: 'granted' })),
+        },
     };
 });
 

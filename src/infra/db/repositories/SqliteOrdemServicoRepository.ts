@@ -64,6 +64,22 @@ export class SqliteOrdemServicoRepository implements IOrdemServicoRepository {
       os.dataFechamento ? os.dataFechamento.toISOString() : null,
       os.syncedAt ? os.syncedAt.toISOString() : null
     );
+
+    for (const foto of os.fotos) {
+      await this.db.runAsync(
+        `INSERT OR REPLACE INTO os_fotos
+         (id, os_id, foto_local_path, foto_remota_url, tipo, tamanho_kb, enviada, created_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        foto.id,
+        foto.osId,
+        foto.fotoLocalPath,
+        foto.fotoRemotaUrl ?? null,
+        foto.tipo,
+        foto.tamanhoKb,
+        foto.enviada ? 1 : 0,
+        foto.createdAt.toISOString()
+      );
+    }
   }
 
   public async buscarPorIdLocal(idLocal: string): Promise<OrdemServico | null> {

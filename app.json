@@ -10,13 +10,15 @@
     "ios": {
       "icon": "./assets/expo.icon",
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "O app CJnet necessita da sua localização para verificar a viabilidade técnica e cobertura de fibra óptica no seu endereço."
+        "NSLocationWhenInUseUsageDescription": "O app CJnet necessita da sua localização para verificar a viabilidade técnica e cobertura de fibra óptica no seu endereço.",
+        "NSCameraUsageDescription": "O app CJnet necessita de acesso à câmera para fotografar o roteador/ONU e registrar a resolução dos chamados técnicos."
       }
     },
     "android": {
       "permissions": [
         "ACCESS_COARSE_LOCATION",
-        "ACCESS_FINE_LOCATION"
+        "ACCESS_FINE_LOCATION",
+        "CAMERA"
       ],
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
@@ -55,6 +57,12 @@
         "expo-location",
         {
           "locationWhenInUsePermission": "O app CJnet necessita da sua localização para verificar a viabilidade técnica e cobertura de fibra óptica no seu endereço."
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "O app CJnet necessita de acesso à câmera para fotografar o roteador/ONU e registrar a resolução dos chamados técnicos."
         }
       ]
     ],
