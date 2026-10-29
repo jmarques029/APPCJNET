@@ -29,6 +29,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import { OrdemServico } from '@/domain/entities/OrdemServico';
 import { sharedOsRepo, sharedClienteRepo } from './mockStore';
 import { ConcluirAtendimentoUseCase } from '@/application/use-cases';
@@ -494,16 +495,16 @@ export function TecnicoTabScreen({
                   {/* Botão Câmera Real do Celular para o Técnico */}
                   <TouchableOpacity
                     style={styles.btnCameraTecnicoReal}
-                    onPress={() => setModalCameraVisible(true)}
+                    onPress={handleTirarFotoCelular}
                     testID="btn-abrir-camera-tecnico"
                   >
                     <Ionicons name="camera" size={16} color="#0284c7" />
                     <Text style={styles.btnCameraTecnicoRealText}>
-                      {fotoResolucao.anexada ? 'Fotografar Novamente com a Câmera' : 'Abrir Câmera do Dispositivo'}
+                      {fotoResolucao.anexada ? 'Fotografar Novamente com a Câmera do Celular' : 'Abrir Câmera do Celular'}
                     </Text>
                   </TouchableOpacity>
 
-                  {/* Preview da Foto de Resolução Anexada */}
+                  {/* Preview da Foto de Resolução Anexada com Tratamento de Imagem */}
                   {fotoResolucao.anexada && fotoResolucao.caminho && (
                     <View style={styles.previewFotoReparoContainer}>
                       <Image
@@ -514,7 +515,7 @@ export function TecnicoTabScreen({
                       <View style={styles.previewFotoReparoBadge}>
                         <Ionicons name="shield-checkmark" size={14} color="#10b981" />
                         <Text style={styles.previewFotoReparoBadgeText}>
-                          Comprovante de Reparo • {fotoResolucao.tamanhoKb} KB
+                          Laudo de Reparo • Cortada & Comprimida • {fotoResolucao.tamanhoKb} KB
                         </Text>
                       </View>
                     </View>

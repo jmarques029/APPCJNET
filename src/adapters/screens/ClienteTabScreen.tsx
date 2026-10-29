@@ -48,6 +48,10 @@ import { getTecnicoInfo } from './HistoricoRelatoriosScreen';
 import { CameraCaptureModal, CapturedPhoto } from '@/adapters/components/CameraCaptureModal';
 import { LocationService } from '@/infra/device/LocationService';
 import { CameraDeviceService } from '@/infra/device/CameraDeviceService';
+import {
+  MapaDisponibilidadeModal,
+  ResultadoLocalizacaoCobertura,
+} from '@/adapters/components/MapaDisponibilidadeModal';
 
 export interface ClienteTabScreenProps {
   clienteId?: string;
@@ -129,14 +133,21 @@ export function ClienteTabScreen({
     longitude: -45.4350,
     status: 'IDLE',
   });
+  const [modalMapaVisible, setModalMapaVisible] = useState<boolean>(false);
   const [criandoOS, setCriandoOS] = useState<boolean>(false);
 
+  const handleConfirmarPontoMapa = (ponto: ResultadoLocalizacaoCobertura) => {
+    setCoordenadasGps({
+      latitude: ponto.latitude,
+      longitude: ponto.longitude,
+      precisao: 5,
+      status: 'OBTIDO',
+      mensagem: ponto.mensagem,
+    });
+    setModalMapaVisible(false);
+  };
+
   const handleTirarFotoCelular = async () => {
-    if (fotoAnexada) {
-      setFotoAnexada(false);
-      setFotoCapturada(null);
-      return;
-    }
     const res = await CameraDeviceService.abrirCameraCelular();
     if (res.sucesso && res.uri) {
       setFotoAnexada(true);
@@ -145,6 +156,11 @@ export function ClienteTabScreen({
         tamanhoKb: res.tamanhoKb || 620,
       });
     }
+  };
+
+  const handleRemoverFoto = () => {
+    setFotoAnexada(false);
+    setFotoCapturada(null);
   };
 
   const handleObterGps = async () => {
@@ -617,20 +633,36 @@ export function ClienteTabScreen({
               >
                 <Ionicons name="camera" size={16} color="#0284c7" />
                 <Text style={styles.btnCameraClienteRealText}>
-                  {fotoAnexada ? 'Fotografar Novamente com a Câmera' : 'Abrir Câmera do Dispositivo'}
+                  {fotoAnexada ? 'Fotografar Novamente com a Câmera do Celular' : 'Abrir Câmera do Celular'}
                 </Text>
               </TouchableOpacity>
 
-              {/* Miniatura da Foto Anexada */}
+              {/* Miniatura da Foto Anexada com Badge de Corte e Compressão */}
               {fotoAnexada && fotoCapturada?.uri && (
                 <View style={styles.previewFotoContainer}>
                   <Image source={{ uri: fotoCapturada.uri }} style={styles.previewFotoMini} />
                   <View style={{ flex: 1, marginLeft: 10 }}>
-                    <Text style={styles.previewFotoTitulo}>Foto Anexada para Diagnóstico</Text>
+                    <Text style={styles.previewFotoTitulo}>Foto Pronta para Envio ✂️</Text>
                     <Text style={styles.previewFotoSub}>
-                      {fotoCapturada.tamanhoKb} KB (Limite RNF09 &lt;= 1 MB)
+                      {fotoCapturada.tamanhoKb} KB • Cortada & Comprimida (RNF09 &lt;= 1 MB)
                     </Text>
                   </View>
+                  <TouchableOpacity
+                    onPress={handleTirarFotoCelular}
+                    style={{ padding: 6, marginRight: 4 }}
+                    testID="btn-recortar-foto-cliente"
+                    accessibilityLabel="Recortar ou fotografar novamente"
+                  >
+                    <Ionicons name="crop" size={18} color="#0284c7" />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={handleRemoverFoto}
+                    style={{ padding: 6 }}
+                    testID="btn-remover-foto-cliente"
+                    accessibilityLabel="Remover foto"
+                  >
+                    <Ionicons name="trash-outline" size={18} color="#ef4444" />
+                  </TouchableOpacity>
                 </View>
               )}
 
@@ -666,6 +698,16 @@ export function ClienteTabScreen({
                 <Text style={styles.gpsSubCliente}>
                   Coordenadas em Coqueiral/MG vinculadas ao chamado para atendimento de campo.
                 </Text>
+
+                {/* Botão para abrir o mapa interativo e checar cobertura */}
+                <TouchableOpacity
+                  style={styles.btnAbrirMapaCliente}
+                  onPress={() => setModalMapaVisible(true)}
+                  testID="btn-abrir-mapa-cliente"
+                >
+                  <Ionicons name="map-outline" size={15} color="#0284c7" />
+                  <Text style={styles.btnAbrirMapaClienteText}>Abrir no Mapa & Checar Disponibilidade 📍</Text>
+                </TouchableOpacity>
               </View>
 
               {/* Botão de Enviar */}
@@ -872,6 +914,16 @@ export function ClienteTabScreen({
         subtitulo="Fotografe as luzes PON e LOS do equipamento"
         fallbackFilename="onu.jpg"
         fallbackTamanhoKb={620}
+      />
+
+      {/* Modal de Mapa e Disponibilidade Técnica CJnet */}
+      <MapaDisponibilidadeModal
+        visible={modalMapaVisible}
+        onClose={() => setModalMapaVisible(false)}
+        initialLatitude={coordenadasGps.latitude}
+        initialLongitude={coordenadasGps.longitude}
+        onConfirmar={handleConfirmarPontoMapa}
+        titulo="Localização do Ponto de Atendimento"
       />
 
       {/* Barra de Navegação Inferior */}
@@ -1529,5 +1581,25 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '700',
     textAlign: 'center',
+  },
+
+  /* Estilos do Mapa na Aba Cliente */
+  btnAbrirMapaCliente: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#e0f2fe',
+    borderColor: '#bae6fd',
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    marginTop: 10,
+    gap: 6,
+  },
+  btnAbrirMapaClienteText: {
+    color: '#0284c7',
+    fontSize: 13,
+    fontWeight: '700',
   },
 });

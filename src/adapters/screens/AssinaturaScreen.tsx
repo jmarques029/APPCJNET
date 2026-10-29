@@ -36,6 +36,10 @@ import {
 } from '@/application/use-cases';
 import { useAuth } from '@/adapters/context/AuthContext';
 import { AppNavBar } from './components/AppNavBar';
+import {
+  MapaDisponibilidadeModal,
+  ResultadoLocalizacaoCobertura,
+} from '@/adapters/components/MapaDisponibilidadeModal';
 
 export interface AssinaturaScreenProps {
   onVoltar?: () => void;
@@ -71,6 +75,19 @@ export function AssinaturaScreen({ onVoltar, onAssinarPlano, onSair }: Assinatur
   const [coberturaGps, setCoberturaGps] = useState<CoberturaGpsState>({
     status: 'IDLE',
   });
+  const [modalMapaVisible, setModalMapaVisible] = useState<boolean>(false);
+
+  const handleConfirmarDoMapa = (res: ResultadoLocalizacaoCobertura) => {
+    setCoberturaGps({
+      status: 'SUCESSO',
+      latitude: res.latitude,
+      longitude: res.longitude,
+      coberto: res.coberto,
+      zonaAtendida: res.zonaAtendida,
+      mensagem: res.mensagem,
+    });
+    setModalMapaVisible(false);
+  };
 
   useEffect(() => {
     async function carregar() {
@@ -432,6 +449,16 @@ export function AssinaturaScreen({ onVoltar, onAssinarPlano, onSair }: Assinatur
                     </Text>
                   </TouchableOpacity>
 
+                  {/* Botão de abrir mapa de cobertura com disponibilidade em tempo real */}
+                  <TouchableOpacity
+                    style={styles.btnAbrirMapa}
+                    onPress={() => setModalMapaVisible(true)}
+                    testID="btn-abrir-mapa-cobertura"
+                  >
+                    <Ionicons name="map" size={18} color="#0284c7" style={{ marginRight: 8 }} />
+                    <Text style={styles.btnAbrirMapaText}>Abrir no Mapa & Ver Disponibilidade 📍</Text>
+                  </TouchableOpacity>
+
                   {/* Atalhos para simulação / testes rápidos */}
                   <View style={styles.simulacaoRow}>
                     <Text style={styles.simulacaoLabel}>Simular ponto de teste:</Text>
@@ -495,6 +522,16 @@ export function AssinaturaScreen({ onVoltar, onAssinarPlano, onSair }: Assinatur
                       </View>
 
                       <Text style={styles.resultadoGpsMensagem}>{coberturaGps.mensagem}</Text>
+
+                      {/* Botão para ver/ajustar o ponto no mapa interativo */}
+                      <TouchableOpacity
+                        style={styles.btnVerNoMapaMini}
+                        onPress={() => setModalMapaVisible(true)}
+                        testID="btn-ver-no-mapa"
+                      >
+                        <Ionicons name="map-outline" size={14} color="#0284c7" style={{ marginRight: 4 }} />
+                        <Text style={styles.btnVerNoMapaMiniText}>Ver / Ajustar Ponto no Mapa</Text>
+                      </TouchableOpacity>
                     </View>
                   )}
 
@@ -578,6 +615,16 @@ export function AssinaturaScreen({ onVoltar, onAssinarPlano, onSair }: Assinatur
           </View>
         )}
       </Modal>
+
+      {/* Modal com Mapa Interativo de Cobertura e Disponibilidade */}
+      <MapaDisponibilidadeModal
+        visible={modalMapaVisible}
+        onClose={() => setModalMapaVisible(false)}
+        initialLatitude={coberturaGps.latitude || -21.1850}
+        initialLongitude={coberturaGps.longitude || -45.4350}
+        onConfirmar={handleConfirmarDoMapa}
+        titulo="Mapa de Cobertura CJnet"
+      />
 
       <AppNavBar currentTab="assinatura" onSair={onSair} />
     </SafeAreaView>
@@ -1099,5 +1146,42 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: '#64748b',
+  },
+
+  /* Estilos do Mapa de Disponibilidade */
+  btnAbrirMapa: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#e0f2fe',
+    borderColor: '#0284c7',
+    borderWidth: 1.5,
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    marginTop: 10,
+    marginBottom: 6,
+  },
+  btnAbrirMapaText: {
+    color: '#0284c7',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  btnVerNoMapaMini: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    backgroundColor: '#f0f9ff',
+    borderColor: '#bae6fd',
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    marginTop: 8,
+  },
+  btnVerNoMapaMiniText: {
+    color: '#0284c7',
+    fontSize: 12,
+    fontWeight: '600',
   },
 });

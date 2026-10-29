@@ -12,6 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import { Ionicons } from '@expo/vector-icons';
+import { CameraDeviceService } from '@/infra/device/CameraDeviceService';
 
 export interface CapturedPhoto {
   uri: string;
@@ -67,6 +68,14 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
         }
       }
 
+      // Abre diretamente a câmera nativa do celular como prioridade
+      const celRes = await CameraDeviceService.abrirCameraCelular();
+      if (celRes.sucesso && celRes.uri) {
+        setPreviewUri(celRes.uri);
+        setPreviewTamanhoKb(celRes.tamanhoKb || fallbackTamanhoKb);
+        return;
+      }
+
       // Fallback gracioso caso câmera nativa não retorne URI (ex: web sem suporte completo ou mock)
       usarFotoFallback();
     } catch (err) {
@@ -101,6 +110,14 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
 
   const handleAlternarCamera = () => {
     setFacing((current) => (current === 'back' ? 'front' : 'back'));
+  };
+
+  const handleAbrirCameraCelular = async () => {
+    const res = await CameraDeviceService.abrirCameraCelular();
+    if (res.sucesso && res.uri) {
+      setPreviewUri(res.uri);
+      setPreviewTamanhoKb(res.tamanhoKb || fallbackTamanhoKb);
+    }
   };
 
   if (!visible) return null;
@@ -199,6 +216,15 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
               </TouchableOpacity>
 
               <TouchableOpacity
+                testID="btn-abrir-camera-celular-modal"
+                style={[styles.btnPermissao, { backgroundColor: '#0284c7', marginTop: 10 }]}
+                onPress={handleAbrirCameraCelular}
+              >
+                <Ionicons name="camera" size={20} color="#ffffff" />
+                <Text style={styles.btnPermissaoTexto}>Abrir Câmera do Celular</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
                 testID="btn-simular-camera-fallback"
                 style={styles.btnFallback}
                 onPress={usarFotoFallback}
@@ -256,7 +282,15 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
                 </View>
               </TouchableOpacity>
 
-              <View style={{ width: 80 }} />
+              {/* Botão Câmera do Celular */}
+              <TouchableOpacity
+                testID="btn-abrir-camera-celular-direto"
+                style={styles.btnSecundarioDemonstracao}
+                onPress={handleAbrirCameraCelular}
+              >
+                <Ionicons name="camera" size={16} color="#38bdf8" />
+                <Text style={styles.btnSecundarioDemonstracaoTexto}>Celular</Text>
+              </TouchableOpacity>
             </View>
           )}
         </View>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import { CameraCaptureModal } from '@/adapters/components/CameraCaptureModal';
+import { MapaDisponibilidadeModal } from '@/adapters/components/MapaDisponibilidadeModal';
 import { LocationService, COQUEIRAL_COORDENADAS_PADRAO } from '@/infra/device/LocationService';
 import * as Location from 'expo-location';
 import { AbrirOrdemServicoUseCase } from '@/application/use-cases/ordens-servico/AbrirOrdemServicoUseCase';
@@ -34,7 +35,7 @@ describe('Funcionalidades de Câmera e Geolocalização (expo-camera & expo-loca
       expect(loc.isFallback).toBe(true);
       expect(loc.mensagem).toContain('Permissão');
 
-      Location.requestForegroundPermissionsAsync = originalMock;
+      (Location as any).requestForegroundPermissionsAsync = originalMock;
     });
 
     it('deve verificar status de permissão corretamente', async () => {
@@ -143,7 +144,6 @@ describe('Funcionalidades de Câmera e Geolocalização (expo-camera & expo-loca
         email: 'cliente@cjnet.com.br',
         papel: PapelUsuario.CLIENTE,
         telefone: '35999998888',
-        enderecoCompleto: 'Rua Direita, 100, Centro - Coqueiral/MG',
         statusContrato: 'ATIVO',
       });
       await clienteRepo.salvar(cliente);
@@ -156,7 +156,6 @@ describe('Funcionalidades de Câmera e Geolocalização (expo-camera & expo-loca
         email: 'tecnico@cjnet.com.br',
         papel: PapelUsuario.TECNICO,
         telefone: '35988887777',
-        enderecoCompleto: 'Central CJnet, Coqueiral/MG',
         statusContrato: 'ATIVO',
       });
       await clienteRepo.salvar(tecnico);
@@ -219,4 +218,74 @@ describe('Funcionalidades de Câmera e Geolocalização (expo-camera & expo-loca
       expect(osFinal?.parecerTecnico).toContain('Conector óptico');
     });
   });
+
+  describe('MapaDisponibilidadeModal (Mapa de Cobertura e Disponibilidade Técnica)', () => {
+    it('deve exibir mapa com localização inicial e confirmar disponibilidade técnica no Centro de Coqueiral', async () => {
+      const mockClose = jest.fn();
+      const mockConfirmar = jest.fn();
+
+      const { getByTestId, getByText } = await render(
+        <MapaDisponibilidadeModal
+          visible={true}
+          onClose={mockClose}
+          onConfirmar={mockConfirmar}
+          initialLatitude={-21.1850}
+          initialLongitude={-45.4350}
+          titulo="Mapa de Cobertura CJnet"
+        />
+      );
+
+      // Aguarda avaliação da cobertura
+      await waitFor(() => {
+        expect(getByText(/Disponibilidade Confirmada!/i)).toBeTruthy();
+      });
+
+      // Confirma o ponto no mapa
+      fireEvent.press(getByTestId('btn-confirmar-localizacao-mapa'));
+
+      expect(mockConfirmar).toHaveBeenCalledWith(
+        expect.objectContaining({
+          latitude: -21.1850,
+          longitude: -45.4350,
+          coberto: true,
+          zonaAtendida: expect.any(String),
+        })
+      );
+      expect(mockClose).toHaveBeenCalled();
+    });
+
+    it('deve atualizar status dinamicamente para fora de cobertura ao simular Zona Rural', async () => {
+      const mockClose = jest.fn();
+      const mockConfirmar = jest.fn();
+
+      const { getByTestId, getByText, getAllByText } = await render(
+        <MapaDisponibilidadeModal
+          visible={true}
+          onClose={mockClose}
+          onConfirmar={mockConfirmar}
+          initialLatitude={-21.1850}
+          initialLongitude={-45.4350}
+        />
+      );
+
+      // Simula ponto na Zona Rural
+      fireEvent.press(getByTestId('btn-mapa-testar-fora'));
+
+      await waitFor(() => {
+        expect(getAllByText(/Fora da Área de Cobertura/i).length).toBeGreaterThan(0);
+      });
+
+      // Confirma ponto fora de cobertura
+      fireEvent.press(getByTestId('btn-confirmar-localizacao-mapa'));
+
+      expect(mockConfirmar).toHaveBeenCalledWith(
+        expect.objectContaining({
+          latitude: -21.2500,
+          longitude: -45.5000,
+          coberto: false,
+        })
+      );
+    });
+  });
 });
+

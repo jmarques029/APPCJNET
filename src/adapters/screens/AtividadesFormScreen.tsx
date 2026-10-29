@@ -119,11 +119,6 @@ export function AtividadesFormScreen({
   const [chamadoCriado, setChamadoCriado] = useState<OrdemServico | null>(null);
 
   const handleTirarFotoCelular = async () => {
-    if (fotoAnexada) {
-      setFotoAnexada(false);
-      setFotoCapturada(null);
-      return;
-    }
     const res = await CameraDeviceService.abrirCameraCelular();
     if (res.sucesso && res.uri) {
       setFotoAnexada(true);
@@ -132,6 +127,11 @@ export function AtividadesFormScreen({
         tamanhoKb: res.tamanhoKb || 540,
       });
     }
+  };
+
+  const handleRemoverFoto = () => {
+    setFotoAnexada(false);
+    setFotoCapturada(null);
   };
 
   const handleFotoCapturada = (photo: CapturedPhoto) => {
@@ -403,15 +403,15 @@ export function AtividadesFormScreen({
             </View>
           </TouchableOpacity>
 
-          {/* Botão de Câmera em Tempo Real (Expo Camera) */}
+          {/* Botão de Câmera Real do Celular */}
           <TouchableOpacity
             testID="btn-abrir-camera-real"
             style={styles.btnCameraReal}
-            onPress={() => setModalCameraVisible(true)}
+            onPress={handleTirarFotoCelular}
           >
             <Ionicons name="camera" size={18} color="#0284c7" />
             <Text style={styles.btnCameraRealText}>
-              {fotoAnexada ? 'Fotografar Novamente com a Câmera' : 'Abrir Câmera do Dispositivo'}
+              {fotoAnexada ? 'Fotografar Novamente com a Câmera do Celular' : 'Abrir Câmera do Celular'}
             </Text>
           </TouchableOpacity>
 
@@ -424,10 +424,28 @@ export function AtividadesFormScreen({
                 resizeMode="cover"
               />
               <View style={styles.previewOverlay}>
-                <Ionicons name="image" size={14} color="#ffffff" />
+                <Ionicons name="cut-outline" size={14} color="#ffffff" />
                 <Text style={styles.previewOverlayText}>
-                  {fotoCapturada.tamanhoKb} KB • Salva na OS
+                  {fotoCapturada.tamanhoKb} KB • Cortada & Comprimida para a OS
                 </Text>
+              </View>
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 8, gap: 12 }}>
+                <TouchableOpacity
+                  onPress={handleTirarFotoCelular}
+                  style={{ flexDirection: 'row', alignItems: 'center', padding: 6, gap: 4 }}
+                  testID="btn-recortar-foto"
+                >
+                  <Ionicons name="crop" size={16} color="#0284c7" />
+                  <Text style={{ color: '#0284c7', fontSize: 13, fontWeight: '600' }}>Recortar / Trocar</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={handleRemoverFoto}
+                  style={{ flexDirection: 'row', alignItems: 'center', padding: 6, gap: 4 }}
+                  testID="btn-remover-foto"
+                >
+                  <Ionicons name="trash-outline" size={16} color="#ef4444" />
+                  <Text style={{ color: '#ef4444', fontSize: 13, fontWeight: '600' }}>Remover Foto</Text>
+                </TouchableOpacity>
               </View>
             </View>
           )}

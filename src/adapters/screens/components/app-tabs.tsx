@@ -22,7 +22,7 @@ export default function AppTabs() {
         options={{
           title: 'Home',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home-outline" size={size} color={color} />
+            <Ionicons name="home-outline" size={size} color={typeof color === 'string' ? color : undefined} />
           ),
         }}
       />
@@ -32,7 +32,7 @@ export default function AppTabs() {
         options={{
           title: 'Explore',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="compass-outline" size={size} color={color} />
+            <Ionicons name="compass-outline" size={size} color={typeof color === 'string' ? color : undefined} />
           ),
         }}
       />

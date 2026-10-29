@@ -131,3 +131,25 @@ jest.mock('expo-image-picker', () => ({
     },
 }));
 
+// Mock react-native-maps para ambiente de testes e web
+jest.mock('react-native-maps', () => {
+    const React = require('react');
+    const { View } = require('react-native');
+
+    const MockMapView = (props: any) => React.createElement(View, { testID: 'mock-map-view', ...props }, props.children);
+    const MockMarker = (props: any) => React.createElement(View, { testID: 'mock-marker', ...props }, props.children);
+    const MockPolygon = (props: any) => React.createElement(View, { testID: 'mock-polygon', ...props }, props.children);
+    const MockCircle = (props: any) => React.createElement(View, { testID: 'mock-circle', ...props }, props.children);
+
+    return {
+        __esModule: true,
+        default: MockMapView,
+        MapView: MockMapView,
+        Marker: MockMarker,
+        Polygon: MockPolygon,
+        Circle: MockCircle,
+        PROVIDER_GOOGLE: 'google',
+        PROVIDER_DEFAULT: 'default',
+    };
+});
+
