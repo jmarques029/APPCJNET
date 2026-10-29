@@ -26,9 +26,9 @@ export interface AppNavBarProps {
 export function AppNavBar({ currentTab, onSair }: AppNavBarProps) {
   const { signOut, role } = useAuth();
 
-  const isClienteTab = currentTab === 'cliente' || currentTab === 'historico' || currentTab === 'atividades';
-  const isTecnicoTab = currentTab === 'tecnico';
-  const isAdminTab = currentTab === 'admin';
+  // Isola as opções de navegação com base no perfil autenticado
+  // Cliente só vê Cliente; Técnico só vê Técnico; Admin só vê Admin.
+  const effectiveRole = role || (currentTab === 'tecnico' ? 'tecnico' : currentTab === 'admin' ? 'admin' : 'cliente');
 
   const handleSair = async () => {
     if (onSair) {
@@ -63,56 +63,146 @@ export function AppNavBar({ currentTab, onSair }: AppNavBarProps) {
 
   return (
     <View style={styles.navContainer}>
-      {/* Aba Cliente: só abre chamado e acompanha suas OS aberta, verifica o técnico atribuído */}
-      <TouchableOpacity
-        style={[styles.navItem, isClienteTab && styles.navItemActive]}
-        onPress={() => router.push('/cliente' as any)}
-        accessibilityLabel="Ir para Aba do Cliente"
-        testID="tab-nav-cliente"
-      >
-        <Ionicons
-          name={isClienteTab ? 'person-circle' : 'person-circle-outline'}
-          size={22}
-          color={isClienteTab ? '#0284c7' : '#64748b'}
-        />
-        <Text style={[styles.navLabel, isClienteTab && styles.navLabelActive]}>
-          Cliente
-        </Text>
-      </TouchableOpacity>
+      {/* Visualização restrita ao CLIENTE */}
+      {effectiveRole === 'cliente' && (
+        <>
+          <TouchableOpacity
+            style={[styles.navItem, currentTab === 'cliente' && styles.navItemActive]}
+            onPress={() => router.push('/cliente' as any)}
+            accessibilityLabel="Ir para Aba do Cliente"
+            testID="tab-nav-cliente"
+          >
+            <Ionicons
+              name={currentTab === 'cliente' ? 'person-circle' : 'person-circle-outline'}
+              size={22}
+              color={currentTab === 'cliente' ? '#0284c7' : '#64748b'}
+            />
+            <Text style={[styles.navLabel, currentTab === 'cliente' && styles.navLabelActive]}>
+              Chamados
+            </Text>
+          </TouchableOpacity>
 
-      {/* Aba Técnico: visualiza OS atribuída, fecha OS e tira foto da resolução do problema */}
-      <TouchableOpacity
-        style={[styles.navItem, isTecnicoTab && styles.navItemActive]}
-        onPress={() => router.push('/tecnico' as any)}
-        accessibilityLabel="Ir para Aba do Técnico"
-        testID="tab-nav-tecnico"
-      >
-        <Ionicons
-          name={isTecnicoTab ? 'construct' : 'construct-outline'}
-          size={22}
-          color={isTecnicoTab ? '#0284c7' : '#64748b'}
-        />
-        <Text style={[styles.navLabel, isTecnicoTab && styles.navLabelActive]}>
-          Técnico
-        </Text>
-      </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.navItem, currentTab === 'atividades' && styles.navItemActive]}
+            onPress={() => router.push('/atividades' as any)}
+            accessibilityLabel="Abrir Novo Chamado"
+            testID="tab-nav-atividades"
+          >
+            <Ionicons
+              name={currentTab === 'atividades' ? 'add-circle' : 'add-circle-outline'}
+              size={22}
+              color={currentTab === 'atividades' ? '#0284c7' : '#64748b'}
+            />
+            <Text style={[styles.navLabel, currentTab === 'atividades' && styles.navLabelActive]}>
+              Abrir OS
+            </Text>
+          </TouchableOpacity>
 
-      {/* Aba Admin: controla todas as OS abertas, atribui a um técnico, conversa com cliente, analisa histórico */}
-      <TouchableOpacity
-        style={[styles.navItem, isAdminTab && styles.navItemActive]}
-        onPress={() => router.push('/admin' as any)}
-        accessibilityLabel="Ir para Aba do Administrador"
-        testID="tab-nav-admin"
-      >
-        <Ionicons
-          name={isAdminTab ? 'shield-checkmark' : 'shield-checkmark-outline'}
-          size={22}
-          color={isAdminTab ? '#0284c7' : '#64748b'}
-        />
-        <Text style={[styles.navLabel, isAdminTab && styles.navLabelActive]}>
-          Admin
-        </Text>
-      </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.navItem, currentTab === 'historico' && styles.navItemActive]}
+            onPress={() => router.push('/historico' as any)}
+            accessibilityLabel="Histórico de Chamados"
+            testID="tab-nav-historico"
+          >
+            <Ionicons
+              name={currentTab === 'historico' ? 'time' : 'time-outline'}
+              size={22}
+              color={currentTab === 'historico' ? '#0284c7' : '#64748b'}
+            />
+            <Text style={[styles.navLabel, currentTab === 'historico' && styles.navLabelActive]}>
+              Histórico
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.navItem, currentTab === 'assinatura' && styles.navItemActive]}
+            onPress={() => router.push('/assinatura' as any)}
+            accessibilityLabel="Ver Planos"
+            testID="tab-nav-assinatura"
+          >
+            <Ionicons
+              name={currentTab === 'assinatura' ? 'sparkles' : 'sparkles-outline'}
+              size={22}
+              color={currentTab === 'assinatura' ? '#0284c7' : '#64748b'}
+            />
+            <Text style={[styles.navLabel, currentTab === 'assinatura' && styles.navLabelActive]}>
+              Planos
+            </Text>
+          </TouchableOpacity>
+        </>
+      )}
+
+      {/* Visualização restrita ao TÉCNICO */}
+      {effectiveRole === 'tecnico' && (
+        <TouchableOpacity
+          style={[styles.navItem, currentTab === 'tecnico' && styles.navItemActive]}
+          onPress={() => router.push('/tecnico' as any)}
+          accessibilityLabel="Ir para Aba do Técnico"
+          testID="tab-nav-tecnico"
+        >
+          <Ionicons
+            name={currentTab === 'tecnico' ? 'construct' : 'construct-outline'}
+            size={22}
+            color={currentTab === 'tecnico' ? '#0284c7' : '#64748b'}
+          />
+          <Text style={[styles.navLabel, currentTab === 'tecnico' && styles.navLabelActive]}>
+            Atendimentos
+          </Text>
+        </TouchableOpacity>
+      )}
+
+      {/* Visualização restrita ao ADMINISTRADOR */}
+      {effectiveRole === 'admin' && (
+        <>
+          <TouchableOpacity
+            style={[styles.navItem, currentTab === 'admin' && styles.navItemActive]}
+            onPress={() => router.push('/admin' as any)}
+            accessibilityLabel="Ir para Aba do Administrador"
+            testID="tab-nav-admin"
+          >
+            <Ionicons
+              name={currentTab === 'admin' ? 'shield-checkmark' : 'shield-checkmark-outline'}
+              size={22}
+              color={currentTab === 'admin' ? '#0284c7' : '#64748b'}
+            />
+            <Text style={[styles.navLabel, currentTab === 'admin' && styles.navLabelActive]}>
+              Painel Admin
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.navItem, currentTab === 'historico' && styles.navItemActive]}
+            onPress={() => router.push('/historico' as any)}
+            accessibilityLabel="Histórico Geral e Auditoria"
+            testID="tab-nav-historico"
+          >
+            <Ionicons
+              name={currentTab === 'historico' ? 'bar-chart' : 'bar-chart-outline'}
+              size={22}
+              color={currentTab === 'historico' ? '#0284c7' : '#64748b'}
+            />
+            <Text style={[styles.navLabel, currentTab === 'historico' && styles.navLabelActive]}>
+              Histórico
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.navItem, currentTab === 'assinatura' && styles.navItemActive]}
+            onPress={() => router.push('/assinatura' as any)}
+            accessibilityLabel="Gestão de Planos"
+            testID="tab-nav-assinatura"
+          >
+            <Ionicons
+              name={currentTab === 'assinatura' ? 'sparkles' : 'sparkles-outline'}
+              size={22}
+              color={currentTab === 'assinatura' ? '#0284c7' : '#64748b'}
+            />
+            <Text style={[styles.navLabel, currentTab === 'assinatura' && styles.navLabelActive]}>
+              Planos
+            </Text>
+          </TouchableOpacity>
+        </>
+      )}
 
       {/* Botão Sair */}
       <TouchableOpacity

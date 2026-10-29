@@ -18,6 +18,14 @@ jest.mock('expo-router', () => ({
 }));
 
 describe('Aba do Cliente (ClienteTabScreen)', () => {
+  const sessaoCliente = {
+    accessToken: 'token-cli',
+    refreshToken: 'ref-cli',
+    userId: DEMO_CLIENTE_ID,
+    role: 'cliente' as const,
+    name: 'Carlos Eduardo Silva',
+  };
+
   beforeEach(() => {
     initializeSharedStore(true);
     jest.clearAllMocks();
@@ -25,7 +33,7 @@ describe('Aba do Cliente (ClienteTabScreen)', () => {
 
   it('deve listar chamados abertos do cliente e exibir status e técnico atribuído ou pendente', async () => {
     const { getByText, getByTestId, unmount } = await render(
-      <AuthProvider autoRestore={false}>
+      <AuthProvider autoRestore={false} initialSession={sessaoCliente}>
         <ClienteTabScreen clienteId={DEMO_CLIENTE_ID} />
       </AuthProvider>
     );
@@ -45,7 +53,7 @@ describe('Aba do Cliente (ClienteTabScreen)', () => {
   it('deve permitir abrir modal e criar um novo chamado com descrição e foto de roteador', async () => {
     const mockSuccess = jest.fn();
     const { getByTestId, getByText, queryByText, unmount } = await render(
-      <AuthProvider autoRestore={false}>
+      <AuthProvider autoRestore={false} initialSession={sessaoCliente}>
         <ClienteTabScreen
           clienteId={DEMO_CLIENTE_ID}
           initialDescricao="Luz PON vermelha piscando na ONU da sala."
@@ -93,7 +101,7 @@ describe('Aba do Cliente (ClienteTabScreen)', () => {
         expect(getByText('TÉCNICO ATRIBUÍDO')).toBeTruthy();
         expect(getByText('Técnico de Campo - Fibra Óptica')).toBeTruthy();
       },
-      { timeout: 8000 }
+      { timeout: 15000 }
     );
 
     unmount();

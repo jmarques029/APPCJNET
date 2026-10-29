@@ -40,6 +40,7 @@ import { useAuth } from '@/adapters/context/AuthContext';
 import { AppNavBar } from './components/AppNavBar';
 import { CameraCaptureModal, CapturedPhoto } from '@/adapters/components/CameraCaptureModal';
 import { LocationService } from '@/infra/device/LocationService';
+import { CameraDeviceService } from '@/infra/device/CameraDeviceService';
 
 export interface AtividadesFormScreenProps {
   clienteId?: string;
@@ -117,21 +118,19 @@ export function AtividadesFormScreen({
   const [loading, setLoading] = useState<boolean>(false);
   const [chamadoCriado, setChamadoCriado] = useState<OrdemServico | null>(null);
 
-  const handleSimularFoto = () => {
+  const handleTirarFotoCelular = async () => {
     if (fotoAnexada) {
       setFotoAnexada(false);
       setFotoCapturada(null);
-    } else {
+      return;
+    }
+    const res = await CameraDeviceService.abrirCameraCelular();
+    if (res.sucesso && res.uri) {
       setFotoAnexada(true);
       setFotoCapturada({
-        uri: 'file:///storage/emulated/0/cjnet/onu-pon.jpg',
-        tamanhoKb: 840,
+        uri: res.uri,
+        tamanhoKb: res.tamanhoKb || 540,
       });
-      Alert.alert(
-        'Foto das Luzes do Roteador Anexada! 📸',
-        'Imagem comprimida para 840 KB (em conformidade com o limite de 1 MB - RNF09). O técnico poderá visualizar o status das luzes PON/LOS antes da visita.',
-        [{ text: 'Entendido' }]
-      );
     }
   };
 
@@ -378,7 +377,7 @@ export function AtividadesFormScreen({
               styles.fotoButton,
               fotoAnexada ? styles.fotoButtonAnexado : styles.fotoButtonVazio,
             ]}
-            onPress={handleSimularFoto}
+            onPress={handleTirarFotoCelular}
           >
             <Ionicons
               name={fotoAnexada ? 'checkmark-circle' : 'camera-outline'}

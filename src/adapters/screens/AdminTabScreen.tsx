@@ -56,7 +56,7 @@ export function AdminTabScreen({
   initialTextoMensagem,
   onSair,
 }: AdminTabScreenProps) {
-  const { user } = useAuth();
+  const { user, role } = useAuth();
   const [ordens, setOrdens] = useState<OrdemServico[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [filtro, setFiltro] = useState<FiltroAdmin>(initialFiltro);
@@ -220,6 +220,32 @@ export function AdminTabScreen({
     setOsHistorico(os);
     setModalHistorico(true);
   };
+
+  // Guarda de Acesso RBAC: Admin não acessa cliente/tecnico e vice-versa
+  if (role && role !== 'admin') {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.accessDeniedCard}>
+          <Ionicons name="shield-outline" size={56} color="#ef4444" />
+          <Text style={styles.accessDeniedTitle}>Acesso Restrito a Administradores</Text>
+          <Text style={styles.accessDeniedDesc}>
+            Seu usuário está autenticado com o perfil de {role === 'tecnico' ? 'Técnico de Campo' : 'Cliente'}.
+            Este painel é de controle gerencial e operacional restrito à equipe de administração e NOC.
+          </Text>
+          <TouchableOpacity
+            style={styles.accessDeniedButton}
+            onPress={() => router.replace(role === 'tecnico' ? '/tecnico' : '/cliente')}
+            accessibilityLabel="Ir para o Painel Autorizado"
+          >
+            <Text style={styles.accessDeniedButtonText}>
+              Ir para o Painel do {role === 'tecnico' ? 'Técnico' : 'Cliente'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+        <AppNavBar currentTab="admin" onSair={onSair} />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -1244,5 +1270,44 @@ const styles = StyleSheet.create({
     color: '#059669',
     fontWeight: '600',
     marginTop: 4,
+  },
+  accessDeniedCard: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 32,
+    backgroundColor: '#f8fafc',
+  },
+  accessDeniedTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#0f172a',
+    marginTop: 16,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  accessDeniedDesc: {
+    fontSize: 14,
+    color: '#64748b',
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: 24,
+  },
+  accessDeniedButton: {
+    backgroundColor: '#0284c7',
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    shadowColor: '#0284c7',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  accessDeniedButtonText: {
+    color: '#ffffff',
+    fontSize: 15,
+    fontWeight: '700',
+    textAlign: 'center',
   },
 });

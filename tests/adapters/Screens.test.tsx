@@ -169,7 +169,7 @@ describe('Camada de Interface do Usuário e Rotas (adapters/screens/)', () => {
       fireEvent.press(btnFoto);
 
       await waitFor(() => {
-        expect(getByText('Foto da ONU Anexada (840 KB)')).toBeTruthy();
+        expect(getByText(/Foto da ONU Anexada/)).toBeTruthy();
       });
 
       // Submete

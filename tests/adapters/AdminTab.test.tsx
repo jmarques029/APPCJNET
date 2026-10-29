@@ -188,31 +188,68 @@ describe('Aba do Administrador (AdminTabScreen) & AppNavBar', () => {
     unmount();
   });
 
-  it('deve navegar entre as abas cliente, tecnico e admin ao tocar nos botões da barra de navegação', async () => {
-    const { getByTestId, unmount } = await render(
-      <AuthProvider autoRestore={false}>
+  it('deve exibir apenas abas do cliente para o perfil cliente', async () => {
+    const sessaoCliente = {
+      accessToken: 'token-cli',
+      refreshToken: 'ref-cli',
+      userId: 'cli-01',
+      role: 'cliente' as const,
+      name: 'Cliente Demo',
+    };
+    const { getByTestId, queryByTestId, unmount } = await render(
+      <AuthProvider autoRestore={false} initialSession={sessaoCliente}>
         <AppNavBar currentTab="cliente" />
       </AuthProvider>
     );
 
-    const tabTecnico = getByTestId('tab-nav-tecnico');
-    await act(async () => {
-      fireEvent.press(tabTecnico);
-    });
-    expect(router.push).toHaveBeenCalledWith('/tecnico');
+    expect(getByTestId('tab-nav-cliente')).toBeTruthy();
+    expect(getByTestId('tab-nav-atividades')).toBeTruthy();
+    expect(queryByTestId('tab-nav-tecnico')).toBeNull();
+    expect(queryByTestId('tab-nav-admin')).toBeNull();
 
-    const tabAdmin = getByTestId('tab-nav-admin');
+    const tabAtividades = getByTestId('tab-nav-atividades');
     await act(async () => {
-      fireEvent.press(tabAdmin);
+      fireEvent.press(tabAtividades);
     });
-    expect(router.push).toHaveBeenCalledWith('/admin');
+    expect(router.push).toHaveBeenCalledWith('/atividades');
+    unmount();
+  });
 
-    const tabCliente = getByTestId('tab-nav-cliente');
-    await act(async () => {
-      fireEvent.press(tabCliente);
-    });
-    expect(router.push).toHaveBeenCalledWith('/cliente');
+  it('deve exibir apenas abas do técnico para o perfil técnico', async () => {
+    const sessaoTecnico = {
+      accessToken: 'token-tec',
+      refreshToken: 'ref-tec',
+      userId: 'tec-01',
+      role: 'tecnico' as const,
+      name: 'Tecnico Demo',
+    };
+    const { getByTestId, queryByTestId, unmount } = await render(
+      <AuthProvider autoRestore={false} initialSession={sessaoTecnico}>
+        <AppNavBar currentTab="tecnico" />
+      </AuthProvider>
+    );
+    expect(getByTestId('tab-nav-tecnico')).toBeTruthy();
+    expect(queryByTestId('tab-nav-cliente')).toBeNull();
+    expect(queryByTestId('tab-nav-admin')).toBeNull();
+    unmount();
+  });
 
+  it('deve exibir apenas abas do administrador para o perfil administrador', async () => {
+    const sessaoAdmin = {
+      accessToken: 'token-adm',
+      refreshToken: 'ref-adm',
+      userId: 'adm-01',
+      role: 'admin' as const,
+      name: 'Admin Demo',
+    };
+    const { getByTestId, queryByTestId, unmount } = await render(
+      <AuthProvider autoRestore={false} initialSession={sessaoAdmin}>
+        <AppNavBar currentTab="admin" />
+      </AuthProvider>
+    );
+    expect(getByTestId('tab-nav-admin')).toBeTruthy();
+    expect(queryByTestId('tab-nav-cliente')).toBeNull();
+    expect(queryByTestId('tab-nav-tecnico')).toBeNull();
     unmount();
   });
 });

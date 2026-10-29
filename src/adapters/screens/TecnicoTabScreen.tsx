@@ -35,6 +35,7 @@ import { ConcluirAtendimentoUseCase } from '@/application/use-cases';
 import { useAuth } from '@/adapters/context/AuthContext';
 import { AppNavBar } from './components/AppNavBar';
 import { CameraCaptureModal, CapturedPhoto } from '@/adapters/components/CameraCaptureModal';
+import { CameraDeviceService } from '@/infra/device/CameraDeviceService';
 
 export interface TecnicoTabScreenProps {
   tecnicoId?: string;
@@ -51,7 +52,7 @@ export function TecnicoTabScreen({
   onConcluirOSSuccess,
   onSair,
 }: TecnicoTabScreenProps) {
-  const { user } = useAuth();
+  const { user, role } = useAuth();
   const activeTecnicoId = user?.id?.startsWith('tec-') ? user.id : tecnicoId;
   const activeTecnicoNome = user?.name || 'João Santos';
 
@@ -140,13 +141,15 @@ export function TecnicoTabScreen({
     setModalFecharOS(true);
   };
 
-  const simularCapturaFotoResolucao = () => {
-    // Simula a captura de foto da câmera do técnico com resolução do reparo (< 1024 KB)
-    setFotoResolucao({
-      anexada: true,
-      caminho: 'file:///storage/emulated/0/cjnet/reparo-fibra-cto04.jpg',
-      tamanhoKb: 450,
-    });
+  const handleTirarFotoCelular = async () => {
+    const res = await CameraDeviceService.abrirCameraCelular();
+    if (res.sucesso && res.uri) {
+      setFotoResolucao({
+        anexada: true,
+        caminho: res.uri,
+        tamanhoKb: res.tamanhoKb || 450,
+      });
+    }
   };
 
   const handleConfirmarFechamento = async () => {
@@ -201,6 +204,32 @@ export function TecnicoTabScreen({
       setConcluindo(false);
     }
   };
+
+  // Guarda de Acesso RBAC: Técnico não acessa cliente/admin e vice-versa
+  if (role && role !== 'tecnico') {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.accessDeniedCard}>
+          <Ionicons name="shield-outline" size={56} color="#ef4444" />
+          <Text style={styles.accessDeniedTitle}>Acesso Restrito a Técnicos</Text>
+          <Text style={styles.accessDeniedDesc}>
+            Seu usuário está autenticado com o perfil de {role === 'admin' ? 'Administrador (NOC)' : 'Cliente'}.
+            Este painel é de uso exclusivo da equipe técnica de campo da CJnet.
+          </Text>
+          <TouchableOpacity
+            style={styles.accessDeniedButton}
+            onPress={() => router.replace(role === 'admin' ? '/admin' : '/cliente')}
+            accessibilityLabel="Ir para o Painel Autorizado"
+          >
+            <Text style={styles.accessDeniedButtonText}>
+              Ir para o Painel do {role === 'admin' ? 'Administrador' : 'Cliente'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+        <AppNavBar currentTab="tecnico" onSair={onSair} />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -435,7 +464,7 @@ export function TecnicoTabScreen({
                       styles.btnCapturaFoto,
                       fotoResolucao.anexada && styles.btnCapturaFotoSucesso,
                     ]}
-                    onPress={simularCapturaFotoResolucao}
+                    onPress={handleTirarFotoCelular}
                     testID="btn-tirar-foto-resolucao"
                   >
                     <Ionicons
@@ -985,5 +1014,44 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 11,
     fontWeight: '600',
+  },
+  accessDeniedCard: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 32,
+    backgroundColor: '#f8fafc',
+  },
+  accessDeniedTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#0f172a',
+    marginTop: 16,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  accessDeniedDesc: {
+    fontSize: 14,
+    color: '#64748b',
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: 24,
+  },
+  accessDeniedButton: {
+    backgroundColor: '#0284c7',
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    shadowColor: '#0284c7',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  accessDeniedButtonText: {
+    color: '#ffffff',
+    fontSize: 15,
+    fontWeight: '700',
+    textAlign: 'center',
   },
 });

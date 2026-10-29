@@ -47,6 +47,7 @@ import { AppNavBar } from './components/AppNavBar';
 import { getTecnicoInfo } from './HistoricoRelatoriosScreen';
 import { CameraCaptureModal, CapturedPhoto } from '@/adapters/components/CameraCaptureModal';
 import { LocationService } from '@/infra/device/LocationService';
+import { CameraDeviceService } from '@/infra/device/CameraDeviceService';
 
 export interface ClienteTabScreenProps {
   clienteId?: string;
@@ -102,7 +103,7 @@ export function ClienteTabScreen({
   onNovoChamadoSuccess,
   onSair,
 }: ClienteTabScreenProps) {
-  const { user, signOut } = useAuth();
+  const { user, role, signOut } = useAuth();
   const activeClienteId = user?.id || clienteId;
   const activeClienteNome = user?.name || 'Carlos Eduardo Silva';
 
@@ -129,6 +130,22 @@ export function ClienteTabScreen({
     status: 'IDLE',
   });
   const [criandoOS, setCriandoOS] = useState<boolean>(false);
+
+  const handleTirarFotoCelular = async () => {
+    if (fotoAnexada) {
+      setFotoAnexada(false);
+      setFotoCapturada(null);
+      return;
+    }
+    const res = await CameraDeviceService.abrirCameraCelular();
+    if (res.sucesso && res.uri) {
+      setFotoAnexada(true);
+      setFotoCapturada({
+        uri: res.uri,
+        tamanhoKb: res.tamanhoKb || 620,
+      });
+    }
+  };
 
   const handleObterGps = async () => {
     setCoordenadasGps((prev) => ({ ...prev, status: 'BUSCANDO' }));
@@ -270,6 +287,32 @@ export function ClienteTabScreen({
     setNovaMensagem('');
   };
 
+  // Guarda de Acesso RBAC: Cliente não acessa técnico/admin e vice-versa
+  if (role && role !== 'cliente') {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.accessDeniedCard}>
+          <Ionicons name="shield-outline" size={56} color="#ef4444" />
+          <Text style={styles.accessDeniedTitle}>Acesso Restrito ao Cliente</Text>
+          <Text style={styles.accessDeniedDesc}>
+            Seu usuário está autenticado com o perfil de {role === 'admin' ? 'Administrador (NOC)' : 'Técnico de Campo'}.
+            Para sua segurança, cada perfil possui acesso exclusivo aos seus próprios módulos.
+          </Text>
+          <TouchableOpacity
+            style={styles.accessDeniedButton}
+            onPress={() => router.replace(role === 'admin' ? '/admin' : '/tecnico')}
+            accessibilityLabel="Ir para o Painel Autorizado"
+          >
+            <Text style={styles.accessDeniedButtonText}>
+              Ir para o Painel do {role === 'admin' ? 'Administrador' : 'Técnico'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+        <AppNavBar currentTab="cliente" onSair={onSair} />
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView
@@ -352,10 +395,12 @@ export function ClienteTabScreen({
                 const isEmAtendimento = os.status.value === 'EM_ATENDIMENTO';
 
                 return (
-                  <View
+                  <TouchableOpacity
                     key={os.idLocal}
                     style={styles.cardOS}
                     testID={`card-os-cliente-${os.idLocal}`}
+                    onPress={() => setSelectedOs(os)}
+                    activeOpacity={0.8}
                   >
                     {/* Linha superior: Protocolo e Status */}
                     <View style={styles.cardTopRow}>
@@ -424,16 +469,15 @@ export function ClienteTabScreen({
                           minute: '2-digit',
                         })}
                       </Text>
-                      <TouchableOpacity
+                      <View
                         style={styles.cardAcao}
-                        onPress={() => setSelectedOs(os)}
                         testID={`btn-ver-detalhes-${os.idLocal}`}
                       >
                         <Text style={styles.cardAcaoText}>Ver Detalhes</Text>
                         <Ionicons name="arrow-forward" size={14} color="#0284c7" />
-                      </TouchableOpacity>
+                      </View>
                     </View>
-                  </View>
+                  </TouchableOpacity>
                 );
               })}
             </View>
@@ -545,18 +589,7 @@ export function ClienteTabScreen({
               <Text style={styles.formLabel}>Foto do Roteador / ONU (Autodiagnóstico):</Text>
               <TouchableOpacity
                 style={[styles.btnAnexarFoto, fotoAnexada && styles.btnAnexarFotoAtivo]}
-                onPress={() => {
-                  if (fotoAnexada) {
-                    setFotoAnexada(false);
-                    setFotoCapturada(null);
-                  } else {
-                    setFotoAnexada(true);
-                    setFotoCapturada({
-                      uri: 'file:///storage/emulated/0/cjnet/onu.jpg',
-                      tamanhoKb: 620,
-                    });
-                  }
-                }}
+                onPress={handleTirarFotoCelular}
                 testID="btn-anexar-foto-roteador"
               >
                 <Ionicons
@@ -571,7 +604,7 @@ export function ClienteTabScreen({
                   ]}
                 >
                   {fotoAnexada
-                    ? `Foto do Roteador Anexada (onu-pon.jpg • ${fotoCapturada?.tamanhoKb || 620} KB)`
+                    ? `Foto do Roteador Anexada (${fotoCapturada?.tamanhoKb || 620} KB)`
                     : 'Tirar Foto das Luzes do Roteador / ONU'}
                 </Text>
               </TouchableOpacity>
@@ -579,7 +612,7 @@ export function ClienteTabScreen({
               {/* Botão para Câmera Real do Celular */}
               <TouchableOpacity
                 style={styles.btnCameraClienteReal}
-                onPress={() => setModalCameraVisible(true)}
+                onPress={handleTirarFotoCelular}
                 testID="btn-abrir-camera-cliente"
               >
                 <Ionicons name="camera" size={16} color="#0284c7" />
@@ -1457,5 +1490,44 @@ const styles = StyleSheet.create({
     fontSize: 9,
     color: '#64748b',
     marginTop: 2,
+  },
+  accessDeniedCard: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 32,
+    backgroundColor: '#f8fafc',
+  },
+  accessDeniedTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#0f172a',
+    marginTop: 16,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  accessDeniedDesc: {
+    fontSize: 14,
+    color: '#64748b',
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: 24,
+  },
+  accessDeniedButton: {
+    backgroundColor: '#0284c7',
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    shadowColor: '#0284c7',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  accessDeniedButtonText: {
+    color: '#ffffff',
+    fontSize: 15,
+    fontWeight: '700',
+    textAlign: 'center',
   },
 });

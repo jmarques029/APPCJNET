@@ -99,3 +99,35 @@ jest.mock('expo-camera', () => {
     };
 });
 
+// Mock expo-image-picker para disparar captura de câmera nativa em testes
+jest.mock('expo-image-picker', () => ({
+    requestCameraPermissionsAsync: jest.fn(async () => ({ status: 'granted', granted: true })),
+    requestMediaLibraryPermissionsAsync: jest.fn(async () => ({ status: 'granted', granted: true })),
+    launchCameraAsync: jest.fn(async () => ({
+        canceled: false,
+        assets: [
+            {
+                uri: 'file:///storage/emulated/0/cjnet/foto-camera-real-celular.jpg',
+                width: 1080,
+                height: 1920,
+                fileSize: 450 * 1024,
+            },
+        ],
+    })),
+    launchImageLibraryAsync: jest.fn(async () => ({
+        canceled: false,
+        assets: [
+            {
+                uri: 'file:///storage/emulated/0/cjnet/foto-galeria-celular.jpg',
+                width: 1080,
+                height: 1920,
+                fileSize: 420 * 1024,
+            },
+        ],
+    })),
+    CameraType: {
+        back: 'back',
+        front: 'front',
+    },
+}));
+
