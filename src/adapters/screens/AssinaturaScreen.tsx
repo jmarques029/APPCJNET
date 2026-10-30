@@ -40,6 +40,7 @@ import {
   MapaDisponibilidadeModal,
   ResultadoLocalizacaoCobertura,
 } from '@/adapters/components/MapaDisponibilidadeModal';
+import { MapaVisualCobertura } from '@/adapters/components/MapaVisualCobertura';
 
 export interface AssinaturaScreenProps {
   onVoltar?: () => void;
@@ -73,7 +74,12 @@ export function AssinaturaScreen({ onVoltar, onAssinarPlano, onSair }: Assinatur
 
   // Estado da Verificação por Geolocalização
   const [coberturaGps, setCoberturaGps] = useState<CoberturaGpsState>({
-    status: 'IDLE',
+    status: 'SUCESSO',
+    latitude: -21.1850,
+    longitude: -45.4350,
+    coberto: true,
+    zonaAtendida: 'Centro e Bairros Adjacentes (Coqueiral/MG)',
+    mensagem: 'Endereço dentro da zona de atendimento de fibra óptica CJnet.',
   });
   const [modalMapaVisible, setModalMapaVisible] = useState<boolean>(false);
 
@@ -427,63 +433,73 @@ export function AssinaturaScreen({ onVoltar, onAssinarPlano, onSair }: Assinatur
                     <Text style={styles.geoSectionTitle}>Verificação de Cobertura por GPS</Text>
                   </View>
                   <Text style={styles.geoSectionDesc}>
-                    Detecte a sua posição geográfica para consultar em tempo real a disponibilidade de portas de fibra óptica (CTO) no seu imóvel.
+                    Veja visualmente no mapa onde você está e a disponibilidade imediata de portas de fibra óptica (CTO) no imóvel.
                   </Text>
 
-                  {/* Botão de detecção via GPS */}
-                  <TouchableOpacity
-                    style={styles.btnGpsDetect}
-                    onPress={handleObterLocalizacaoGps}
-                    disabled={coberturaGps.status === 'BUSCANDO'}
-                    testID="btn-obter-gps"
-                  >
-                    {coberturaGps.status === 'BUSCANDO' ? (
-                      <ActivityIndicator size="small" color="#ffffff" style={{ marginRight: 8 }} />
-                    ) : (
-                      <Ionicons name="navigate-circle" size={20} color="#ffffff" style={{ marginRight: 8 }} />
-                    )}
-                    <Text style={styles.btnGpsDetectText}>
-                      {coberturaGps.status === 'BUSCANDO'
-                        ? 'Consultando Satélites & Rede CJnet...'
-                        : 'Detectar Minha Localização Atual'}
-                    </Text>
-                  </TouchableOpacity>
+                  {/* MAPA VISUAL INTEGRADO COM PIN E DISPONIBILIDADE */}
+                  <MapaVisualCobertura
+                    latitude={coberturaGps.latitude || -21.1850}
+                    longitude={coberturaGps.longitude || -45.4350}
+                    coberto={coberturaGps.coberto ?? true}
+                    zonaAtendida={coberturaGps.zonaAtendida}
+                    mensagem={coberturaGps.mensagem}
+                    onChangeCoordenadas={({ latitude, longitude }) => {
+                      verificarCoberturaPorCoordenadas(latitude, longitude);
+                    }}
+                    onExpandirMapa={() => setModalMapaVisible(true)}
+                    altura={220}
+                  />
 
-                  {/* Botão de abrir mapa de cobertura com disponibilidade em tempo real */}
-                  <TouchableOpacity
-                    style={styles.btnAbrirMapa}
-                    onPress={() => setModalMapaVisible(true)}
-                    testID="btn-abrir-mapa-cobertura"
-                  >
-                    <Ionicons name="map" size={18} color="#0284c7" style={{ marginRight: 8 }} />
-                    <Text style={styles.btnAbrirMapaText}>Abrir no Mapa & Ver Disponibilidade 📍</Text>
-                  </TouchableOpacity>
-
-                  {/* Atalhos para simulação / testes rápidos */}
+                  {/* Botões de Ação Rápida */}
                   <View style={styles.simulacaoRow}>
-                    <Text style={styles.simulacaoLabel}>Simular ponto de teste:</Text>
-                    <View style={styles.simulacaoBtns}>
-                      <TouchableOpacity
-                        style={styles.btnSimularItem}
-                        onPress={() => handleSimularPonto(true)}
-                        testID="btn-simular-centro"
-                      >
-                        <Ionicons name="checkmark-circle-outline" size={14} color="#10b981" />
-                        <Text style={styles.btnSimularText}>Coqueiral Centro (Com Cobertura)</Text>
-                      </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.btnGpsDetect}
+                      onPress={handleObterLocalizacaoGps}
+                      disabled={coberturaGps.status === 'BUSCANDO'}
+                      testID="btn-obter-gps"
+                    >
+                      {coberturaGps.status === 'BUSCANDO' ? (
+                        <ActivityIndicator size="small" color="#ffffff" style={{ marginRight: 6 }} />
+                      ) : (
+                        <Ionicons name="navigate-circle" size={18} color="#ffffff" style={{ marginRight: 6 }} />
+                      )}
+                      <Text style={styles.btnGpsDetectText}>
+                        {coberturaGps.status === 'BUSCANDO' ? 'Consultando GPS...' : 'Usar Meu GPS'}
+                      </Text>
+                    </TouchableOpacity>
 
-                      <TouchableOpacity
-                        style={styles.btnSimularItem}
-                        onPress={() => handleSimularPonto(false)}
-                        testID="btn-simular-fora"
-                      >
-                        <Ionicons name="close-circle-outline" size={14} color="#f59e0b" />
-                        <Text style={styles.btnSimularText}>Zona Rural (Fora da Área)</Text>
-                      </TouchableOpacity>
-                    </View>
+                    <TouchableOpacity
+                      style={styles.btnAbrirMapa}
+                      onPress={() => setModalMapaVisible(true)}
+                      testID="btn-abrir-mapa-cobertura"
+                    >
+                      <Ionicons name="expand" size={16} color="#0284c7" style={{ marginRight: 6 }} />
+                      <Text style={styles.btnAbrirMapaText}>Expandir Mapa ⛶</Text>
+                    </TouchableOpacity>
                   </View>
 
-                  {/* Card de Resultado da Geolocalização */}
+                  {/* Atalhos para simulação / testes rápidos */}
+                  <View style={styles.simulacaoBtns}>
+                    <TouchableOpacity
+                      style={styles.btnSimularItem}
+                      onPress={() => handleSimularPonto(true)}
+                      testID="btn-simular-centro"
+                    >
+                      <Ionicons name="checkmark-circle-outline" size={14} color="#10b981" />
+                      <Text style={styles.btnSimularText}>Coqueiral Centro (Com Cobertura)</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      style={styles.btnSimularItem}
+                      onPress={() => handleSimularPonto(false)}
+                      testID="btn-simular-fora"
+                    >
+                      <Ionicons name="close-circle-outline" size={14} color="#f59e0b" />
+                      <Text style={styles.btnSimularText}>Zona Rural (Fora da Área)</Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  {/* Card de Resultado da Disponibilidade */}
                   {coberturaGps.status === 'SUCESSO' && (
                     <View
                       style={[
@@ -495,7 +511,7 @@ export function AssinaturaScreen({ onVoltar, onAssinarPlano, onSair }: Assinatur
                       <View style={styles.resultadoGpsHeader}>
                         <Ionicons
                           name={coberturaGps.coberto ? 'shield-checkmark' : 'alert-circle'}
-                          size={24}
+                          size={22}
                           color={coberturaGps.coberto ? '#15803d' : '#b45309'}
                           style={{ marginRight: 8 }}
                         />
@@ -508,17 +524,10 @@ export function AssinaturaScreen({ onVoltar, onAssinarPlano, onSair }: Assinatur
                           >
                             {coberturaGps.coberto ? 'COBERTURA CONFIRMADA! ✅' : 'ÁREA EM ESTUDO DE EXPANSÃO ⚠️'}
                           </Text>
-                          {coberturaGps.zonaAtendida && (
-                            <Text style={styles.resultadoGpsZona}>Zona: {coberturaGps.zonaAtendida}</Text>
-                          )}
+                          <Text style={styles.resultadoGpsZona}>
+                            {coberturaGps.zonaAtendida || 'Região de Coqueiral/MG'}
+                          </Text>
                         </View>
-                      </View>
-
-                      <View style={styles.resultadoGpsCoords}>
-                        <Ionicons name="pin-outline" size={14} color="#64748b" style={{ marginRight: 4 }} />
-                        <Text style={styles.resultadoGpsCoordsText}>
-                          Lat: {coberturaGps.latitude?.toFixed(4)} | Lng: {coberturaGps.longitude?.toFixed(4)}
-                        </Text>
                       </View>
 
                       <Text style={styles.resultadoGpsMensagem}>{coberturaGps.mensagem}</Text>

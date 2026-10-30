@@ -36,12 +36,13 @@ import { TipoProblema, type TipoProblemaType } from '@/domain/value-objects/Tipo
 import {
   sharedOsRepo,
   sharedClienteRepo,
+  sharedAreaRepo,
   DEMO_CLIENTE_ID,
   obterMensagensPorOS,
   enviarMensagemOS,
   type MensagemOS,
 } from './mockStore';
-import { AbrirOrdemServicoUseCase } from '@/application/use-cases';
+import { AbrirOrdemServicoUseCase, VerificarCoberturaUseCase } from '@/application/use-cases';
 import { useAuth } from '@/adapters/context/AuthContext';
 import { AppNavBar } from './components/AppNavBar';
 import { getTecnicoInfo } from './HistoricoRelatoriosScreen';
@@ -52,6 +53,7 @@ import {
   MapaDisponibilidadeModal,
   ResultadoLocalizacaoCobertura,
 } from '@/adapters/components/MapaDisponibilidadeModal';
+import { MapaVisualCobertura } from '@/adapters/components/MapaVisualCobertura';
 
 export interface ClienteTabScreenProps {
   clienteId?: string;
@@ -125,13 +127,18 @@ export function ClienteTabScreen({
   const [coordenadasGps, setCoordenadasGps] = useState<{
     latitude: number;
     longitude: number;
+    coberto: boolean;
+    zonaAtendida?: string;
     precisao?: number | null;
     status: 'IDLE' | 'BUSCANDO' | 'OBTIDO' | 'ERRO';
     mensagem?: string;
   }>({
     latitude: -21.1850,
     longitude: -45.4350,
-    status: 'IDLE',
+    coberto: true,
+    zonaAtendida: 'Centro e Bairros Adjacentes (Coqueiral/MG)',
+    status: 'OBTIDO',
+    mensagem: 'Ponto de atendimento na rede de fibra óptica CJnet.',
   });
   const [modalMapaVisible, setModalMapaVisible] = useState<boolean>(false);
   const [criandoOS, setCriandoOS] = useState<boolean>(false);
@@ -140,6 +147,8 @@ export function ClienteTabScreen({
     setCoordenadasGps({
       latitude: ponto.latitude,
       longitude: ponto.longitude,
+      coberto: ponto.coberto,
+      zonaAtendida: ponto.zonaAtendida,
       precisao: 5,
       status: 'OBTIDO',
       mensagem: ponto.mensagem,
@@ -166,17 +175,25 @@ export function ClienteTabScreen({
   const handleObterGps = async () => {
     setCoordenadasGps((prev) => ({ ...prev, status: 'BUSCANDO' }));
     const resultado = await LocationService.obterLocalizacaoAtual();
+    const useCase = new VerificarCoberturaUseCase(sharedAreaRepo);
+    const validacao = await useCase.execute({
+      latitude: resultado.latitude,
+      longitude: resultado.longitude,
+    });
+
     setCoordenadasGps({
       latitude: resultado.latitude,
       longitude: resultado.longitude,
+      coberto: validacao.coberto,
+      zonaAtendida: validacao.zonaAtendida,
       precisao: resultado.precisao,
       status: resultado.isFallback ? 'ERRO' : 'OBTIDO',
-      mensagem: resultado.mensagem,
+      mensagem: validacao.mensagem,
     });
     if (!resultado.isFallback) {
       Alert.alert(
         'GPS CJnet 📍',
-        `Coordenadas capturadas com sucesso!\nLat: ${resultado.latitude.toFixed(4)} | Lng: ${resultado.longitude.toFixed(4)}`
+        `Localização capturada com sucesso!\n${validacao.coberto ? '✅ Fibra Óptica Disponível' : '⚠️ Fora da Área Cabeada'}`
       );
     }
   };
@@ -666,20 +683,34 @@ export function ClienteTabScreen({
                 </View>
               )}
 
-              {/* Geolocalização GPS do Ponto de Atendimento */}
-              <Text style={styles.formLabel}>Ponto de Atendimento (Geolocalização GPS):</Text>
+              {/* Geolocalização GPS do Ponto de Atendimento com Mapa Visual */}
+              <Text style={styles.formLabel}>Ponto de Atendimento (Localização no Mapa):</Text>
               <View style={styles.gpsCardCliente} testID="box-gps-cliente">
+                <MapaVisualCobertura
+                  latitude={coordenadasGps.latitude}
+                  longitude={coordenadasGps.longitude}
+                  coberto={coordenadasGps.coberto}
+                  zonaAtendida={coordenadasGps.zonaAtendida}
+                  mensagem={coordenadasGps.mensagem}
+                  onChangeCoordenadas={({ latitude, longitude }) => {
+                    const useCase = new VerificarCoberturaUseCase(sharedAreaRepo);
+                    useCase.execute({ latitude, longitude }).then((res) => {
+                      setCoordenadasGps({
+                        latitude,
+                        longitude,
+                        coberto: res.coberto,
+                        zonaAtendida: res.zonaAtendida,
+                        precisao: 5,
+                        status: 'OBTIDO',
+                        mensagem: res.mensagem,
+                      });
+                    });
+                  }}
+                  onExpandirMapa={() => setModalMapaVisible(true)}
+                  altura={200}
+                />
+
                 <View style={styles.gpsRowCliente}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1 }}>
-                    <Ionicons
-                      name={coordenadasGps.status === 'OBTIDO' ? 'navigate' : 'navigate-outline'}
-                      size={18}
-                      color={coordenadasGps.status === 'OBTIDO' ? '#10b981' : '#0284c7'}
-                    />
-                    <Text style={styles.gpsCoordenadasClienteText}>
-                      Lat: {coordenadasGps.latitude.toFixed(4)} | Lng: {coordenadasGps.longitude.toFixed(4)}
-                    </Text>
-                  </View>
                   <TouchableOpacity
                     style={styles.btnGpsCliente}
                     onPress={handleObterGps}
@@ -690,24 +721,24 @@ export function ClienteTabScreen({
                     ) : (
                       <>
                         <Ionicons name="locate" size={14} color="#0284c7" />
-                        <Text style={styles.btnGpsClienteText}>Atualizar GPS</Text>
+                        <Text style={styles.btnGpsClienteText}>Atualizar Meu GPS</Text>
                       </>
                     )}
                   </TouchableOpacity>
-                </View>
-                <Text style={styles.gpsSubCliente}>
-                  Coordenadas em Coqueiral/MG vinculadas ao chamado para atendimento de campo.
-                </Text>
 
-                {/* Botão para abrir o mapa interativo e checar cobertura */}
-                <TouchableOpacity
-                  style={styles.btnAbrirMapaCliente}
-                  onPress={() => setModalMapaVisible(true)}
-                  testID="btn-abrir-mapa-cliente"
-                >
-                  <Ionicons name="map-outline" size={15} color="#0284c7" />
-                  <Text style={styles.btnAbrirMapaClienteText}>Abrir no Mapa & Checar Disponibilidade 📍</Text>
-                </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.btnAbrirMapaCliente}
+                    onPress={() => setModalMapaVisible(true)}
+                    testID="btn-abrir-mapa-cliente"
+                  >
+                    <Ionicons name="expand" size={14} color="#0284c7" />
+                    <Text style={styles.btnAbrirMapaClienteText}>Expandir Mapa ⛶</Text>
+                  </TouchableOpacity>
+                </View>
+
+                <Text style={styles.gpsSubCliente}>
+                  Ponto de atendimento georreferenciado e vinculado ao chamado para deslocamento do técnico.
+                </Text>
               </View>
 
               {/* Botão de Enviar */}

@@ -286,39 +286,68 @@ export const MapaDisponibilidadeModal: React.FC<MapaDisponibilidadeModalProps> =
               />
             </MapView>
           ) : (
-            /* Visualização Interativa para Web / Emuladores sem módulo nativo */
-            <View style={styles.webMapFallback} testID="mapa-cobertura-fallback">
-              <View style={styles.webMapHeader}>
-                <Ionicons name="map-outline" size={32} color="#0284c7" />
-                <Text style={styles.webMapTitulo}>Simulador de Mapa Geográfico</Text>
-                <Text style={styles.webMapSub}>
-                  Coordenadas atuais: Lat {coordenadas.latitude.toFixed(4)} | Lng {coordenadas.longitude.toFixed(4)}
-                </Text>
+            /* Visualização Cartográfica Rica para Web e Universal */
+            <TouchableOpacity
+              activeOpacity={0.95}
+              style={styles.cartografiaContainer}
+              testID="mapa-cobertura-fallback"
+              onPress={resultado.coberto ? handleTestarFora : handleTestarCentro}
+            >
+              <View style={styles.ruaHorizontal1} />
+              <View style={styles.ruaHorizontal2} />
+              <View style={styles.ruaHorizontal3} />
+              <View style={styles.ruaVertical1} />
+              <View style={styles.ruaVertical2} />
+              <View style={styles.ruaVertical3} />
+
+              <Text style={styles.labelRuaPrincipal}>Av. Minas Gerais</Text>
+              <Text style={styles.labelRuaSecundaria}>Rua Direita</Text>
+              <Text style={styles.labelRuaCentro}>Praça 7 de Setembro</Text>
+
+              <View style={styles.areaVerdePraca}>
+                <Ionicons name="leaf" size={14} color="#15803d" />
+                <Text style={styles.areaVerdeTexto}>Matriz</Text>
               </View>
 
-              <View style={styles.webMapGrid}>
-                <View
-                  style={[
-                    styles.webMapAreaCoverage,
-                    resultado.coberto ? styles.webMapAreaActive : styles.webMapAreaInactive,
-                  ]}
-                >
-                  <Text style={styles.webMapAreaLabel}>
-                    ZONA DE FIBRA ÓPTICA CJNET (COQUEIRAL/MG)
-                  </Text>
-                  <View style={styles.webMapPinBox}>
-                    <Ionicons
-                      name="location"
-                      size={36}
-                      color={resultado.coberto ? '#10b981' : '#ef4444'}
-                    />
-                    <Text style={styles.webMapPinText}>
-                      {resultado.coberto ? 'Você está aqui (Coberto)' : 'Você está aqui (Fora)'}
-                    </Text>
-                  </View>
+              <View style={styles.poligonoZonaCentral}>
+                <View style={styles.tagFibraCentral}>
+                  <Ionicons name="flash" size={12} color="#0284c7" />
+                  <Text style={styles.tagFibraCentralText}>REDE DE FIBRA ÓPTICA CJNET</Text>
                 </View>
               </View>
-            </View>
+
+              {/* Marcador do Usuário */}
+              <View
+                style={[
+                  styles.marcadorPin,
+                  {
+                    top: (resultado.coberto ? '44%' : '76%') as any,
+                    left: (resultado.coberto ? '48%' : '78%') as any,
+                  },
+                ]}
+                testID="marcador-posicao-usuario"
+              >
+                <View
+                  style={[
+                    styles.pulsoGps,
+                    resultado.coberto ? styles.pulsoGpsVerde : styles.pulsoGpsVermelho,
+                  ]}
+                />
+                <View
+                  style={[
+                    styles.pinIconeBox,
+                    resultado.coberto ? styles.pinIconeVerde : styles.pinIconeVermelho,
+                  ]}
+                >
+                  <Ionicons name="location" size={26} color="#ffffff" />
+                </View>
+                <View style={styles.pinBalao}>
+                  <Text style={styles.pinBalaoTexto}>
+                    {resultado.coberto ? '📍 Você está aqui (Centro)' : '📍 Você está aqui (Rural)'}
+                  </Text>
+                </View>
+              </View>
+            </TouchableOpacity>
           )}
 
           {/* Dica flutuante para o usuário */}
@@ -398,11 +427,13 @@ export const MapaDisponibilidadeModal: React.FC<MapaDisponibilidadeModalProps> =
             {resultado.mensagem}
           </Text>
 
-          {/* Coordenadas Técnicas */}
+          {/* Localização Amigável (Substituindo latitude e longitude numéricas) */}
           <View style={styles.coordenadasInfoRow}>
-            <Ionicons name="navigate-outline" size={14} color="#64748b" />
+            <Ionicons name="business-outline" size={16} color="#0284c7" />
             <Text style={styles.coordenadasInfoText}>
-              Lat: {coordenadas.latitude.toFixed(5)} | Lng: {coordenadas.longitude.toFixed(5)} • Ponto Georreferenciado
+              {resultado.coberto
+                ? 'Coqueiral/MG • Bairro Centro e Adjacências (Fibra Ativa)'
+                : 'Coqueiral/MG • Zona Rural (Fora da Área Cabeada)'}
             </Text>
           </View>
 
@@ -523,28 +554,205 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 12,
   },
-  webMapAreaActive: {
-    backgroundColor: 'rgba(2, 132, 199, 0.15)',
-    borderColor: '#0284c7',
+  /* Estilos Cartográficos Ricos */
+  cartografiaContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: '#f1f5f9',
+    overflow: 'hidden',
   },
-  webMapAreaInactive: {
-    backgroundColor: 'rgba(239, 68, 68, 0.1)',
-    borderColor: '#ef4444',
+  ruaHorizontal1: {
+    position: 'absolute',
+    top: '28%',
+    left: 0,
+    right: 0,
+    height: 14,
+    backgroundColor: '#ffffff',
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: '#cbd5e1',
   },
-  webMapAreaLabel: {
-    fontSize: 11,
+  ruaHorizontal2: {
+    position: 'absolute',
+    top: '52%',
+    left: 0,
+    right: 0,
+    height: 18,
+    backgroundColor: '#ffffff',
+    borderTopWidth: 1.5,
+    borderBottomWidth: 1.5,
+    borderColor: '#94a3b8',
+  },
+  ruaHorizontal3: {
+    position: 'absolute',
+    top: '76%',
+    left: 0,
+    right: 0,
+    height: 12,
+    backgroundColor: '#ffffff',
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: '#cbd5e1',
+  },
+  ruaVertical1: {
+    position: 'absolute',
+    left: '20%',
+    top: 0,
+    bottom: 0,
+    width: 12,
+    backgroundColor: '#ffffff',
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderColor: '#cbd5e1',
+  },
+  ruaVertical2: {
+    position: 'absolute',
+    left: '50%',
+    top: 0,
+    bottom: 0,
+    width: 16,
+    backgroundColor: '#ffffff',
+    borderLeftWidth: 1.5,
+    borderRightWidth: 1.5,
+    borderColor: '#94a3b8',
+  },
+  ruaVertical3: {
+    position: 'absolute',
+    left: '75%',
+    top: 0,
+    bottom: 0,
+    width: 12,
+    backgroundColor: '#ffffff',
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderColor: '#cbd5e1',
+  },
+  labelRuaPrincipal: {
+    position: 'absolute',
+    top: '53%',
+    left: 10,
+    fontSize: 9,
     fontWeight: '700',
-    color: '#0369a1',
-    textAlign: 'center',
+    color: '#64748b',
+    textTransform: 'uppercase',
   },
-  webMapPinBox: {
-    alignItems: 'center',
-    marginTop: 10,
+  labelRuaSecundaria: {
+    position: 'absolute',
+    left: '51%',
+    top: 14,
+    fontSize: 8,
+    fontWeight: '700',
+    color: '#64748b',
+    textTransform: 'uppercase',
   },
-  webMapPinText: {
-    fontSize: 12,
+  labelRuaCentro: {
+    position: 'absolute',
+    top: '30%',
+    left: '28%',
+    fontSize: 8,
     fontWeight: '600',
-    color: '#0f172a',
+    color: '#94a3b8',
+  },
+  areaVerdePraca: {
+    position: 'absolute',
+    top: '33%',
+    left: '24%',
+    width: 55,
+    height: 34,
+    backgroundColor: '#dcfce7',
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#86efac',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  areaVerdeTexto: {
+    fontSize: 8,
+    fontWeight: '700',
+    color: '#15803d',
+  },
+  poligonoZonaCentral: {
+    position: 'absolute',
+    top: '20%',
+    left: '16%',
+    width: '66%',
+    height: '52%',
+    backgroundColor: 'rgba(2, 132, 199, 0.12)',
+    borderWidth: 2,
+    borderStyle: 'dashed',
+    borderColor: '#0284c7',
+    borderRadius: 14,
+    padding: 6,
+  },
+  tagFibraCentral: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    alignSelf: 'flex-start',
+    gap: 4,
+  },
+  tagFibraCentralText: {
+    fontSize: 8,
+    fontWeight: '800',
+    color: '#0284c7',
+  },
+  marcadorPin: {
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 60,
+    height: 60,
+    marginLeft: -30,
+    marginTop: -45,
+  },
+  pulsoGps: {
+    position: 'absolute',
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    opacity: 0.35,
+  },
+  pulsoGpsVerde: {
+    backgroundColor: '#10b981',
+  },
+  pulsoGpsVermelho: {
+    backgroundColor: '#ef4444',
+  },
+  pinIconeBox: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 6,
+  },
+  pinIconeVerde: {
+    backgroundColor: '#16a34a',
+  },
+  pinIconeVermelho: {
+    backgroundColor: '#dc2626',
+  },
+  pinBalao: {
+    backgroundColor: '#0f172a',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    marginTop: 3,
+  },
+  pinBalaoTexto: {
+    color: '#ffffff',
+    fontSize: 9,
+    fontWeight: '700',
   },
   dicaFlutuante: {
     position: 'absolute',
