@@ -141,6 +141,7 @@ export function ClienteTabScreen({
     mensagem: 'Ponto de atendimento na rede de fibra óptica CJnet.',
   });
   const [modalMapaVisible, setModalMapaVisible] = useState<boolean>(false);
+  const [mapaExpandido, setMapaExpandido] = useState<boolean>(false);
   const [criandoOS, setCriandoOS] = useState<boolean>(false);
 
   const handleConfirmarPontoMapa = (ponto: ResultadoLocalizacaoCobertura) => {
@@ -706,7 +707,9 @@ export function ClienteTabScreen({
                       });
                     });
                   }}
-                  onExpandirMapa={() => setModalMapaVisible(true)}
+                  expandido={mapaExpandido}
+                  onToggleExpandir={setMapaExpandido}
+                  onExpandirMapa={() => setMapaExpandido(true)}
                   altura={200}
                 />
 
@@ -728,7 +731,7 @@ export function ClienteTabScreen({
 
                   <TouchableOpacity
                     style={styles.btnAbrirMapaCliente}
-                    onPress={() => setModalMapaVisible(true)}
+                    onPress={() => setMapaExpandido(true)}
                     testID="btn-abrir-mapa-cliente"
                   >
                     <Ionicons name="expand" size={14} color="#0284c7" />

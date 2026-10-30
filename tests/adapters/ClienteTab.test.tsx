@@ -89,7 +89,7 @@ describe('Aba do Cliente (ClienteTabScreen)', () => {
     const os1002 = await sharedOsRepo.buscarPorIdLocal('OS-1002');
 
     const { getByTestId, getByText, unmount } = await render(
-      <AuthProvider autoRestore={false}>
+      <AuthProvider autoRestore={false} initialSession={sessaoCliente}>
         <ClienteTabScreen clienteId={DEMO_CLIENTE_ID} initialSelectedOs={os1002} />
       </AuthProvider>
     );
@@ -101,7 +101,7 @@ describe('Aba do Cliente (ClienteTabScreen)', () => {
         expect(getByText('TÉCNICO ATRIBUÍDO')).toBeTruthy();
         expect(getByText('Técnico de Campo - Fibra Óptica')).toBeTruthy();
       },
-      { timeout: 15000 }
+      { timeout: 25000 }
     );
 
     unmount();

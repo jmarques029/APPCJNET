@@ -35,7 +35,6 @@ import {
   SolicitarPreCadastroUseCase,
 } from '@/application/use-cases';
 import { useAuth } from '@/adapters/context/AuthContext';
-import { AppNavBar } from './components/AppNavBar';
 import {
   MapaDisponibilidadeModal,
   ResultadoLocalizacaoCobertura,
@@ -82,6 +81,7 @@ export function AssinaturaScreen({ onVoltar, onAssinarPlano, onSair }: Assinatur
     mensagem: 'Endereço dentro da zona de atendimento de fibra óptica CJnet.',
   });
   const [modalMapaVisible, setModalMapaVisible] = useState<boolean>(false);
+  const [mapaExpandido, setMapaExpandido] = useState<boolean>(false);
 
   const handleConfirmarDoMapa = (res: ResultadoLocalizacaoCobertura) => {
     setCoberturaGps({
@@ -183,6 +183,23 @@ export function AssinaturaScreen({ onVoltar, onAssinarPlano, onSair }: Assinatur
       return;
     }
 
+    // Regra: A tela de planos é somente para assinar se a área de cobertura for compatível
+    if (coberturaGps.status === 'IDLE') {
+      Alert.alert(
+        'Verificação de Cobertura Necessária 📍',
+        'Por favor, utilize o botão "Usar Meu GPS" ou ajuste o ponto no mapa para verificar a viabilidade técnica antes de assinar.'
+      );
+      return;
+    }
+
+    if (!coberturaGps.coberto) {
+      Alert.alert(
+        'Assinatura Indisponível ⚠️',
+        'Este endereço está fora da área de cobertura técnica de fibra óptica da CJnet no momento. A assinatura de planos só é permitida onde a cobertura for compatível.'
+      );
+      return;
+    }
+
     setSubmetendo(true);
     try {
       const useCase = new SolicitarPreCadastroUseCase(
@@ -203,9 +220,7 @@ export function AssinaturaScreen({ onVoltar, onAssinarPlano, onSair }: Assinatur
 
       setModalContratacaoVisible(false);
 
-      const msg = coberturaGps.coberto
-        ? `Protocolo: #${preCadastro.id}\n\n✅ Cobertura Confirmada na zona "${coberturaGps.zonaAtendida}"!\n\nNossa equipe em Coqueiral/MG entrará em contato para agendar sua instalação 100% gratuita!`
-        : `Protocolo: #${preCadastro.id}\n\n📍 Endereço recebido para análise de viabilidade técnica de expansão de rede. Entraremos em contato com você em breve!`;
+      const msg = `Protocolo: #${preCadastro.id}\n\n✅ Cobertura Confirmada na zona "${coberturaGps.zonaAtendida}"!\n\nNossa equipe em Coqueiral/MG entrará em contato para agendar sua instalação 100% gratuita!`;
 
       Alert.alert('Contratação Solicitada com Sucesso! 🎉', msg, [{ text: 'Concluir' }]);
     } catch (err: unknown) {
@@ -446,7 +461,9 @@ export function AssinaturaScreen({ onVoltar, onAssinarPlano, onSair }: Assinatur
                     onChangeCoordenadas={({ latitude, longitude }) => {
                       verificarCoberturaPorCoordenadas(latitude, longitude);
                     }}
-                    onExpandirMapa={() => setModalMapaVisible(true)}
+                    expandido={mapaExpandido}
+                    onToggleExpandir={setMapaExpandido}
+                    onExpandirMapa={() => setMapaExpandido(true)}
                     altura={220}
                   />
 
@@ -470,7 +487,7 @@ export function AssinaturaScreen({ onVoltar, onAssinarPlano, onSair }: Assinatur
 
                     <TouchableOpacity
                       style={styles.btnAbrirMapa}
-                      onPress={() => setModalMapaVisible(true)}
+                      onPress={() => setMapaExpandido(true)}
                       testID="btn-abrir-mapa-cobertura"
                     >
                       <Ionicons name="expand" size={16} color="#0284c7" style={{ marginRight: 6 }} />
@@ -535,7 +552,7 @@ export function AssinaturaScreen({ onVoltar, onAssinarPlano, onSair }: Assinatur
                       {/* Botão para ver/ajustar o ponto no mapa interativo */}
                       <TouchableOpacity
                         style={styles.btnVerNoMapaMini}
-                        onPress={() => setModalMapaVisible(true)}
+                        onPress={() => setMapaExpandido(true)}
                         testID="btn-ver-no-mapa"
                       >
                         <Ionicons name="map-outline" size={14} color="#0284c7" style={{ marginRight: 4 }} />
@@ -598,7 +615,11 @@ export function AssinaturaScreen({ onVoltar, onAssinarPlano, onSair }: Assinatur
 
                 {/* Botão de Finalização */}
                 <TouchableOpacity
-                  style={[styles.btnFinalizarContrato, submetendo && { opacity: 0.7 }]}
+                  style={[
+                    styles.btnFinalizarContrato,
+                    (!coberturaGps.coberto && coberturaGps.status === 'SUCESSO') && styles.btnFinalizarBloqueado,
+                    submetendo && { opacity: 0.7 },
+                  ]}
                   onPress={handleConfirmarContratacao}
                   disabled={submetendo}
                   testID="btn-finalizar-contratacao"
@@ -606,10 +627,19 @@ export function AssinaturaScreen({ onVoltar, onAssinarPlano, onSair }: Assinatur
                   {submetendo ? (
                     <ActivityIndicator size="small" color="#ffffff" style={{ marginRight: 8 }} />
                   ) : (
-                    <Ionicons name="checkmark-done-circle" size={22} color="#ffffff" style={{ marginRight: 8 }} />
+                    <Ionicons
+                      name={coberturaGps.coberto ? 'checkmark-done-circle' : 'alert-circle-outline'}
+                      size={22}
+                      color="#ffffff"
+                      style={{ marginRight: 8 }}
+                    />
                   )}
                   <Text style={styles.btnFinalizarContratoText}>
-                    {submetendo ? 'Registrando Solicitação...' : 'Confirmar Contratação & Instalação'}
+                    {submetendo
+                      ? 'Registrando Solicitação...'
+                      : (!coberturaGps.coberto && coberturaGps.status === 'SUCESSO')
+                      ? 'Assinatura Bloqueada (Fora de Cobertura)'
+                      : 'Confirmar Contratação & Instalação'}
                   </Text>
                 </TouchableOpacity>
 
@@ -635,7 +665,20 @@ export function AssinaturaScreen({ onVoltar, onAssinarPlano, onSair }: Assinatur
         titulo="Mapa de Cobertura CJnet"
       />
 
-      <AppNavBar currentTab="assinatura" onSair={onSair} />
+      {/* Barra Inferior Pública (Exclusiva da Vitrine de Planos - Sem acesso a chamados do cliente) */}
+      <View style={styles.barraInferiorPublica}>
+        <TouchableOpacity
+          style={styles.btnVoltarAoLoginBarra}
+          onPress={handleVoltar}
+          testID="btn-voltar-ao-login"
+        >
+          <Ionicons name="arrow-back-circle" size={20} color="#0284c7" />
+          <Text style={styles.btnVoltarAoLoginBarraText}>Voltar ao Início / Login</Text>
+        </TouchableOpacity>
+        <Text style={styles.textoInformativoPublico}>
+          Vitrine Comercial • Assinatura sujeita à cobertura técnica
+        </Text>
+      </View>
     </SafeAreaView>
   );
 }
@@ -1192,5 +1235,50 @@ const styles = StyleSheet.create({
     color: '#0284c7',
     fontSize: 12,
     fontWeight: '600',
+  },
+  btnFinalizarBloqueado: {
+    backgroundColor: '#b45309',
+    shadowColor: '#b45309',
+  },
+
+  /* Barra Inferior Pública (Sem acesso à área do cliente) */
+  barraInferiorPublica: {
+    backgroundColor: '#ffffff',
+    borderTopWidth: 1,
+    borderTopColor: '#e2e8f0',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#0f172a',
+    shadowOffset: { width: 0, height: -3 },
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 8,
+  },
+  btnVoltarAoLoginBarra: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#f0f9ff',
+    borderWidth: 1.5,
+    borderColor: '#bae6fd',
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    gap: 8,
+    width: '100%',
+    marginBottom: 6,
+  },
+  btnVoltarAoLoginBarraText: {
+    color: '#0284c7',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  textoInformativoPublico: {
+    fontSize: 11,
+    color: '#94a3b8',
+    fontWeight: '600',
+    textAlign: 'center',
   },
 });
