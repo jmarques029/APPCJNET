@@ -10,36 +10,36 @@
  *  - Estilização exclusiva via StyleSheet e Flexbox (com flexDirection: 'column' como padrão)
  */
 
-import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  ActivityIndicator,
-  Alert,
-  Platform,
-  Modal,
-  TextInput,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import * as Location from 'expo-location';
-import { PlanoInternet } from '@/domain/entities/PlanoInternet';
-import { sharedPlanoRepo, sharedAreaRepo, sharedPreCadastroRepo } from './mockStore';
-import {
-  ConsultarPlanosPublicosUseCase,
-  VerificarCoberturaUseCase,
-  SolicitarPreCadastroUseCase,
-} from '@/application/use-cases';
-import { useAuth } from '@/adapters/context/AuthContext';
 import {
   MapaDisponibilidadeModal,
   ResultadoLocalizacaoCobertura,
 } from '@/adapters/components/MapaDisponibilidadeModal';
 import { MapaVisualCobertura } from '@/adapters/components/MapaVisualCobertura';
+import { useAuth } from '@/adapters/context/AuthContext';
+import {
+  ConsultarPlanosPublicosUseCase,
+  SolicitarPreCadastroUseCase,
+  VerificarCoberturaUseCase,
+} from '@/application/use-cases';
+import { PlanoInternet } from '@/domain/entities/PlanoInternet';
+import { Ionicons } from '@expo/vector-icons';
+import * as Location from 'expo-location';
+import { router } from 'expo-router';
+import { useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  Modal,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { sharedAreaRepo, sharedPlanoRepo, sharedPreCadastroRepo } from './mockStore';
 
 export interface AssinaturaScreenProps {
   onVoltar?: () => void;
@@ -464,7 +464,7 @@ export function AssinaturaScreen({ onVoltar, onAssinarPlano, onSair }: Assinatur
                     expandido={mapaExpandido}
                     onToggleExpandir={setMapaExpandido}
                     onExpandirMapa={() => setMapaExpandido(true)}
-                    altura={220}
+                    altura={250}
                   />
 
                   {/* Botões de Ação Rápida */}
@@ -638,8 +638,8 @@ export function AssinaturaScreen({ onVoltar, onAssinarPlano, onSair }: Assinatur
                     {submetendo
                       ? 'Registrando Solicitação...'
                       : (!coberturaGps.coberto && coberturaGps.status === 'SUCESSO')
-                      ? 'Assinatura Bloqueada (Fora de Cobertura)'
-                      : 'Confirmar Contratação & Instalação'}
+                        ? 'Assinatura Bloqueada (Fora de Cobertura)'
+                        : 'Confirmar Contratação & Instalação'}
                   </Text>
                 </TouchableOpacity>
 
@@ -1014,6 +1014,8 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   geoSectionTitle: {
+    flex: 1,
+    flexShrink: 1,
     fontSize: 15,
     fontWeight: '700',
     color: '#0f172a',
@@ -1070,12 +1072,14 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingVertical: 6,
     paddingHorizontal: 10,
+    maxWidth: '100%',
   },
   btnSimularText: {
     fontSize: 11,
     fontWeight: '600',
     color: '#334155',
     marginLeft: 6,
+    flexShrink: 1,
   },
   resultadoGpsCard: {
     borderRadius: 12,
@@ -1176,6 +1180,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: '#16a34a',
     paddingVertical: 14,
+    paddingHorizontal: 14,
     borderRadius: 14,
     marginTop: 8,
     shadowColor: '#16a34a',
@@ -1188,6 +1193,8 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 15,
     fontWeight: '700',
+    flexShrink: 1,
+    textAlign: 'center',
   },
   btnCancelarContrato: {
     alignItems: 'center',

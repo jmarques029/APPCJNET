@@ -11,20 +11,19 @@
  * sem depender de múltiplos Modals nativos concorrentes.
  */
 
+import { LocationService } from '@/infra/device/LocationService';
+import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
   ActivityIndicator,
-  Platform,
-  Dimensions,
   Modal,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { LocationService } from '@/infra/device/LocationService';
 
 // Import condicional do react-native-maps para plataformas nativas
 let MapView: any = null;
@@ -135,9 +134,9 @@ export const MapaVisualCobertura: React.FC<MapaVisualCoberturaProps> = ({
   };
 
   // Posição percentual visual do marcador no mapa interativo
-  // Centro = ~44%, Rural = ~76%
-  const pinPosTop = coberto ? '44%' : '76%';
-  const pinPosLeft = coberto ? '48%' : '78%';
+  // Mantém o marcador centralizado na área visível entre os overlays superior e inferior
+  const pinPosTop = coberto ? '42%' : '54%';
+  const pinPosLeft = coberto ? '48%' : '62%';
 
   /**
    * Renderização da camada de mapa (Nativa ou Cartográfica Universal)
@@ -219,7 +218,9 @@ export const MapaVisualCobertura: React.FC<MapaVisualCoberturaProps> = ({
           <View style={styles.poligonoZonaCentral}>
             <View style={styles.tagFibraCentral}>
               <Ionicons name="flash" size={10} color="#0284c7" />
-              <Text style={styles.tagFibraCentralText}>REDE DE FIBRA ÓPTICA CJNET</Text>
+              <Text style={styles.tagFibraCentralText} numberOfLines={1}>
+                REDE DE FIBRA ÓPTICA CJNET
+              </Text>
             </View>
           </View>
 
@@ -245,15 +246,15 @@ export const MapaVisualCobertura: React.FC<MapaVisualCoberturaProps> = ({
                 coberto ? styles.pinIconeVerde : styles.pinIconeVermelho,
               ]}
             >
-              <Ionicons name="location" size={26} color="#ffffff" />
+              <Ionicons name="location" size={24} color="#ffffff" />
             </View>
             <View style={styles.pinSombra} />
 
             {/* Balão "Você está aqui" */}
             <View style={styles.pinBalao}>
-              <Text style={styles.pinBalaoTexto}>
-                {coberto ? '📍 Você está aqui (Centro)' : '📍 Ponto Marcado (Rural)'}
-              </Text>
+                <Text style={styles.pinBalaoTexto} numberOfLines={1}>
+                  {coberto ? '📍 Você está aqui (Centro)' : '📍 Ponto Marcado (Rural)'}
+                </Text>
             </View>
           </View>
         </TouchableOpacity>
@@ -659,30 +660,33 @@ const styles = StyleSheet.create({
   poligonoZonaCentral: {
     position: 'absolute',
     top: '20%',
-    left: '16%',
-    width: '66%',
-    height: '52%',
+    left: '14%',
+    width: '68%',
+    height: '48%',
     backgroundColor: 'rgba(2, 132, 199, 0.12)',
     borderWidth: 2,
     borderStyle: 'dashed',
     borderColor: '#0284c7',
     borderRadius: 14,
     padding: 6,
+    overflow: 'hidden',
   },
   tagFibraCentral: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    backgroundColor: 'rgba(255, 255, 255, 0.92)',
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
     alignSelf: 'flex-start',
+    maxWidth: '100%',
     gap: 4,
   },
   tagFibraCentralText: {
     fontSize: 8,
     fontWeight: '800',
     color: '#0284c7',
+    flexShrink: 1,
   },
 
   /* Marcador do Usuário */
@@ -690,16 +694,16 @@ const styles = StyleSheet.create({
     position: 'absolute',
     alignItems: 'center',
     justifyContent: 'center',
-    width: 60,
-    height: 60,
-    marginLeft: -30,
-    marginTop: -45,
+    width: 148,
+    marginLeft: -74,
+    marginTop: -32,
   },
   pulsoGps: {
     position: 'absolute',
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    top: -4,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     opacity: 0.35,
   },
   pulsoGpsVerde: {
@@ -709,9 +713,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#ef4444',
   },
   pinIconeBox: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000000',
@@ -739,11 +743,13 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     borderRadius: 6,
     marginTop: 3,
+    maxWidth: 144,
   },
   pinBalaoTexto: {
     color: '#ffffff',
     fontSize: 9,
     fontWeight: '700',
+    textAlign: 'center',
   },
 
   /* Overlay Topo */
@@ -765,6 +771,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 1,
     marginRight: 8,
+    overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -780,12 +787,14 @@ const styles = StyleSheet.create({
     borderColor: '#fca5a5',
   },
   badgeStatusTitulo: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '800',
+    flexShrink: 1,
   },
   badgeStatusSub: {
     fontSize: 10,
     fontWeight: '600',
+    flexShrink: 1,
   },
 
   btnAcaoFlutuante: {
@@ -839,23 +848,24 @@ const styles = StyleSheet.create({
   controlesRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    flexWrap: 'wrap',
     gap: 6,
   },
   btnGpsRapido: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#0284c7',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 5,
     borderRadius: 6,
   },
   btnGpsRapidoText: {
     color: '#ffffff',
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '700',
   },
   btnAlternarPonto: {
-    paddingHorizontal: 8,
+    paddingHorizontal: 7,
     paddingVertical: 5,
     borderRadius: 6,
     backgroundColor: '#f1f5f9',
@@ -879,7 +889,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#ffffff',
-    paddingHorizontal: 8,
+    paddingHorizontal: 7,
     paddingVertical: 5,
     borderRadius: 6,
     borderWidth: 1,
@@ -980,7 +990,9 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 14,
     left: 16,
+    right: 16,
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 8,
   },
   btnSimularFullscreen: {
@@ -1064,6 +1076,7 @@ const styles = StyleSheet.create({
   btnConfirmarFullscreen: {
     marginTop: 14,
     paddingVertical: 14,
+    paddingHorizontal: 14,
     borderRadius: 12,
     flexDirection: 'row',
     alignItems: 'center',
@@ -1080,5 +1093,7 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 15,
     fontWeight: '700',
+    flexShrink: 1,
+    textAlign: 'center',
   },
 });

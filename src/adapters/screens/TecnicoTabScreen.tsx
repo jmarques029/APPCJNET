@@ -416,152 +416,152 @@ export function TecnicoTabScreen({
             {osParaFechar && (
               <>
                 <View style={styles.modalHeader}>
-                  <View>
-                    <Text style={styles.modalTitulo}>Concluir OS #{osParaFechar.idLocal}</Text>
-                    <Text style={styles.modalSubtitulo}>{osParaFechar.tipoProblema.label}</Text>
-                  </View>
-                  <TouchableOpacity
-                    onPress={() => setModalFecharOS(false)}
-                    style={styles.modalCloseBtn}
-                  >
-                    <Ionicons name="close" size={22} color="#64748b" />
-                  </TouchableOpacity>
-                </View>
-
-                <ScrollView showsVerticalScrollIndicator={false} style={styles.modalForm}>
-                  {/* Descrição do Problema Relatado */}
-                  <View style={styles.blocoProblema}>
-                    <Text style={styles.blocoProblemaTitulo}>Problema a Resolver:</Text>
-                    <Text style={styles.blocoProblemaTexto}>{osParaFechar.descricao}</Text>
+                    <View style={{ flex: 1, marginRight: 8 }}>
+                      <Text style={styles.modalTitulo}>Concluir OS #{osParaFechar.idLocal}</Text>
+                      <Text style={styles.modalSubtitulo}>{osParaFechar.tipoProblema.label}</Text>
+                    </View>
+                    <TouchableOpacity
+                      onPress={() => setModalFecharOS(false)}
+                      style={styles.modalCloseBtn}
+                    >
+                      <Ionicons name="close" size={22} color="#64748b" />
+                    </TouchableOpacity>
                   </View>
 
-                  {/* Foto prévia do cliente (autodiagnóstico da ONU) */}
-                  {osParaFechar.fotos && osParaFechar.fotos.length > 0 && (
+                  <ScrollView showsVerticalScrollIndicator={false} style={styles.modalForm}>
+                    {/* Descrição do Problema Relatado */}
                     <View style={styles.blocoProblema}>
-                      <Text style={styles.blocoProblemaTitulo}>Foto Anexada pelo Cliente:</Text>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 6, gap: 10 }}>
+                      <Text style={styles.blocoProblemaTitulo}>Problema a Resolver:</Text>
+                      <Text style={styles.blocoProblemaTexto}>{osParaFechar.descricao}</Text>
+                    </View>
+
+                    {/* Foto prévia do cliente (autodiagnóstico da ONU) */}
+                    {osParaFechar.fotos && osParaFechar.fotos.length > 0 && (
+                      <View style={styles.blocoProblema}>
+                        <Text style={styles.blocoProblemaTitulo}>Foto Anexada pelo Cliente:</Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 6, gap: 10 }}>
+                          <Image
+                            source={{ uri: osParaFechar.fotos[0].fotoLocalPath }}
+                            style={{ width: 64, height: 64, borderRadius: 8, backgroundColor: '#0f172a' }}
+                          />
+                          <View style={{ flex: 1 }}>
+                            <Text style={{ fontSize: 12, fontWeight: '700', color: '#0f172a' }}>
+                              Luzes da ONU / Roteador
+                            </Text>
+                            <Text style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>
+                              {osParaFechar.fotos[0].tamanhoKb} KB • Enviada no chamado
+                            </Text>
+                          </View>
+                        </View>
+                      </View>
+                    )}
+
+                    {/* 1. Tirar Foto da Resolução do Problema (Requisito Explícito) */}
+                    <Text style={styles.formLabel}>
+                      1. Foto da Resolução do Problema (Obrigatório):
+                    </Text>
+                    <TouchableOpacity
+                      style={[
+                        styles.btnCapturaFoto,
+                        fotoResolucao.anexada && styles.btnCapturaFotoSucesso,
+                      ]}
+                      onPress={handleTirarFotoCelular}
+                      testID="btn-tirar-foto-resolucao"
+                    >
+                      <Ionicons
+                        name={fotoResolucao.anexada ? 'checkmark-circle' : 'camera'}
+                        size={24}
+                        color={fotoResolucao.anexada ? '#10b981' : '#0284c7'}
+                      />
+                      <View style={{ flex: 1, marginLeft: 10 }}>
+                        <Text
+                          style={[
+                            styles.btnCapturaFotoTitulo,
+                            fotoResolucao.anexada && { color: '#10b981' },
+                          ]}
+                        >
+                          {fotoResolucao.anexada
+                            ? 'Foto da Resolução Anexada! 📸'
+                            : 'Tirar Foto da Resolução / Reparo'}
+                        </Text>
+                        <Text style={styles.btnCapturaFotoSub}>
+                          {fotoResolucao.anexada
+                            ? `reparo-fibra-cto04.jpg (${fotoResolucao.tamanhoKb} KB <= 1MB)`
+                            : 'Abra a câmera do dispositivo para fotografar o conserto'}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+
+                    {/* Botão Câmera Real do Celular para o Técnico */}
+                    <TouchableOpacity
+                      style={styles.btnCameraTecnicoReal}
+                      onPress={handleTirarFotoCelular}
+                      testID="btn-abrir-camera-tecnico"
+                    >
+                      <Ionicons name="camera" size={16} color="#0284c7" />
+                      <Text style={styles.btnCameraTecnicoRealText}>
+                        {fotoResolucao.anexada ? 'Fotografar Novamente com a Câmera do Celular' : 'Abrir Câmera do Celular'}
+                      </Text>
+                    </TouchableOpacity>
+
+                    {/* Preview da Foto de Resolução Anexada com Tratamento de Imagem */}
+                    {fotoResolucao.anexada && fotoResolucao.caminho && (
+                      <View style={styles.previewFotoReparoContainer}>
                         <Image
-                          source={{ uri: osParaFechar.fotos[0].fotoLocalPath }}
-                          style={{ width: 64, height: 64, borderRadius: 8, backgroundColor: '#0f172a' }}
+                          source={{ uri: fotoResolucao.caminho }}
+                          style={styles.previewFotoReparo}
+                          resizeMode="cover"
                         />
-                        <View style={{ flex: 1 }}>
-                          <Text style={{ fontSize: 12, fontWeight: '700', color: '#0f172a' }}>
-                            Luzes da ONU / Roteador
-                          </Text>
-                          <Text style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>
-                            {osParaFechar.fotos[0].tamanhoKb} KB • Enviada no chamado
+                        <View style={styles.previewFotoReparoBadge}>
+                          <Ionicons name="shield-checkmark" size={14} color="#10b981" />
+                          <Text style={styles.previewFotoReparoBadgeText}>
+                            Laudo de Reparo • Cortada & Comprimida • {fotoResolucao.tamanhoKb} KB
                           </Text>
                         </View>
                       </View>
-                    </View>
-                  )}
-
-                  {/* 1. Tirar Foto da Resolução do Problema (Requisito Explícito) */}
-                  <Text style={styles.formLabel}>
-                    1. Foto da Resolução do Problema (Obrigatório):
-                  </Text>
-                  <TouchableOpacity
-                    style={[
-                      styles.btnCapturaFoto,
-                      fotoResolucao.anexada && styles.btnCapturaFotoSucesso,
-                    ]}
-                    onPress={handleTirarFotoCelular}
-                    testID="btn-tirar-foto-resolucao"
-                  >
-                    <Ionicons
-                      name={fotoResolucao.anexada ? 'checkmark-circle' : 'camera'}
-                      size={24}
-                      color={fotoResolucao.anexada ? '#10b981' : '#0284c7'}
-                    />
-                    <View style={{ flex: 1, marginLeft: 10 }}>
-                      <Text
-                        style={[
-                          styles.btnCapturaFotoTitulo,
-                          fotoResolucao.anexada && { color: '#10b981' },
-                        ]}
-                      >
-                        {fotoResolucao.anexada
-                          ? 'Foto da Resolução Anexada! 📸'
-                          : 'Tirar Foto da Resolução / Reparo'}
-                      </Text>
-                      <Text style={styles.btnCapturaFotoSub}>
-                        {fotoResolucao.anexada
-                          ? `reparo-fibra-cto04.jpg (${fotoResolucao.tamanhoKb} KB <= 1MB)`
-                          : 'Abra a câmera do dispositivo para fotografar o conserto'}
-                      </Text>
-                    </View>
-                  </TouchableOpacity>
-
-                  {/* Botão Câmera Real do Celular para o Técnico */}
-                  <TouchableOpacity
-                    style={styles.btnCameraTecnicoReal}
-                    onPress={handleTirarFotoCelular}
-                    testID="btn-abrir-camera-tecnico"
-                  >
-                    <Ionicons name="camera" size={16} color="#0284c7" />
-                    <Text style={styles.btnCameraTecnicoRealText}>
-                      {fotoResolucao.anexada ? 'Fotografar Novamente com a Câmera do Celular' : 'Abrir Câmera do Celular'}
-                    </Text>
-                  </TouchableOpacity>
-
-                  {/* Preview da Foto de Resolução Anexada com Tratamento de Imagem */}
-                  {fotoResolucao.anexada && fotoResolucao.caminho && (
-                    <View style={styles.previewFotoReparoContainer}>
-                      <Image
-                        source={{ uri: fotoResolucao.caminho }}
-                        style={styles.previewFotoReparo}
-                        resizeMode="cover"
-                      />
-                      <View style={styles.previewFotoReparoBadge}>
-                        <Ionicons name="shield-checkmark" size={14} color="#10b981" />
-                        <Text style={styles.previewFotoReparoBadgeText}>
-                          Laudo de Reparo • Cortada & Comprimida • {fotoResolucao.tamanhoKb} KB
-                        </Text>
-                      </View>
-                    </View>
-                  )}
-
-                  {/* 2. Parecer Técnico da Resolução */}
-                  <Text style={styles.formLabel}>2. Parecer Técnico da Solução:</Text>
-                  <TextInput
-                    style={styles.inputParecer}
-                    placeholder="Descreva a ação realizada (ex: Conector óptico na CTO refeito, potência em -19.4 dBm, navegação normalizada)..."
-                    placeholderTextColor="#94a3b8"
-                    multiline
-                    numberOfLines={4}
-                    value={parecerTecnico}
-                    onChangeText={setParecerTecnico}
-                    testID="input-parecer-tecnico"
-                  />
-
-                  {/* Botão de Confirmação */}
-                  <TouchableOpacity
-                    style={[
-                      styles.btnConfirmarFechamento,
-                      (!fotoResolucao.anexada || parecerTecnico.trim().length < 5 || concluindo) && {
-                        opacity: 0.6,
-                      },
-                    ]}
-                    onPress={handleConfirmarFechamento}
-                    disabled={concluindo || !fotoResolucao.anexada || parecerTecnico.trim().length < 5}
-                    testID="btn-confirmar-fechamento-os"
-                  >
-                    {concluindo ? (
-                      <ActivityIndicator color="#ffffff" />
-                    ) : (
-                      <>
-                        <Ionicons name="checkmark-done" size={20} color="#ffffff" />
-                        <Text style={styles.btnConfirmarFechamentoText}>
-                          Fechar Ordem de Serviço
-                        </Text>
-                      </>
                     )}
-                  </TouchableOpacity>
-                </ScrollView>
-              </>
+
+                    {/* 2. Parecer Técnico da Resolução */}
+                    <Text style={styles.formLabel}>2. Parecer Técnico da Solução:</Text>
+                    <TextInput
+                      style={styles.inputParecer}
+                      placeholder="Descreva a ação realizada (ex: Conector óptico na CTO refeito, potência em -19.4 dBm, navegação normalizada)..."
+                      placeholderTextColor="#94a3b8"
+                      multiline
+                      numberOfLines={4}
+                      value={parecerTecnico}
+                      onChangeText={setParecerTecnico}
+                      testID="input-parecer-tecnico"
+                    />
+
+                    {/* Botão de Confirmação */}
+                    <TouchableOpacity
+                      style={[
+                        styles.btnConfirmarFechamento,
+                        (!fotoResolucao.anexada || parecerTecnico.trim().length < 5 || concluindo) && {
+                          opacity: 0.6,
+                        },
+                      ]}
+                      onPress={handleConfirmarFechamento}
+                      disabled={concluindo || !fotoResolucao.anexada || parecerTecnico.trim().length < 5}
+                      testID="btn-confirmar-fechamento-os"
+                    >
+                      {concluindo ? (
+                        <ActivityIndicator color="#ffffff" />
+                      ) : (
+                        <>
+                          <Ionicons name="checkmark-done" size={20} color="#ffffff" />
+                          <Text style={styles.btnConfirmarFechamentoText}>
+                            Fechar Ordem de Serviço
+                          </Text>
+                        </>
+                      )}
+                    </TouchableOpacity>
+                  </ScrollView>
+                </>
             )}
+              </View>
           </View>
-        </View>
       </Modal>
 
       {/* Modal de Câmera Nativa Expo v57 */}
@@ -602,6 +602,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 8,
     marginBottom: 8,
   },
   badgeTecnico: {
@@ -675,6 +677,8 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   secaoTitulo: {
+    flex: 1,
+    flexShrink: 1,
     fontSize: 17,
     fontWeight: '700',
     color: '#0f172a',
@@ -731,6 +735,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 6,
   },
   protocoloTag: {
     backgroundColor: '#f1f5f9',
@@ -793,6 +799,8 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   infoClienteText: {
+    flex: 1,
+    flexShrink: 1,
     fontSize: 12,
     color: '#64748b',
     fontWeight: '500',
@@ -962,8 +970,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#bae6fd',
     alignSelf: 'flex-start',
+    maxWidth: '100%',
   },
   badgeFotosClienteText: {
+    flexShrink: 1,
     fontSize: 11,
     color: '#0284c7',
     fontWeight: '600',
@@ -977,6 +987,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(2, 132, 199, 0.3)',
     borderRadius: 10,
     paddingVertical: 9,
+    paddingHorizontal: 12,
     marginTop: 8,
     gap: 6,
   },
@@ -984,6 +995,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '700',
     color: '#0284c7',
+    flexShrink: 1,
+    textAlign: 'center',
   },
   previewFotoReparoContainer: {
     marginTop: 10,
@@ -1003,6 +1016,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 8,
     left: 8,
+    right: 8,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'rgba(15, 23, 42, 0.8)',
@@ -1015,6 +1029,7 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 11,
     fontWeight: '600',
+    flexShrink: 1,
   },
   accessDeniedCard: {
     flex: 1,

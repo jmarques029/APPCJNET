@@ -5,18 +5,17 @@
  * principais do aplicativo CJnet (Histórico, Nova OS, Planos) e botão Sair.
  */
 
-import React from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Alert,
-  Platform,
-} from 'react-native';
+import { useAuth } from '@/adapters/context/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { useAuth } from '@/adapters/context/AuthContext';
+import {
+  Alert,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 export interface AppNavBarProps {
   currentTab: 'cliente' | 'tecnico' | 'admin' | 'historico' | 'atividades' | 'assinatura';
@@ -243,6 +242,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 4,
+    paddingHorizontal: 4,
     borderRadius: 8,
   },
   navItemActive: {
@@ -256,6 +256,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#64748b',
     marginTop: 3,
+    textAlign: 'center',
   },
   navLabelActive: {
     color: '#0284c7',

@@ -12,23 +12,23 @@
  *  - Compatível com Android, iOS e fallback visual para Web.
  */
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import {
-  Modal,
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ActivityIndicator,
-  Platform,
-  Dimensions,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { LocationService } from '@/infra/device/LocationService';
 import { sharedAreaRepo } from '@/adapters/screens/mockStore';
 import { VerificarCoberturaUseCase } from '@/application/use-cases/cobertura/VerificarCoberturaUseCase';
 import { ResultadoValidacaoCobertura } from '@/domain/services/ValidacaoCoberturaService';
+import { LocationService } from '@/infra/device/LocationService';
+import { Ionicons } from '@expo/vector-icons';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  ActivityIndicator,
+  Dimensions,
+  Modal,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 // Import condicional do react-native-maps para suporte universal
 let MapView: any = null;
@@ -312,7 +312,9 @@ export const MapaDisponibilidadeModal: React.FC<MapaDisponibilidadeModalProps> =
               <View style={styles.poligonoZonaCentral}>
                 <View style={styles.tagFibraCentral}>
                   <Ionicons name="flash" size={12} color="#0284c7" />
-                  <Text style={styles.tagFibraCentralText}>REDE DE FIBRA ÓPTICA CJNET</Text>
+                  <Text style={styles.tagFibraCentralText} numberOfLines={1}>
+                    REDE DE FIBRA ÓPTICA CJNET
+                  </Text>
                 </View>
               </View>
 
@@ -321,8 +323,8 @@ export const MapaDisponibilidadeModal: React.FC<MapaDisponibilidadeModalProps> =
                 style={[
                   styles.marcadorPin,
                   {
-                    top: (resultado.coberto ? '44%' : '76%') as any,
-                    left: (resultado.coberto ? '48%' : '78%') as any,
+                    top: (resultado.coberto ? '42%' : '56%') as any,
+                    left: (resultado.coberto ? '48%' : '62%') as any,
                   },
                 ]}
                 testID="marcador-posicao-usuario"
@@ -339,12 +341,12 @@ export const MapaDisponibilidadeModal: React.FC<MapaDisponibilidadeModalProps> =
                     resultado.coberto ? styles.pinIconeVerde : styles.pinIconeVermelho,
                   ]}
                 >
-                  <Ionicons name="location" size={26} color="#ffffff" />
+                  <Ionicons name="location" size={24} color="#ffffff" />
                 </View>
                 <View style={styles.pinBalao}>
-                  <Text style={styles.pinBalaoTexto}>
-                    {resultado.coberto ? '📍 Você está aqui (Centro)' : '📍 Você está aqui (Rural)'}
-                  </Text>
+                    <Text style={styles.pinBalaoTexto} numberOfLines={1}>
+                      {resultado.coberto ? '📍 Você está aqui (Centro)' : '📍 Você está aqui (Rural)'}
+                    </Text>
                 </View>
               </View>
             </TouchableOpacity>
@@ -677,45 +679,48 @@ const styles = StyleSheet.create({
   poligonoZonaCentral: {
     position: 'absolute',
     top: '20%',
-    left: '16%',
-    width: '66%',
-    height: '52%',
+    left: '14%',
+    width: '68%',
+    height: '48%',
     backgroundColor: 'rgba(2, 132, 199, 0.12)',
     borderWidth: 2,
     borderStyle: 'dashed',
     borderColor: '#0284c7',
     borderRadius: 14,
     padding: 6,
+    overflow: 'hidden',
   },
   tagFibraCentral: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    backgroundColor: 'rgba(255, 255, 255, 0.92)',
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
     alignSelf: 'flex-start',
+    maxWidth: '100%',
     gap: 4,
   },
   tagFibraCentralText: {
     fontSize: 8,
     fontWeight: '800',
     color: '#0284c7',
+    flexShrink: 1,
   },
   marcadorPin: {
     position: 'absolute',
     alignItems: 'center',
     justifyContent: 'center',
-    width: 60,
-    height: 60,
-    marginLeft: -30,
-    marginTop: -45,
+    width: 148,
+    marginLeft: -74,
+    marginTop: -32,
   },
   pulsoGps: {
     position: 'absolute',
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    top: -4,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     opacity: 0.35,
   },
   pulsoGpsVerde: {
@@ -725,9 +730,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#ef4444',
   },
   pinIconeBox: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000000',
@@ -748,11 +753,13 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     borderRadius: 6,
     marginTop: 3,
+    maxWidth: 144,
   },
   pinBalaoTexto: {
     color: '#ffffff',
     fontSize: 9,
     fontWeight: '700',
+    textAlign: 'center',
   },
   dicaFlutuante: {
     position: 'absolute',
@@ -781,7 +788,9 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 12,
     left: 16,
+    right: 16,
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 8,
   },
   btnSimularMini: {
@@ -858,12 +867,15 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   coordenadasInfoText: {
+    flex: 1,
+    flexShrink: 1,
     fontSize: 11,
     color: '#64748b',
   },
   btnConfirmarLocal: {
     marginTop: 14,
     paddingVertical: 13,
+    paddingHorizontal: 14,
     borderRadius: 10,
     flexDirection: 'row',
     alignItems: 'center',
@@ -880,5 +892,7 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 15,
     fontWeight: '700',
+    flexShrink: 1,
+    textAlign: 'center',
   },
 });

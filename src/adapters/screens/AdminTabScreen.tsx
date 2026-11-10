@@ -386,8 +386,8 @@ export function AdminTabScreen({
                           isConcluida
                             ? styles.statusConcluido
                             : temTecnico
-                            ? styles.statusEmAtendimento
-                            : styles.statusPendente,
+                              ? styles.statusEmAtendimento
+                              : styles.statusPendente,
                         ]}
                       >
                         <Text
@@ -397,16 +397,16 @@ export function AdminTabScreen({
                               color: isConcluida
                                 ? '#15803d'
                                 : temTecnico
-                                ? '#0369a1'
-                                : '#b45309',
+                                  ? '#0369a1'
+                                  : '#b45309',
                             },
                           ]}
                         >
                           {isConcluida
                             ? 'Concluída'
                             : temTecnico
-                            ? 'Em Atendimento'
-                            : 'Pendente de Técnico'}
+                              ? 'Em Atendimento'
+                              : 'Pendente de Técnico'}
                         </Text>
                       </View>
                     </View>
@@ -494,69 +494,69 @@ export function AdminTabScreen({
             {osParaAtribuir && (
               <>
                 <View style={styles.modalHeader}>
-                  <View>
-                    <Text style={styles.modalTitulo}>Atribuir Técnico de Campo</Text>
-                    <Text style={styles.modalSubtitulo}>
-                      OS #{osParaAtribuir.idLocal} • {osParaAtribuir.tipoProblema.label}
-                    </Text>
+                    <View style={{ flex: 1, marginRight: 8 }}>
+                      <Text style={styles.modalTitulo}>Atribuir Técnico de Campo</Text>
+                      <Text style={styles.modalSubtitulo}>
+                        OS #{osParaAtribuir.idLocal} • {osParaAtribuir.tipoProblema.label}
+                      </Text>
+                    </View>
+                    <TouchableOpacity
+                      onPress={() => setModalAtribuir(false)}
+                      style={styles.modalCloseBtn}
+                    >
+                      <Ionicons name="close" size={22} color="#64748b" />
+                    </TouchableOpacity>
                   </View>
-                  <TouchableOpacity
-                    onPress={() => setModalAtribuir(false)}
-                    style={styles.modalCloseBtn}
-                  >
-                    <Ionicons name="close" size={22} color="#64748b" />
-                  </TouchableOpacity>
-                </View>
 
-                <Text style={styles.modalDesc}>
-                  Selecione o técnico disponível da CJnet para atender esta solicitação:
-                </Text>
-
-                {/* Lista de Técnicos Disponíveis */}
-                <View style={styles.listaTecnicosSelecao}>
-                  {TECNICOS_DISPONIVEIS.map((tec) => {
-                    const isSelected = tecnicoSelecionado === tec.id;
-                    return (
-                      <TouchableOpacity
-                        key={tec.id}
-                        style={[
-                          styles.cardTecnicoItem,
-                          isSelected && styles.cardTecnicoItemSelected,
-                        ]}
-                        onPress={() => setTecnicoSelecionado(tec.id)}
-                        testID={`opcao-tecnico-${tec.id}`}
-                      >
-                        <Ionicons
-                          name={isSelected ? 'radio-button-on' : 'radio-button-off'}
-                          size={20}
-                          color={isSelected ? '#0284c7' : '#94a3b8'}
-                        />
-                        <View style={{ flex: 1, marginLeft: 10 }}>
-                          <Text style={styles.cardTecnicoNome}>{tec.nome}</Text>
-                          <Text style={styles.cardTecnicoFuncao}>{tec.funcao}</Text>
-                          <Text style={styles.cardTecnicoEsp}>
-                            {tec.especialidade} • {tec.telefone}
-                          </Text>
-                        </View>
-                      </TouchableOpacity>
-                    );
-                  })}
-                </View>
-
-                <TouchableOpacity
-                  style={styles.btnConfirmarAtribuicao}
-                  onPress={handleConfirmarAtribuicao}
-                  testID="btn-confirmar-atribuicao"
-                >
-                  <Ionicons name="checkmark-sharp" size={20} color="#ffffff" />
-                  <Text style={styles.btnConfirmarAtribuicaoText}>
-                    Confirmar Despacho do Técnico
+                  <Text style={styles.modalDesc}>
+                    Selecione o técnico disponível da CJnet para atender esta solicitação:
                   </Text>
-                </TouchableOpacity>
-              </>
+
+                  {/* Lista de Técnicos Disponíveis */}
+                  <View style={styles.listaTecnicosSelecao}>
+                    {TECNICOS_DISPONIVEIS.map((tec) => {
+                      const isSelected = tecnicoSelecionado === tec.id;
+                      return (
+                        <TouchableOpacity
+                          key={tec.id}
+                          style={[
+                            styles.cardTecnicoItem,
+                            isSelected && styles.cardTecnicoItemSelected,
+                          ]}
+                          onPress={() => setTecnicoSelecionado(tec.id)}
+                          testID={`opcao-tecnico-${tec.id}`}
+                        >
+                          <Ionicons
+                            name={isSelected ? 'radio-button-on' : 'radio-button-off'}
+                            size={20}
+                            color={isSelected ? '#0284c7' : '#94a3b8'}
+                          />
+                          <View style={{ flex: 1, marginLeft: 10 }}>
+                            <Text style={styles.cardTecnicoNome}>{tec.nome}</Text>
+                            <Text style={styles.cardTecnicoFuncao}>{tec.funcao}</Text>
+                            <Text style={styles.cardTecnicoEsp}>
+                              {tec.especialidade} • {tec.telefone}
+                            </Text>
+                          </View>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
+
+                  <TouchableOpacity
+                    style={styles.btnConfirmarAtribuicao}
+                    onPress={handleConfirmarAtribuicao}
+                    testID="btn-confirmar-atribuicao"
+                  >
+                    <Ionicons name="checkmark-sharp" size={20} color="#ffffff" />
+                    <Text style={styles.btnConfirmarAtribuicaoText}>
+                      Confirmar Despacho do Técnico
+                    </Text>
+                  </TouchableOpacity>
+                </>
             )}
+              </View>
           </View>
-        </View>
       </Modal>
 
       {/* ─── Modal 2: Conversar com o Cliente ──────────────────────────────────── */}
@@ -571,75 +571,75 @@ export function AdminTabScreen({
             {osParaConversa && (
               <>
                 <View style={styles.modalHeader}>
-                  <View>
-                    <Text style={styles.modalTitulo}>Conversa com Cliente</Text>
-                    <Text style={styles.modalSubtitulo}>
-                      OS #{osParaConversa.idLocal} • Carlos Eduardo Silva
-                    </Text>
+                    <View style={{ flex: 1, marginRight: 8 }}>
+                      <Text style={styles.modalTitulo}>Conversa com Cliente</Text>
+                      <Text style={styles.modalSubtitulo}>
+                        OS #{osParaConversa.idLocal} • Carlos Eduardo Silva
+                      </Text>
+                    </View>
+                    <TouchableOpacity
+                      onPress={() => setModalConversa(false)}
+                      style={styles.modalCloseBtn}
+                    >
+                      <Ionicons name="close" size={22} color="#64748b" />
+                    </TouchableOpacity>
                   </View>
-                  <TouchableOpacity
-                    onPress={() => setModalConversa(false)}
-                    style={styles.modalCloseBtn}
-                  >
-                    <Ionicons name="close" size={22} color="#64748b" />
-                  </TouchableOpacity>
-                </View>
 
-                {/* Histórico do Chat */}
-                <ScrollView style={styles.chatScroll} showsVerticalScrollIndicator={false}>
-                  {mensagensChat.length === 0 ? (
-                    <Text style={styles.chatVazioText}>
-                      Nenhuma mensagem enviada ainda. Inicie o contato com o cliente abaixo.
-                    </Text>
-                  ) : (
-                    mensagensChat.map((m) => {
-                      const isAdmin = m.papel === 'ADMIN';
-                      return (
-                        <View
-                          key={m.id}
-                          style={[
-                            styles.bolhaMsg,
-                            isAdmin ? styles.bolhaAdmin : styles.bolhaCliente,
-                          ]}
-                        >
-                          <Text style={styles.bolhaAutor}>
-                            {m.remetenteNome} ({m.papel})
-                          </Text>
-                          <Text style={styles.bolhaTexto}>{m.texto}</Text>
-                          <Text style={styles.bolhaHora}>
-                            {new Date(m.createdAt).toLocaleTimeString('pt-BR', {
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            })}
-                          </Text>
-                        </View>
-                      );
-                    })
-                  )}
-                </ScrollView>
+                  {/* Histórico do Chat */}
+                  <ScrollView style={styles.chatScroll} showsVerticalScrollIndicator={false}>
+                    {mensagensChat.length === 0 ? (
+                      <Text style={styles.chatVazioText}>
+                        Nenhuma mensagem enviada ainda. Inicie o contato com o cliente abaixo.
+                      </Text>
+                    ) : (
+                      mensagensChat.map((m) => {
+                        const isAdmin = m.papel === 'ADMIN';
+                        return (
+                          <View
+                            key={m.id}
+                            style={[
+                              styles.bolhaMsg,
+                              isAdmin ? styles.bolhaAdmin : styles.bolhaCliente,
+                            ]}
+                          >
+                            <Text style={styles.bolhaAutor}>
+                              {m.remetenteNome} ({m.papel})
+                            </Text>
+                            <Text style={styles.bolhaTexto}>{m.texto}</Text>
+                            <Text style={styles.bolhaHora}>
+                              {new Date(m.createdAt).toLocaleTimeString('pt-BR', {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })}
+                            </Text>
+                          </View>
+                        );
+                      })
+                    )}
+                  </ScrollView>
 
-                {/* Input de Envio de Mensagem pelo Admin */}
-                <View style={styles.inputChatRow}>
-                  <TextInput
-                    style={styles.inputChat}
-                    placeholder="Digite uma mensagem para o cliente..."
-                    placeholderTextColor="#94a3b8"
-                    value={textoMensagem}
-                    onChangeText={setTextoMensagem}
-                    testID="input-mensagem-admin"
-                  />
-                  <TouchableOpacity
-                    style={styles.btnChatSend}
-                    onPress={handleEnviarMensagemAdmin}
-                    testID="btn-enviar-mensagem-admin"
-                  >
-                    <Ionicons name="send" size={18} color="#ffffff" />
-                  </TouchableOpacity>
-                </View>
-              </>
+                  {/* Input de Envio de Mensagem pelo Admin */}
+                  <View style={styles.inputChatRow}>
+                    <TextInput
+                      style={styles.inputChat}
+                      placeholder="Digite uma mensagem para o cliente..."
+                      placeholderTextColor="#94a3b8"
+                      value={textoMensagem}
+                      onChangeText={setTextoMensagem}
+                      testID="input-mensagem-admin"
+                    />
+                    <TouchableOpacity
+                      style={styles.btnChatSend}
+                      onPress={handleEnviarMensagemAdmin}
+                      testID="btn-enviar-mensagem-admin"
+                    >
+                      <Ionicons name="send" size={18} color="#ffffff" />
+                    </TouchableOpacity>
+                  </View>
+                </>
             )}
+              </View>
           </View>
-        </View>
       </Modal>
 
       {/* ─── Modal 3: Analisar Todo o Histórico da OS até a Conclusão ─────────── */}
@@ -654,126 +654,126 @@ export function AdminTabScreen({
             {osHistorico && (
               <>
                 <View style={styles.modalHeader}>
-                  <View>
-                    <Text style={styles.modalTitulo}>Histórico Completo da OS</Text>
-                    <Text style={styles.modalSubtitulo}>
-                      Protocolo #{osHistorico.idLocal} • Análise de Ciclo de Vida
-                    </Text>
-                  </View>
-                  <TouchableOpacity
-                    onPress={() => setModalHistorico(false)}
-                    style={styles.modalCloseBtn}
-                  >
-                    <Ionicons name="close" size={22} color="#64748b" />
-                  </TouchableOpacity>
-                </View>
-
-                <ScrollView showsVerticalScrollIndicator={false} style={styles.timelineScroll}>
-                  {/* Etapa 1: Abertura */}
-                  <View style={styles.timelineItem}>
-                    <View style={styles.timelineDot}>
-                      <Ionicons name="add" size={14} color="#ffffff" />
-                    </View>
-                    <View style={styles.timelineConteudo}>
-                      <Text style={styles.timelineEtapa}>1. Abertura do Chamado</Text>
-                      <Text style={styles.timelineData}>
-                        {new Date(osHistorico.createdAt).toLocaleDateString('pt-BR')} às{' '}
-                        {new Date(osHistorico.createdAt).toLocaleTimeString('pt-BR')}
-                      </Text>
-                      <Text style={styles.timelineTexto}>
-                        Problema: {osHistorico.tipoProblema.label}
-                      </Text>
-                      <Text style={styles.timelineTextoSub}>
-                        Relato: "{osHistorico.descricao}"
+                    <View style={{ flex: 1, marginRight: 8 }}>
+                      <Text style={styles.modalTitulo}>Histórico Completo da OS</Text>
+                      <Text style={styles.modalSubtitulo}>
+                        Protocolo #{osHistorico.idLocal} • Análise de Ciclo de Vida
                       </Text>
                     </View>
-                  </View>
-
-                  {/* Etapa 2: Atribuição do Técnico */}
-                  <View style={styles.timelineItem}>
-                    <View
-                      style={[
-                        styles.timelineDot,
-                        osHistorico.tecnicoId ? { backgroundColor: '#0284c7' } : { backgroundColor: '#cbd5e1' },
-                      ]}
+                    <TouchableOpacity
+                      onPress={() => setModalHistorico(false)}
+                      style={styles.modalCloseBtn}
                     >
-                      <Ionicons name="person" size={12} color="#ffffff" />
-                    </View>
-                    <View style={styles.timelineConteudo}>
-                      <Text style={styles.timelineEtapa}>2. Atribuição de Técnico</Text>
-                      <Text style={styles.timelineData}>
-                        {osHistorico.tecnicoId ? 'Técnico Vinculado pela Central' : 'Pendente de Atribuição'}
-                      </Text>
-                      <Text style={styles.timelineTexto}>
-                        {osHistorico.tecnicoId
-                          ? `${getTecnicoInfo(osHistorico.tecnicoId).nome} (${getTecnicoInfo(osHistorico.tecnicoId).funcao})`
-                          : 'Aguardando despacho pelo Admin'}
-                      </Text>
-                    </View>
+                      <Ionicons name="close" size={22} color="#64748b" />
+                    </TouchableOpacity>
                   </View>
 
-                  {/* Etapa 3: Andamento / Visita de Campo */}
-                  <View style={styles.timelineItem}>
-                    <View
-                      style={[
-                        styles.timelineDot,
-                        osHistorico.status.value === 'EM_ATENDIMENTO' || osHistorico.status.value === 'CONCLUIDO'
-                          ? { backgroundColor: '#0284c7' }
-                          : { backgroundColor: '#cbd5e1' },
-                      ]}
-                    >
-                      <Ionicons name="construct" size={12} color="#ffffff" />
-                    </View>
-                    <View style={styles.timelineConteudo}>
-                      <Text style={styles.timelineEtapa}>3. Atendimento de Campo</Text>
-                      <Text style={styles.timelineData}>
-                        Status: {osHistorico.status.value}
-                      </Text>
-                      <Text style={styles.timelineTexto}>
-                        Técnico em deslocamento e testes na infraestrutura óptica
-                      </Text>
-                    </View>
-                  </View>
-
-                  {/* Etapa 4: Conclusão e Resolução com Foto */}
-                  <View style={styles.timelineItem}>
-                    <View
-                      style={[
-                        styles.timelineDot,
-                        osHistorico.status.value === 'CONCLUIDO'
-                          ? { backgroundColor: '#16a34a' }
-                          : { backgroundColor: '#cbd5e1' },
-                      ]}
-                    >
-                      <Ionicons name="checkmark" size={14} color="#ffffff" />
-                    </View>
-                    <View style={styles.timelineConteudo}>
-                      <Text style={styles.timelineEtapa}>4. Conclusão & Laudo Final</Text>
-                      <Text style={styles.timelineData}>
-                        {osHistorico.dataFechamento
-                          ? `Fechada em ${new Date(osHistorico.dataFechamento).toLocaleDateString('pt-BR')} às ${new Date(osHistorico.dataFechamento).toLocaleTimeString('pt-BR')}`
-                          : 'Chamado ainda não finalizado'}
-                      </Text>
-                      {osHistorico.parecerTecnico ? (
-                        <View style={styles.laudoBox}>
-                          <Text style={styles.laudoTitulo}>PARECER TÉCNICO REGISTRADO:</Text>
-                          <Text style={styles.laudoTexto}>{osHistorico.parecerTecnico}</Text>
-                          <Text style={styles.fotoInfo}>
-                            Foto da Resolução: Anexada pelo técnico de campo (reparo.jpg • &lt; 1MB)
-                          </Text>
-                        </View>
-                      ) : (
-                        <Text style={styles.timelineTextoSub}>
-                          Aguardando finalização pelo técnico com foto e parecer.
+                  <ScrollView showsVerticalScrollIndicator={false} style={styles.timelineScroll}>
+                    {/* Etapa 1: Abertura */}
+                    <View style={styles.timelineItem}>
+                      <View style={styles.timelineDot}>
+                        <Ionicons name="add" size={14} color="#ffffff" />
+                      </View>
+                      <View style={styles.timelineConteudo}>
+                        <Text style={styles.timelineEtapa}>1. Abertura do Chamado</Text>
+                        <Text style={styles.timelineData}>
+                          {new Date(osHistorico.createdAt).toLocaleDateString('pt-BR')} às{' '}
+                          {new Date(osHistorico.createdAt).toLocaleTimeString('pt-BR')}
                         </Text>
-                      )}
+                        <Text style={styles.timelineTexto}>
+                          Problema: {osHistorico.tipoProblema.label}
+                        </Text>
+                        <Text style={styles.timelineTextoSub}>
+                          Relato: "{osHistorico.descricao}"
+                        </Text>
+                      </View>
                     </View>
-                  </View>
-                </ScrollView>
-              </>
+
+                    {/* Etapa 2: Atribuição do Técnico */}
+                    <View style={styles.timelineItem}>
+                      <View
+                        style={[
+                          styles.timelineDot,
+                          osHistorico.tecnicoId ? { backgroundColor: '#0284c7' } : { backgroundColor: '#cbd5e1' },
+                        ]}
+                      >
+                        <Ionicons name="person" size={12} color="#ffffff" />
+                      </View>
+                      <View style={styles.timelineConteudo}>
+                        <Text style={styles.timelineEtapa}>2. Atribuição de Técnico</Text>
+                        <Text style={styles.timelineData}>
+                          {osHistorico.tecnicoId ? 'Técnico Vinculado pela Central' : 'Pendente de Atribuição'}
+                        </Text>
+                        <Text style={styles.timelineTexto}>
+                          {osHistorico.tecnicoId
+                            ? `${getTecnicoInfo(osHistorico.tecnicoId).nome} (${getTecnicoInfo(osHistorico.tecnicoId).funcao})`
+                            : 'Aguardando despacho pelo Admin'}
+                        </Text>
+                      </View>
+                    </View>
+
+                    {/* Etapa 3: Andamento / Visita de Campo */}
+                    <View style={styles.timelineItem}>
+                      <View
+                        style={[
+                          styles.timelineDot,
+                          osHistorico.status.value === 'EM_ATENDIMENTO' || osHistorico.status.value === 'CONCLUIDO'
+                            ? { backgroundColor: '#0284c7' }
+                            : { backgroundColor: '#cbd5e1' },
+                        ]}
+                      >
+                        <Ionicons name="construct" size={12} color="#ffffff" />
+                      </View>
+                      <View style={styles.timelineConteudo}>
+                        <Text style={styles.timelineEtapa}>3. Atendimento de Campo</Text>
+                        <Text style={styles.timelineData}>
+                          Status: {osHistorico.status.value}
+                        </Text>
+                        <Text style={styles.timelineTexto}>
+                          Técnico em deslocamento e testes na infraestrutura óptica
+                        </Text>
+                      </View>
+                    </View>
+
+                    {/* Etapa 4: Conclusão e Resolução com Foto */}
+                    <View style={styles.timelineItem}>
+                      <View
+                        style={[
+                          styles.timelineDot,
+                          osHistorico.status.value === 'CONCLUIDO'
+                            ? { backgroundColor: '#16a34a' }
+                            : { backgroundColor: '#cbd5e1' },
+                        ]}
+                      >
+                        <Ionicons name="checkmark" size={14} color="#ffffff" />
+                      </View>
+                      <View style={styles.timelineConteudo}>
+                        <Text style={styles.timelineEtapa}>4. Conclusão & Laudo Final</Text>
+                        <Text style={styles.timelineData}>
+                          {osHistorico.dataFechamento
+                            ? `Fechada em ${new Date(osHistorico.dataFechamento).toLocaleDateString('pt-BR')} às ${new Date(osHistorico.dataFechamento).toLocaleTimeString('pt-BR')}`
+                            : 'Chamado ainda não finalizado'}
+                        </Text>
+                        {osHistorico.parecerTecnico ? (
+                          <View style={styles.laudoBox}>
+                            <Text style={styles.laudoTitulo}>PARECER TÉCNICO REGISTRADO:</Text>
+                            <Text style={styles.laudoTexto}>{osHistorico.parecerTecnico}</Text>
+                            <Text style={styles.fotoInfo}>
+                              Foto da Resolução: Anexada pelo técnico de campo (reparo.jpg • &lt; 1MB)
+                            </Text>
+                          </View>
+                        ) : (
+                          <Text style={styles.timelineTextoSub}>
+                            Aguardando finalização pelo técnico com foto e parecer.
+                          </Text>
+                        )}
+                      </View>
+                    </View>
+                  </ScrollView>
+                </>
             )}
+              </View>
           </View>
-        </View>
       </Modal>
 
       {/* Barra de Navegação Inferior */}
@@ -803,6 +803,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 8,
     marginBottom: 8,
   },
   badgeAdmin: {
@@ -866,6 +868,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '600',
     marginTop: 2,
+    textAlign: 'center',
   },
   buscaRow: {
     flexDirection: 'row',
@@ -957,6 +960,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 6,
   },
   protocoloTag: {
     backgroundColor: '#f1f5f9',
@@ -1014,12 +1019,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#fffbeb',
   },
   tecnicoTexto: {
+    flex: 1,
+    flexShrink: 1,
     fontSize: 12,
     fontWeight: '600',
     color: '#334155',
   },
   acoesAdminRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 8,
     marginTop: 12,
     paddingTop: 10,
@@ -1028,10 +1036,12 @@ const styles = StyleSheet.create({
   },
   btnAcao: {
     flex: 1,
+    minWidth: 92,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 8,
+    paddingHorizontal: 8,
     borderRadius: 8,
     gap: 5,
   },
@@ -1050,6 +1060,8 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '700',
     color: '#ffffff',
+    flexShrink: 1,
+    textAlign: 'center',
   },
   modalOverlay: {
     flex: 1,

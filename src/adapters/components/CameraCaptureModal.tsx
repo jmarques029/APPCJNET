@@ -401,6 +401,8 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 20,
     overflow: 'hidden',
+    maxWidth: '92%',
+    textAlign: 'center',
   },
   previewWrapper: {
     flex: 1,
@@ -417,8 +419,11 @@ const styles = StyleSheet.create({
   badgeFotoInfo: {
     position: 'absolute',
     bottom: 24,
+    left: 16,
+    right: 16,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: 'rgba(15, 23, 42, 0.85)',
     paddingHorizontal: 14,
     paddingVertical: 8,
@@ -431,6 +436,7 @@ const styles = StyleSheet.create({
     color: '#e2e8f0',
     fontSize: 13,
     fontWeight: '600',
+    flexShrink: 1,
   },
   permissaoContainer: {
     padding: 28,

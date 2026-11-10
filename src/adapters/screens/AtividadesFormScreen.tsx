@@ -177,10 +177,10 @@ export function AtividadesFormScreen({
         longitude: coordenadasGps.longitude,
         foto: fotoAnexada
           ? {
-              id: `foto-${Date.now()}`,
-              fotoLocalPath: fotoCapturada?.uri || 'file:///storage/emulated/0/cjnet/onu-pon.jpg',
-              tamanhoKb: fotoCapturada?.tamanhoKb || 840,
-            }
+            id: `foto-${Date.now()}`,
+            fotoLocalPath: fotoCapturada?.uri || 'file:///storage/emulated/0/cjnet/onu-pon.jpg',
+            tamanhoKb: fotoCapturada?.tamanhoKb || 840,
+          }
           : undefined,
       });
 
@@ -418,441 +418,466 @@ export function AtividadesFormScreen({
           {/* Preview da Imagem Anexada */}
           {fotoAnexada && fotoCapturada?.uri && (
             <View style={styles.previewContainer}>
-              <Image
-                source={{ uri: fotoCapturada.uri }}
-                style={styles.previewImage}
-                resizeMode="cover"
-              />
-              <View style={styles.previewOverlay}>
-                <Ionicons name="cut-outline" size={14} color="#ffffff" />
-                <Text style={styles.previewOverlayText}>
-                  {fotoCapturada.tamanhoKb} KB • Cortada & Comprimida para a OS
-                </Text>
-              </View>
-              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 8, gap: 12 }}>
-                <TouchableOpacity
-                  onPress={handleTirarFotoCelular}
-                  style={{ flexDirection: 'row', alignItems: 'center', padding: 6, gap: 4 }}
-                  testID="btn-recortar-foto"
-                >
-                  <Ionicons name="crop" size={16} color="#0284c7" />
-                  <Text style={{ color: '#0284c7', fontSize: 13, fontWeight: '600' }}>Recortar / Trocar</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={handleRemoverFoto}
-                  style={{ flexDirection: 'row', alignItems: 'center', padding: 6, gap: 4 }}
-                  testID="btn-remover-foto"
-                >
-                  <Ionicons name="trash-outline" size={16} color="#ef4444" />
-                  <Text style={{ color: '#ef4444', fontSize: 13, fontWeight: '600' }}>Remover Foto</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
+                <View style={styles.previewImageBox}>
+                  <Image
+                    source={{ uri: fotoCapturada.uri }}
+                    style={styles.previewImage}
+                    resizeMode="cover"
+                  />
+                  <View style={styles.previewOverlay}>
+                    <Ionicons name="cut-outline" size={14} color="#ffffff" />
+                    <Text style={styles.previewOverlayText}>
+                      {fotoCapturada.tamanhoKb} KB • Cortada & Comprimida para a OS
+                    </Text>
+                  </View>
+                </View>
+                  <View style={styles.previewActionsRow}>
+                    <TouchableOpacity
+                      onPress={handleTirarFotoCelular}
+                      style={{ flexDirection: 'row', alignItems: 'center', padding: 6, gap: 4 }}
+                      testID="btn-recortar-foto"
+                    >
+                      <Ionicons name="crop" size={16} color="#0284c7" />
+                      <Text style={{ color: '#0284c7', fontSize: 13, fontWeight: '600' }}>Recortar / Trocar</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={handleRemoverFoto}
+                      style={{ flexDirection: 'row', alignItems: 'center', padding: 6, gap: 4 }}
+                      testID="btn-remover-foto"
+                    >
+                      <Ionicons name="trash-outline" size={16} color="#ef4444" />
+                      <Text style={{ color: '#ef4444', fontSize: 13, fontWeight: '600' }}>Remover Foto</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
           )}
-        </View>
-
-        {/* 4. Endereço da Instalação e Geolocalização GPS */}
-        <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>4. Ponto de Atendimento & Geolocalização</Text>
-          <View style={styles.enderecoContainer}>
-            <Ionicons name="location-outline" size={20} color="#0284c7" />
-            <TextInput
-              style={styles.enderecoInput}
-              value={endereco}
-              onChangeText={setEndereco}
-              placeholder="Endereço em Coqueiral/MG"
-              placeholderTextColor="#94a3b8"
-            />
-          </View>
-
-          {/* Coordenadas GPS */}
-          <View style={styles.gpsContainer} testID="box-gps-os">
-            <View style={styles.gpsTopRow}>
-              <View style={styles.gpsInfo}>
-                <Ionicons
-                  name={coordenadasGps.status === 'OBTIDO' ? 'navigate' : 'navigate-outline'}
-                  size={18}
-                  color={coordenadasGps.status === 'OBTIDO' ? '#10b981' : '#0284c7'}
-                />
-                <Text style={styles.gpsCoordenadasText}>
-                  Lat: {coordenadasGps.latitude.toFixed(4)} | Lng: {coordenadasGps.longitude.toFixed(4)}
-                </Text>
               </View>
+
+              {/* 4. Endereço da Instalação e Geolocalização GPS */}
+              <View style={styles.sectionContainer}>
+                <Text style={styles.sectionTitle}>4. Ponto de Atendimento & Geolocalização</Text>
+                <View style={styles.enderecoContainer}>
+                  <Ionicons name="location-outline" size={20} color="#0284c7" />
+                  <TextInput
+                    style={styles.enderecoInput}
+                    value={endereco}
+                    onChangeText={setEndereco}
+                    placeholder="Endereço em Coqueiral/MG"
+                    placeholderTextColor="#94a3b8"
+                  />
+                </View>
+
+                {/* Coordenadas GPS */}
+                <View style={styles.gpsContainer} testID="box-gps-os">
+                  <View style={styles.gpsTopRow}>
+                    <View style={styles.gpsInfo}>
+                      <Ionicons
+                        name={coordenadasGps.status === 'OBTIDO' ? 'navigate' : 'navigate-outline'}
+                        size={18}
+                        color={coordenadasGps.status === 'OBTIDO' ? '#10b981' : '#0284c7'}
+                      />
+                      <Text style={styles.gpsCoordenadasText}>
+                        Lat: {coordenadasGps.latitude.toFixed(4)} | Lng: {coordenadasGps.longitude.toFixed(4)}
+                      </Text>
+                    </View>
+                    <TouchableOpacity
+                      testID="btn-obter-gps-chamado"
+                      style={styles.btnAtualizarGps}
+                      onPress={handleObterGps}
+                    >
+                      {coordenadasGps.status === 'BUSCANDO' ? (
+                        <ActivityIndicator size="small" color="#0284c7" />
+                      ) : (
+                        <>
+                          <Ionicons name="locate" size={14} color="#0284c7" />
+                          <Text style={styles.btnAtualizarGpsText}>Capturar GPS</Text>
+                        </>
+                      )}
+                    </TouchableOpacity>
+                  </View>
+                  <Text style={styles.gpsHelpText}>
+                    Coordenadas de Coqueiral/MG vinculadas ao chamado para roteamento da equipe de campo.
+                  </Text>
+                </View>
+              </View>
+
+              {/* Botão de Envio */}
               <TouchableOpacity
-                testID="btn-obter-gps-chamado"
-                style={styles.btnAtualizarGps}
-                onPress={handleObterGps}
+                testID="btn-submeter"
+                style={styles.submitButton}
+                onPress={handleSubmeter}
+                disabled={loading}
               >
-                {coordenadasGps.status === 'BUSCANDO' ? (
-                  <ActivityIndicator size="small" color="#0284c7" />
+                {loading ? (
+                  <ActivityIndicator size="small" color="#ffffff" />
                 ) : (
                   <>
-                    <Ionicons name="locate" size={14} color="#0284c7" />
-                    <Text style={styles.btnAtualizarGpsText}>Capturar GPS</Text>
+                    <Text style={styles.submitButtonText}>Registrar Chamado Técnico</Text>
+                    <Ionicons name="send" size={18} color="#ffffff" style={styles.submitIcon} />
                   </>
                 )}
               </TouchableOpacity>
-            </View>
-            <Text style={styles.gpsHelpText}>
-              Coordenadas de Coqueiral/MG vinculadas ao chamado para roteamento da equipe de campo.
-            </Text>
-          </View>
-        </View>
 
-        {/* Botão de Envio */}
-        <TouchableOpacity
-          testID="btn-submeter"
-          style={styles.submitButton}
-          onPress={handleSubmeter}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator size="small" color="#ffffff" />
-          ) : (
-            <>
-              <Text style={styles.submitButtonText}>Registrar Chamado Técnico</Text>
-              <Ionicons name="send" size={18} color="#ffffff" style={styles.submitIcon} />
-            </>
-          )}
-        </TouchableOpacity>
-
-        {/* Mensagem de Confiabilidade Offline-First */}
-        <View style={styles.offlineNotice}>
-          <Ionicons name="cloud-offline-outline" size={18} color="#64748b" />
-          <Text style={styles.offlineNoticeText}>
-            Modo Offline-First ativo: o chamado é gravado localmente no dispositivo e sincronizado automaticamente.
-          </Text>
-        </View>
-      </ScrollView>
+              {/* Mensagem de Confiabilidade Offline-First */}
+              <View style={styles.offlineNotice}>
+                <Ionicons name="cloud-offline-outline" size={18} color="#64748b" />
+                <Text style={styles.offlineNoticeText}>
+                  Modo Offline-First ativo: o chamado é gravado localmente no dispositivo e sincronizado automaticamente.
+                </Text>
+              </View>
+            </ScrollView>
 
       {/* Modal de Câmera Nativa Expo v57 */}
-      <CameraCaptureModal
-        visible={modalCameraVisible}
-        onClose={() => setModalCameraVisible(false)}
-        onCapture={handleFotoCapturada}
-        titulo="Foto do Roteador / ONU"
-        subtitulo="Enquadre as luzes PON e LOS do equipamento de fibra"
-        fallbackFilename="onu-pon.jpg"
-        fallbackTamanhoKb={840}
-      />
+          <CameraCaptureModal
+            visible={modalCameraVisible}
+            onClose={() => setModalCameraVisible(false)}
+            onCapture={handleFotoCapturada}
+            titulo="Foto do Roteador / ONU"
+            subtitulo="Enquadre as luzes PON e LOS do equipamento de fibra"
+            fallbackFilename="onu-pon.jpg"
+            fallbackTamanhoKb={840}
+          />
 
-      <AppNavBar currentTab="atividades" onSair={onSair} />
-    </SafeAreaView>
-  );
+          <AppNavBar currentTab="atividades" onSair={onSair} />
+        </SafeAreaView>
+        );
 }
 
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#f8fafc',
-    flexDirection: 'column',
+        const styles = StyleSheet.create({
+          safeArea: {
+          flex: 1,
+        backgroundColor: '#f8fafc',
+        flexDirection: 'column',
   },
-  scrollView: {
-    flex: 1,
-    flexDirection: 'column',
+        scrollView: {
+          flex: 1,
+        flexDirection: 'column',
   },
-  scrollContent: {
-    flexDirection: 'column',
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 40,
+        scrollContent: {
+          flexDirection: 'column',
+        paddingHorizontal: 20,
+        paddingTop: 16,
+        paddingBottom: 40,
   },
-  headerContainer: {
-    flexDirection: 'column',
-    marginBottom: 20,
+        headerContainer: {
+          flexDirection: 'column',
+        marginBottom: 20,
   },
-  headerTopRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
+        headerTopRow: {
+          flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 16,
   },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#ffffff',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
+        backButton: {
+          width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: '#ffffff',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: '#e2e8f0',
   },
-  btnSairHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fef2f2',
-    borderColor: '#fecaca',
-    borderWidth: 1,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
-    marginRight: Platform.OS === 'ios' ? 44 : 0,
+        btnSairHeader: {
+          flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#fef2f2',
+        borderColor: '#fecaca',
+        borderWidth: 1,
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        borderRadius: 20,
+        marginRight: Platform.OS === 'ios' ? 44 : 0,
   },
-  btnSairHeaderText: {
-    color: '#ef4444',
-    fontSize: 13,
-    fontWeight: '700',
-    marginLeft: 4,
+        btnSairHeaderText: {
+          color: '#ef4444',
+        fontSize: 13,
+        fontWeight: '700',
+        marginLeft: 4,
   },
-  headerTexts: {
-    flexDirection: 'column',
+        headerTexts: {
+          flexDirection: 'column',
   },
-  badgeTop: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#0284c7',
-    letterSpacing: 1.2,
-    marginBottom: 4,
+        badgeTop: {
+          fontSize: 12,
+        fontWeight: '700',
+        color: '#0284c7',
+        letterSpacing: 1.2,
+        marginBottom: 4,
   },
-  headerTitle: {
-    fontSize: 26,
-    fontWeight: '800',
-    color: '#0f172a',
-    marginBottom: 6,
+        headerTitle: {
+          fontSize: 26,
+        fontWeight: '800',
+        color: '#0f172a',
+        marginBottom: 6,
   },
-  headerSubtitle: {
-    fontSize: 14,
-    color: '#64748b',
-    lineHeight: 20,
+        headerSubtitle: {
+          fontSize: 14,
+        color: '#64748b',
+        lineHeight: 20,
   },
-  sectionContainer: {
-    flexDirection: 'column',
-    marginBottom: 22,
+        sectionContainer: {
+          flexDirection: 'column',
+        marginBottom: 22,
   },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#1e293b',
-    marginBottom: 6,
+        sectionTitle: {
+          fontSize: 16,
+        fontWeight: '700',
+        color: '#1e293b',
+        marginBottom: 6,
   },
-  inputHelp: {
-    fontSize: 13,
-    color: '#64748b',
-    marginBottom: 10,
-    lineHeight: 18,
+        inputHelp: {
+          fontSize: 13,
+        color: '#64748b',
+        marginBottom: 10,
+        lineHeight: 18,
   },
-  opcoesContainer: {
-    flexDirection: 'column',
-    gap: 10,
+        opcoesContainer: {
+          flexDirection: 'column',
+        gap: 10,
   },
-  opcaoCard: {
-    flexDirection: 'column',
-    backgroundColor: '#ffffff',
-    borderRadius: 14,
-    padding: 14,
-    borderWidth: 1.5,
-    borderColor: '#e2e8f0',
+        opcaoCard: {
+          flexDirection: 'column',
+        backgroundColor: '#ffffff',
+        borderRadius: 14,
+        padding: 14,
+        borderWidth: 1.5,
+        borderColor: '#e2e8f0',
   },
-  opcaoHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+        opcaoHeader: {
+          flexDirection: 'row',
+        alignItems: 'center',
   },
-  iconCircle: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
+        iconCircle: {
+          width: 38,
+        height: 38,
+        borderRadius: 19,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 12,
   },
-  opcaoTextos: {
-    flex: 1,
-    flexDirection: 'column',
+        opcaoTextos: {
+          flex: 1,
+        flexDirection: 'column',
   },
-  opcaoTitulo: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#1e293b',
-    marginBottom: 2,
+        opcaoTitulo: {
+          fontSize: 15,
+        fontWeight: '600',
+        color: '#1e293b',
+        marginBottom: 2,
   },
-  opcaoSubtitulo: {
-    fontSize: 12,
-    color: '#64748b',
-    lineHeight: 16,
+        opcaoSubtitulo: {
+          fontSize: 12,
+        color: '#64748b',
+        lineHeight: 16,
   },
-  textArea: {
-    backgroundColor: '#ffffff',
-    borderRadius: 14,
-    padding: 14,
-    borderWidth: 1.5,
-    borderColor: '#e2e8f0',
-    fontSize: 14,
-    color: '#0f172a',
-    minHeight: 100,
+        textArea: {
+          backgroundColor: '#ffffff',
+        borderRadius: 14,
+        padding: 14,
+        borderWidth: 1.5,
+        borderColor: '#e2e8f0',
+        fontSize: 14,
+        color: '#0f172a',
+        minHeight: 100,
   },
-  fotoButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    borderRadius: 14,
-    borderWidth: 1.5,
+        fotoButton: {
+          flexDirection: 'row',
+        alignItems: 'center',
+        padding: 16,
+        borderRadius: 14,
+        borderWidth: 1.5,
   },
-  fotoButtonVazio: {
-    backgroundColor: '#f0f9ff',
-    borderColor: '#bae6fd',
-    borderStyle: 'dashed',
+        fotoButtonVazio: {
+          backgroundColor: '#f0f9ff',
+        borderColor: '#bae6fd',
+        borderStyle: 'dashed',
   },
-  fotoButtonAnexado: {
-    backgroundColor: '#ecfdf5',
-    borderColor: '#a7f3d0',
+        fotoButtonAnexado: {
+          backgroundColor: '#ecfdf5',
+        borderColor: '#a7f3d0',
   },
-  fotoTextos: {
-    flex: 1,
-    flexDirection: 'column',
-    marginLeft: 12,
+        fotoTextos: {
+          flex: 1,
+        flexDirection: 'column',
+        marginLeft: 12,
   },
-  fotoTitulo: {
-    fontSize: 14,
-    fontWeight: '700',
-    marginBottom: 2,
+        fotoTitulo: {
+          fontSize: 14,
+        fontWeight: '700',
+        marginBottom: 2,
   },
-  fotoSubtitulo: {
-    fontSize: 12,
-    color: '#64748b',
+        fotoSubtitulo: {
+          fontSize: 12,
+        color: '#64748b',
   },
-  enderecoContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#ffffff',
-    borderRadius: 14,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    borderWidth: 1.5,
-    borderColor: '#e2e8f0',
+        enderecoContainer: {
+          flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#ffffff',
+        borderRadius: 14,
+        paddingHorizontal: 14,
+        paddingVertical: 12,
+        borderWidth: 1.5,
+        borderColor: '#e2e8f0',
   },
-  enderecoInput: {
-    flex: 1,
-    fontSize: 14,
-    color: '#0f172a',
-    marginLeft: 8,
+        enderecoInput: {
+          flex: 1,
+        fontSize: 14,
+        color: '#0f172a',
+        marginLeft: 8,
   },
-  submitButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#0284c7',
-    borderRadius: 14,
-    paddingVertical: 16,
-    marginTop: 10,
-    shadowColor: '#0284c7',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 4,
+        submitButton: {
+          flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#0284c7',
+        borderRadius: 14,
+        paddingVertical: 16,
+        marginTop: 10,
+        shadowColor: '#0284c7',
+        shadowOffset: {width: 0, height: 4 },
+        shadowOpacity: 0.25,
+        shadowRadius: 8,
+        elevation: 4,
   },
-  submitButtonText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#ffffff',
+        submitButtonText: {
+          fontSize: 16,
+        fontWeight: '700',
+        color: '#ffffff',
   },
-  submitIcon: {
-    marginLeft: 8,
+        submitIcon: {
+          marginLeft: 8,
   },
-  offlineNotice: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f1f5f9',
-    borderRadius: 12,
-    padding: 12,
-    marginTop: 18,
+        offlineNotice: {
+          flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#f1f5f9',
+        borderRadius: 12,
+        padding: 12,
+        marginTop: 18,
   },
-  offlineNoticeText: {
-    fontSize: 12,
-    color: '#64748b',
-    marginLeft: 8,
-    flex: 1,
-    lineHeight: 16,
+        offlineNoticeText: {
+          fontSize: 12,
+        color: '#64748b',
+        marginLeft: 8,
+        flex: 1,
+        lineHeight: 16,
   },
-  btnCameraReal: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(2, 132, 199, 0.08)',
-    borderWidth: 1,
-    borderColor: 'rgba(2, 132, 199, 0.3)',
-    borderRadius: 12,
-    paddingVertical: 10,
-    marginTop: 10,
-    gap: 8,
+        btnCameraReal: {
+          flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(2, 132, 199, 0.08)',
+        borderWidth: 1,
+        borderColor: 'rgba(2, 132, 199, 0.3)',
+        borderRadius: 12,
+        paddingVertical: 10,
+        paddingHorizontal: 12,
+        marginTop: 10,
+        gap: 8,
   },
-  btnCameraRealText: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#0284c7',
+        btnCameraRealText: {
+          fontSize: 13,
+        fontWeight: '700',
+        color: '#0284c7',
+        flexShrink: 1,
+        textAlign: 'center',
   },
-  previewContainer: {
-    marginTop: 12,
-    borderRadius: 14,
-    overflow: 'hidden',
-    position: 'relative',
-    height: 140,
-    backgroundColor: '#0f172a',
-    borderWidth: 1,
-    borderColor: '#cbd5e1',
+        previewContainer: {
+          marginTop: 12,
+        borderRadius: 14,
+        overflow: 'hidden',
+        backgroundColor: '#ffffff',
+        borderWidth: 1,
+        borderColor: '#cbd5e1',
   },
-  previewImage: {
-    width: '100%',
-    height: '100%',
+        previewImageBox: {
+          position: 'relative',
+        height: 140,
+        backgroundColor: '#0f172a',
   },
-  previewOverlay: {
-    position: 'absolute',
-    bottom: 8,
-    left: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(15, 23, 42, 0.75)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    gap: 4,
+        previewImage: {
+          width: '100%',
+        height: '100%',
   },
-  previewOverlayText: {
-    color: '#ffffff',
-    fontSize: 11,
-    fontWeight: '600',
+        previewOverlay: {
+          position: 'absolute',
+        bottom: 8,
+        left: 8,
+        right: 8,
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: 'rgba(15, 23, 42, 0.75)',
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 12,
+        gap: 4,
   },
-  gpsContainer: {
-    marginTop: 12,
-    backgroundColor: '#ffffff',
-    borderRadius: 14,
-    padding: 12,
-    borderWidth: 1.5,
-    borderColor: '#e2e8f0',
+        previewOverlayText: {
+          color: '#ffffff',
+        fontSize: 11,
+        fontWeight: '600',
+        flexShrink: 1,
   },
-  gpsTopRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+        previewActionsRow: {
+          flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexWrap: 'wrap',
+        paddingVertical: 6,
+        paddingHorizontal: 10,
+        gap: 12,
+        backgroundColor: '#f8fafc',
+        borderTopWidth: 1,
+        borderTopColor: '#e2e8f0',
   },
-  gpsInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    flex: 1,
+        gpsContainer: {
+          marginTop: 12,
+        backgroundColor: '#ffffff',
+        borderRadius: 14,
+        padding: 12,
+        borderWidth: 1.5,
+        borderColor: '#e2e8f0',
   },
-  gpsCoordenadasText: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#0f172a',
+        gpsTopRow: {
+          flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: 8,
   },
-  btnAtualizarGps: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#e0f2fe',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 8,
-    gap: 4,
+        gpsInfo: {
+          flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+        flex: 1,
   },
-  btnAtualizarGpsText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#0284c7',
+        gpsCoordenadasText: {
+          flexShrink: 1,
+        fontSize: 13,
+        fontWeight: '700',
+        color: '#0f172a',
   },
-  gpsHelpText: {
-    fontSize: 11,
-    color: '#64748b',
-    marginTop: 6,
-    lineHeight: 15,
+        btnAtualizarGps: {
+          flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#e0f2fe',
+        paddingHorizontal: 10,
+        paddingVertical: 6,
+        borderRadius: 8,
+        gap: 4,
+  },
+        btnAtualizarGpsText: {
+          fontSize: 12,
+        fontWeight: '700',
+        color: '#0284c7',
+  },
+        gpsHelpText: {
+          fontSize: 11,
+        color: '#64748b',
+        marginTop: 6,
+        lineHeight: 15,
   },
 });

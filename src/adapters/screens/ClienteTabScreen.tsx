@@ -71,35 +71,35 @@ const OPCOES_PROBLEMA: {
   icon: keyof typeof Ionicons.glyphMap;
   cor: string;
 }[] = [
-  {
-    valor: 'SEM_SINAL',
-    titulo: 'Sem Sinal de Internet',
-    subtitulo: 'Luz PON apagada ou vermelha na ONU',
-    icon: 'wifi-outline',
-    cor: '#ef4444',
-  },
-  {
-    valor: 'LENTIDAO',
-    titulo: 'Lentidão na Conexão',
-    subtitulo: 'Velocidade muito abaixo do contratado',
-    icon: 'speedometer-outline',
-    cor: '#f59e0b',
-  },
-  {
-    valor: 'QUEDA',
-    titulo: 'Quedas Frequentes',
-    subtitulo: 'Sinal caindo repetidamente',
-    icon: 'pulse-outline',
-    cor: '#f97316',
-  },
-  {
-    valor: 'OUTROS',
-    titulo: 'Outro Motivo',
-    subtitulo: 'Dúvidas, cabeamento ou suporte',
-    icon: 'help-circle-outline',
-    cor: '#3b82f6',
-  },
-];
+    {
+      valor: 'SEM_SINAL',
+      titulo: 'Sem Sinal de Internet',
+      subtitulo: 'Luz PON apagada ou vermelha na ONU',
+      icon: 'wifi-outline',
+      cor: '#ef4444',
+    },
+    {
+      valor: 'LENTIDAO',
+      titulo: 'Lentidão na Conexão',
+      subtitulo: 'Velocidade muito abaixo do contratado',
+      icon: 'speedometer-outline',
+      cor: '#f59e0b',
+    },
+    {
+      valor: 'QUEDA',
+      titulo: 'Quedas Frequentes',
+      subtitulo: 'Sinal caindo repetidamente',
+      icon: 'pulse-outline',
+      cor: '#f97316',
+    },
+    {
+      valor: 'OUTROS',
+      titulo: 'Outro Motivo',
+      subtitulo: 'Dúvidas, cabeamento ou suporte',
+      icon: 'help-circle-outline',
+      cor: '#3b82f6',
+    },
+  ];
 
 export function ClienteTabScreen({
   clienteId = DEMO_CLIENTE_ID,
@@ -278,10 +278,10 @@ export function ClienteTabScreen({
         longitude: coordenadasGps.longitude,
         foto: fotoAnexada
           ? {
-              id: `foto-${Date.now()}`,
-              fotoLocalPath: fotoCapturada?.uri || 'file:///storage/emulated/0/cjnet/onu.jpg',
-              tamanhoKb: fotoCapturada?.tamanhoKb || 620,
-            }
+            id: `foto-${Date.now()}`,
+            fotoLocalPath: fotoCapturada?.uri || 'file:///storage/emulated/0/cjnet/onu.jpg',
+            tamanhoKb: fotoCapturada?.tamanhoKb || 620,
+          }
           : undefined,
       });
 
@@ -565,204 +565,204 @@ export function ClienteTabScreen({
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <View>
-                <Text style={styles.modalTitulo}>Abrir Chamado Técnico</Text>
-                <Text style={styles.modalSubtitulo}>Informe o problema para nossa equipe</Text>
-              </View>
-              <TouchableOpacity
-                onPress={() => setModalNovoChamado(false)}
-                style={styles.modalCloseBtn}
-                accessibilityLabel="Fechar modal"
-              >
-                <Ionicons name="close" size={22} color="#64748b" />
-              </TouchableOpacity>
-            </View>
-
-            <ScrollView showsVerticalScrollIndicator={false} style={styles.modalForm}>
-              {/* Seleção do Tipo de Problema */}
-              <Text style={styles.formLabel}>Qual o problema com sua conexão?</Text>
-              <View style={styles.gridProblemas}>
-                {OPCOES_PROBLEMA.map((item) => {
-                  const selecionado = tipoProblema === item.valor;
-                  return (
-                    <TouchableOpacity
-                      key={item.valor}
-                      style={[
-                        styles.itemProblema,
-                        selecionado && { borderColor: item.cor, backgroundColor: '#f8fafc' },
-                      ]}
-                      onPress={() => setTipoProblema(item.valor)}
-                    >
-                      <Ionicons
-                        name={item.icon}
-                        size={22}
-                        color={selecionado ? item.cor : '#64748b'}
-                      />
-                      <Text style={[styles.itemProblemaTitulo, selecionado && { color: item.cor }]}>
-                        {item.titulo}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-
-              {/* Descrição Detalhada */}
-              <Text style={styles.formLabel}>Descreva detalhadamente o que ocorre:</Text>
-              <TextInput
-                style={styles.inputArea}
-                placeholder="Ex: Desde as 14h a luz PON da ONU está piscando em vermelho e não há acesso à internet..."
-                placeholderTextColor="#94a3b8"
-                multiline
-                numberOfLines={4}
-                value={descricao}
-                onChangeText={setDescricao}
-                testID="input-descricao-os"
-              />
-
-              {/* Anexo de Foto do Roteador / ONU (Autodiagnóstico) */}
-              <Text style={styles.formLabel}>Foto do Roteador / ONU (Autodiagnóstico):</Text>
-              <TouchableOpacity
-                style={[styles.btnAnexarFoto, fotoAnexada && styles.btnAnexarFotoAtivo]}
-                onPress={handleTirarFotoCelular}
-                testID="btn-anexar-foto-roteador"
-              >
-                <Ionicons
-                  name={fotoAnexada ? 'checkmark-circle' : 'camera-outline'}
-                  size={20}
-                  color={fotoAnexada ? '#10b981' : '#0284c7'}
-                />
-                <Text
-                  style={[
-                    styles.btnAnexarFotoText,
-                    fotoAnexada && { color: '#10b981', fontWeight: '700' },
-                  ]}
+                <View style={{ flex: 1, marginRight: 8 }}>
+                  <Text style={styles.modalTitulo}>Abrir Chamado Técnico</Text>
+                  <Text style={styles.modalSubtitulo}>Informe o problema para nossa equipe</Text>
+                </View>
+                <TouchableOpacity
+                  onPress={() => setModalNovoChamado(false)}
+                  style={styles.modalCloseBtn}
+                  accessibilityLabel="Fechar modal"
                 >
-                  {fotoAnexada
-                    ? `Foto do Roteador Anexada (${fotoCapturada?.tamanhoKb || 620} KB)`
-                    : 'Tirar Foto das Luzes do Roteador / ONU'}
-                </Text>
-              </TouchableOpacity>
-
-              {/* Botão para Câmera Real do Celular */}
-              <TouchableOpacity
-                style={styles.btnCameraClienteReal}
-                onPress={handleTirarFotoCelular}
-                testID="btn-abrir-camera-cliente"
-              >
-                <Ionicons name="camera" size={16} color="#0284c7" />
-                <Text style={styles.btnCameraClienteRealText}>
-                  {fotoAnexada ? 'Fotografar Novamente com a Câmera do Celular' : 'Abrir Câmera do Celular'}
-                </Text>
-              </TouchableOpacity>
-
-              {/* Miniatura da Foto Anexada com Badge de Corte e Compressão */}
-              {fotoAnexada && fotoCapturada?.uri && (
-                <View style={styles.previewFotoContainer}>
-                  <Image source={{ uri: fotoCapturada.uri }} style={styles.previewFotoMini} />
-                  <View style={{ flex: 1, marginLeft: 10 }}>
-                    <Text style={styles.previewFotoTitulo}>Foto Pronta para Envio ✂️</Text>
-                    <Text style={styles.previewFotoSub}>
-                      {fotoCapturada.tamanhoKb} KB • Cortada & Comprimida (RNF09 &lt;= 1 MB)
-                    </Text>
-                  </View>
-                  <TouchableOpacity
-                    onPress={handleTirarFotoCelular}
-                    style={{ padding: 6, marginRight: 4 }}
-                    testID="btn-recortar-foto-cliente"
-                    accessibilityLabel="Recortar ou fotografar novamente"
-                  >
-                    <Ionicons name="crop" size={18} color="#0284c7" />
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={handleRemoverFoto}
-                    style={{ padding: 6 }}
-                    testID="btn-remover-foto-cliente"
-                    accessibilityLabel="Remover foto"
-                  >
-                    <Ionicons name="trash-outline" size={18} color="#ef4444" />
-                  </TouchableOpacity>
-                </View>
-              )}
-
-              {/* Geolocalização GPS do Ponto de Atendimento com Mapa Visual */}
-              <Text style={styles.formLabel}>Ponto de Atendimento (Localização no Mapa):</Text>
-              <View style={styles.gpsCardCliente} testID="box-gps-cliente">
-                <MapaVisualCobertura
-                  latitude={coordenadasGps.latitude}
-                  longitude={coordenadasGps.longitude}
-                  coberto={coordenadasGps.coberto}
-                  zonaAtendida={coordenadasGps.zonaAtendida}
-                  mensagem={coordenadasGps.mensagem}
-                  onChangeCoordenadas={({ latitude, longitude }) => {
-                    const useCase = new VerificarCoberturaUseCase(sharedAreaRepo);
-                    useCase.execute({ latitude, longitude }).then((res) => {
-                      setCoordenadasGps({
-                        latitude,
-                        longitude,
-                        coberto: res.coberto,
-                        zonaAtendida: res.zonaAtendida,
-                        precisao: 5,
-                        status: 'OBTIDO',
-                        mensagem: res.mensagem,
-                      });
-                    });
-                  }}
-                  expandido={mapaExpandido}
-                  onToggleExpandir={setMapaExpandido}
-                  onExpandirMapa={() => setMapaExpandido(true)}
-                  altura={200}
-                />
-
-                <View style={styles.gpsRowCliente}>
-                  <TouchableOpacity
-                    style={styles.btnGpsCliente}
-                    onPress={handleObterGps}
-                    testID="btn-obter-gps-cliente"
-                  >
-                    {coordenadasGps.status === 'BUSCANDO' ? (
-                      <ActivityIndicator size="small" color="#0284c7" />
-                    ) : (
-                      <>
-                        <Ionicons name="locate" size={14} color="#0284c7" />
-                        <Text style={styles.btnGpsClienteText}>Atualizar Meu GPS</Text>
-                      </>
-                    )}
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={styles.btnAbrirMapaCliente}
-                    onPress={() => setMapaExpandido(true)}
-                    testID="btn-abrir-mapa-cliente"
-                  >
-                    <Ionicons name="expand" size={14} color="#0284c7" />
-                    <Text style={styles.btnAbrirMapaClienteText}>Expandir Mapa ⛶</Text>
-                  </TouchableOpacity>
-                </View>
-
-                <Text style={styles.gpsSubCliente}>
-                  Ponto de atendimento georreferenciado e vinculado ao chamado para deslocamento do técnico.
-                </Text>
+                  <Ionicons name="close" size={22} color="#64748b" />
+                </TouchableOpacity>
               </View>
 
-              {/* Botão de Enviar */}
-              <TouchableOpacity
-                style={[styles.btnConfirmarAbertura, criandoOS && { opacity: 0.6 }]}
-                onPress={handleAbrirChamado}
-                disabled={criandoOS}
-                testID="btn-confirmar-abrir-os"
-              >
-                {criandoOS ? (
-                  <ActivityIndicator color="#ffffff" />
-                ) : (
-                  <>
-                    <Ionicons name="paper-plane-outline" size={20} color="#ffffff" />
-                    <Text style={styles.btnConfirmarAberturaText}>Enviar Chamado</Text>
-                  </>
+              <ScrollView showsVerticalScrollIndicator={false} style={styles.modalForm}>
+                {/* Seleção do Tipo de Problema */}
+                <Text style={styles.formLabel}>Qual o problema com sua conexão?</Text>
+                <View style={styles.gridProblemas}>
+                  {OPCOES_PROBLEMA.map((item) => {
+                    const selecionado = tipoProblema === item.valor;
+                    return (
+                      <TouchableOpacity
+                        key={item.valor}
+                        style={[
+                          styles.itemProblema,
+                          selecionado && { borderColor: item.cor, backgroundColor: '#f8fafc' },
+                        ]}
+                        onPress={() => setTipoProblema(item.valor)}
+                      >
+                        <Ionicons
+                          name={item.icon}
+                          size={22}
+                          color={selecionado ? item.cor : '#64748b'}
+                        />
+                        <Text style={[styles.itemProblemaTitulo, selecionado && { color: item.cor }]}>
+                          {item.titulo}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+
+                {/* Descrição Detalhada */}
+                <Text style={styles.formLabel}>Descreva detalhadamente o que ocorre:</Text>
+                <TextInput
+                  style={styles.inputArea}
+                  placeholder="Ex: Desde as 14h a luz PON da ONU está piscando em vermelho e não há acesso à internet..."
+                  placeholderTextColor="#94a3b8"
+                  multiline
+                  numberOfLines={4}
+                  value={descricao}
+                  onChangeText={setDescricao}
+                  testID="input-descricao-os"
+                />
+
+                {/* Anexo de Foto do Roteador / ONU (Autodiagnóstico) */}
+                <Text style={styles.formLabel}>Foto do Roteador / ONU (Autodiagnóstico):</Text>
+                <TouchableOpacity
+                  style={[styles.btnAnexarFoto, fotoAnexada && styles.btnAnexarFotoAtivo]}
+                  onPress={handleTirarFotoCelular}
+                  testID="btn-anexar-foto-roteador"
+                >
+                  <Ionicons
+                    name={fotoAnexada ? 'checkmark-circle' : 'camera-outline'}
+                    size={20}
+                    color={fotoAnexada ? '#10b981' : '#0284c7'}
+                  />
+                  <Text
+                    style={[
+                      styles.btnAnexarFotoText,
+                      fotoAnexada && { color: '#10b981', fontWeight: '700' },
+                    ]}
+                  >
+                    {fotoAnexada
+                      ? `Foto do Roteador Anexada (${fotoCapturada?.tamanhoKb || 620} KB)`
+                      : 'Tirar Foto das Luzes do Roteador / ONU'}
+                  </Text>
+                </TouchableOpacity>
+
+                {/* Botão para Câmera Real do Celular */}
+                <TouchableOpacity
+                  style={styles.btnCameraClienteReal}
+                  onPress={handleTirarFotoCelular}
+                  testID="btn-abrir-camera-cliente"
+                >
+                  <Ionicons name="camera" size={16} color="#0284c7" />
+                  <Text style={styles.btnCameraClienteRealText}>
+                    {fotoAnexada ? 'Fotografar Novamente com a Câmera do Celular' : 'Abrir Câmera do Celular'}
+                  </Text>
+                </TouchableOpacity>
+
+                {/* Miniatura da Foto Anexada com Badge de Corte e Compressão */}
+                {fotoAnexada && fotoCapturada?.uri && (
+                  <View style={styles.previewFotoContainer}>
+                    <Image source={{ uri: fotoCapturada.uri }} style={styles.previewFotoMini} />
+                    <View style={{ flex: 1, marginLeft: 10 }}>
+                      <Text style={styles.previewFotoTitulo}>Foto Pronta para Envio ✂️</Text>
+                      <Text style={styles.previewFotoSub}>
+                        {fotoCapturada.tamanhoKb} KB • Cortada & Comprimida (RNF09 &lt;= 1 MB)
+                      </Text>
+                    </View>
+                    <TouchableOpacity
+                      onPress={handleTirarFotoCelular}
+                      style={{ padding: 6, marginRight: 4 }}
+                      testID="btn-recortar-foto-cliente"
+                      accessibilityLabel="Recortar ou fotografar novamente"
+                    >
+                      <Ionicons name="crop" size={18} color="#0284c7" />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={handleRemoverFoto}
+                      style={{ padding: 6 }}
+                      testID="btn-remover-foto-cliente"
+                      accessibilityLabel="Remover foto"
+                    >
+                      <Ionicons name="trash-outline" size={18} color="#ef4444" />
+                    </TouchableOpacity>
+                  </View>
                 )}
-              </TouchableOpacity>
-            </ScrollView>
+
+                {/* Geolocalização GPS do Ponto de Atendimento com Mapa Visual */}
+                <Text style={styles.formLabel}>Ponto de Atendimento (Localização no Mapa):</Text>
+                <View style={styles.gpsCardCliente} testID="box-gps-cliente">
+                  <MapaVisualCobertura
+                    latitude={coordenadasGps.latitude}
+                    longitude={coordenadasGps.longitude}
+                    coberto={coordenadasGps.coberto}
+                    zonaAtendida={coordenadasGps.zonaAtendida}
+                    mensagem={coordenadasGps.mensagem}
+                    onChangeCoordenadas={({ latitude, longitude }) => {
+                      const useCase = new VerificarCoberturaUseCase(sharedAreaRepo);
+                      useCase.execute({ latitude, longitude }).then((res) => {
+                        setCoordenadasGps({
+                          latitude,
+                          longitude,
+                          coberto: res.coberto,
+                          zonaAtendida: res.zonaAtendida,
+                          precisao: 5,
+                          status: 'OBTIDO',
+                          mensagem: res.mensagem,
+                        });
+                      });
+                    }}
+                    expandido={mapaExpandido}
+                    onToggleExpandir={setMapaExpandido}
+                    onExpandirMapa={() => setMapaExpandido(true)}
+                    altura={240}
+                  />
+
+                  <View style={styles.gpsRowCliente}>
+                    <TouchableOpacity
+                      style={styles.btnGpsCliente}
+                      onPress={handleObterGps}
+                      testID="btn-obter-gps-cliente"
+                    >
+                      {coordenadasGps.status === 'BUSCANDO' ? (
+                        <ActivityIndicator size="small" color="#0284c7" />
+                      ) : (
+                        <>
+                          <Ionicons name="locate" size={14} color="#0284c7" />
+                          <Text style={styles.btnGpsClienteText}>Atualizar Meu GPS</Text>
+                        </>
+                      )}
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      style={styles.btnAbrirMapaCliente}
+                      onPress={() => setMapaExpandido(true)}
+                      testID="btn-abrir-mapa-cliente"
+                    >
+                      <Ionicons name="expand" size={14} color="#0284c7" />
+                      <Text style={styles.btnAbrirMapaClienteText}>Expandir Mapa ⛶</Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  <Text style={styles.gpsSubCliente}>
+                    Ponto de atendimento georreferenciado e vinculado ao chamado para deslocamento do técnico.
+                  </Text>
+                </View>
+
+                {/* Botão de Enviar */}
+                <TouchableOpacity
+                  style={[styles.btnConfirmarAbertura, criandoOS && { opacity: 0.6 }]}
+                  onPress={handleAbrirChamado}
+                  disabled={criandoOS}
+                  testID="btn-confirmar-abrir-os"
+                >
+                  {criandoOS ? (
+                    <ActivityIndicator color="#ffffff" />
+                  ) : (
+                    <>
+                      <Ionicons name="paper-plane-outline" size={20} color="#ffffff" />
+                      <Text style={styles.btnConfirmarAberturaText}>Enviar Chamado</Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+              </ScrollView>
+            </View>
           </View>
-        </View>
       </Modal>
 
       {/* Modal 2: Detalhes da OS do Cliente & Verificação do Técnico */}
@@ -777,166 +777,166 @@ export function ClienteTabScreen({
             {selectedOs && (
               <>
                 <View style={styles.modalHeader}>
-                  <View>
-                    <Text style={styles.modalTitulo}>Ordem de Serviço #{selectedOs.idLocal}</Text>
-                    <Text style={styles.modalSubtitulo}>{selectedOs.tipoProblema.label}</Text>
-                  </View>
-                  <TouchableOpacity
-                    onPress={() => setSelectedOs(null)}
-                    style={styles.modalCloseBtn}
-                  >
-                    <Ionicons name="close" size={22} color="#64748b" />
-                  </TouchableOpacity>
-                </View>
-
-                <ScrollView showsVerticalScrollIndicator={false} style={styles.modalForm}>
-                  {/* Status do Técnico Atribuído */}
-                  {(() => {
-                    const tecInfo = getTecnicoInfo(selectedOs.tecnicoId);
-                    return (
-                      <View
-                        style={[
-                          styles.detalheTecnicoCard,
-                          tecInfo.atribuido ? styles.detalheTecnicoAtribuido : styles.detalheTecnicoPendente,
-                        ]}
-                        testID="modal-tecnico-detalhes"
-                      >
-                        <Ionicons
-                          name={tecInfo.atribuido ? 'shield-checkmark' : 'alert-circle'}
-                          size={24}
-                          color={tecInfo.atribuido ? '#0284c7' : '#b45309'}
-                        />
-                        <View style={{ flex: 1, marginLeft: 10 }}>
-                          <Text style={styles.detalheTecnicoRotulo}>
-                            {tecInfo.atribuido ? 'TÉCNICO ATRIBUÍDO' : 'AGUARDANDO ATRIBUIÇÃO'}
-                          </Text>
-                          <Text style={styles.detalheTecnicoNomePrincipal}>{tecInfo.nome}</Text>
-                          <Text style={styles.detalheTecnicoSub}>{tecInfo.funcao}</Text>
-                          <Text style={styles.detalheTecnicoContato}>Contato: {tecInfo.telefone}</Text>
-                        </View>
-                      </View>
-                    );
-                  })()}
-
-                  {/* Relato do Problema */}
-                  <View style={styles.blocoDetalhe}>
-                    <Text style={styles.blocoDetalheTitulo}>Descrição Relatada:</Text>
-                    <Text style={styles.blocoDetalheTexto}>{selectedOs.descricao}</Text>
-                  </View>
-
-                  {/* Localização GPS do Chamado */}
-                  {selectedOs.coordenadas && (
-                    <View style={styles.blocoDetalhe}>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-                        <Ionicons name="location" size={16} color="#0284c7" />
-                        <Text style={styles.blocoDetalheTitulo}>Localização do Atendimento (GPS):</Text>
-                      </View>
-                      <Text style={styles.blocoDetalheTexto}>
-                        Lat: {selectedOs.coordenadas.latitude.toFixed(4)} | Lng: {selectedOs.coordenadas.longitude.toFixed(4)} • Coqueiral/MG
-                      </Text>
+                    <View style={{ flex: 1, marginRight: 8 }}>
+                      <Text style={styles.modalTitulo}>Ordem de Serviço #{selectedOs.idLocal}</Text>
+                      <Text style={styles.modalSubtitulo}>{selectedOs.tipoProblema.label}</Text>
                     </View>
-                  )}
+                    <TouchableOpacity
+                      onPress={() => setSelectedOs(null)}
+                      style={styles.modalCloseBtn}
+                    >
+                      <Ionicons name="close" size={22} color="#64748b" />
+                    </TouchableOpacity>
+                  </View>
 
-                  {/* Fotos Registradas na Ordem de Serviço */}
-                  {selectedOs.fotos && selectedOs.fotos.length > 0 && (
-                    <View style={styles.blocoDetalhe}>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 }}>
-                        <Ionicons name="images" size={16} color="#0284c7" />
-                        <Text style={styles.blocoDetalheTitulo}>
-                          Fotos Registradas na OS ({selectedOs.fotos.length}):
-                        </Text>
-                      </View>
-                      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexDirection: 'row' }}>
-                        {selectedOs.fotos.map((f) => (
-                          <View key={f.id} style={styles.fotoThumbCard}>
-                            <Image
-                              source={{ uri: f.fotoLocalPath }}
-                              style={styles.fotoThumbImage}
-                              resizeMode="cover"
-                            />
-                            <Text style={styles.fotoThumbTipo}>
-                              {f.tipo === 'CLIENTE_ROTEADOR' ? 'Foto da ONU' : 'Foto do Reparo'}
+                  <ScrollView showsVerticalScrollIndicator={false} style={styles.modalForm}>
+                    {/* Status do Técnico Atribuído */}
+                    {(() => {
+                      const tecInfo = getTecnicoInfo(selectedOs.tecnicoId);
+                      return (
+                        <View
+                          style={[
+                            styles.detalheTecnicoCard,
+                            tecInfo.atribuido ? styles.detalheTecnicoAtribuido : styles.detalheTecnicoPendente,
+                          ]}
+                          testID="modal-tecnico-detalhes"
+                        >
+                          <Ionicons
+                            name={tecInfo.atribuido ? 'shield-checkmark' : 'alert-circle'}
+                            size={24}
+                            color={tecInfo.atribuido ? '#0284c7' : '#b45309'}
+                          />
+                          <View style={{ flex: 1, marginLeft: 10 }}>
+                            <Text style={styles.detalheTecnicoRotulo}>
+                              {tecInfo.atribuido ? 'TÉCNICO ATRIBUÍDO' : 'AGUARDANDO ATRIBUIÇÃO'}
                             </Text>
-                            <Text style={styles.fotoThumbKb}>{f.tamanhoKb} KB</Text>
+                            <Text style={styles.detalheTecnicoNomePrincipal}>{tecInfo.nome}</Text>
+                            <Text style={styles.detalheTecnicoSub}>{tecInfo.funcao}</Text>
+                            <Text style={styles.detalheTecnicoContato}>Contato: {tecInfo.telefone}</Text>
                           </View>
-                        ))}
-                      </ScrollView>
-                    </View>
-                  )}
+                        </View>
+                      );
+                    })()}
 
-                  {/* Se houver laudo de fechamento */}
-                  {selectedOs.parecerTecnico && (
-                    <View style={[styles.blocoDetalhe, { backgroundColor: '#f0fdf4', borderColor: '#bbf7d0' }]}>
-                      <Text style={[styles.blocoDetalheTitulo, { color: '#15803d' }]}>
-                        Resolução & Parecer Técnico:
-                      </Text>
-                      <Text style={[styles.blocoDetalheTexto, { color: '#166534' }]}>
-                        {selectedOs.parecerTecnico}
-                      </Text>
+                    {/* Relato do Problema */}
+                    <View style={styles.blocoDetalhe}>
+                      <Text style={styles.blocoDetalheTitulo}>Descrição Relatada:</Text>
+                      <Text style={styles.blocoDetalheTexto}>{selectedOs.descricao}</Text>
                     </View>
-                  )}
 
-                  {/* Chat / Mensagens com a Central CJnet */}
-                  <View style={styles.chatSecao}>
-                    <Text style={styles.blocoDetalheTitulo}>
-                      Conversa com a Central CJnet ({mensagensOS.length})
-                    </Text>
-                    {mensagensOS.length === 0 ? (
-                      <Text style={styles.chatVazioText}>
-                        Ainda não há mensagens nesta ordem de serviço.
-                      </Text>
-                    ) : (
-                      <View style={styles.chatLista}>
-                        {mensagensOS.map((msg) => {
-                          const isMinha = msg.remetenteId === activeClienteId;
-                          return (
-                            <View
-                              key={msg.id}
-                              style={[
-                                styles.chatBolha,
-                                isMinha ? styles.chatBolhaCliente : styles.chatBolhaAdmin,
-                              ]}
-                            >
-                              <Text style={styles.chatAutor}>
-                                {msg.remetenteNome} ({msg.papel})
-                              </Text>
-                              <Text style={styles.chatTexto}>{msg.texto}</Text>
-                              <Text style={styles.chatHora}>
-                                {new Date(msg.createdAt).toLocaleTimeString('pt-BR', {
-                                  hour: '2-digit',
-                                  minute: '2-digit',
-                                })}
-                              </Text>
-                            </View>
-                          );
-                        })}
+                    {/* Localização GPS do Chamado */}
+                    {selectedOs.coordenadas && (
+                      <View style={styles.blocoDetalhe}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                          <Ionicons name="location" size={16} color="#0284c7" />
+                          <Text style={styles.blocoDetalheTitulo}>Localização do Atendimento (GPS):</Text>
+                        </View>
+                        <Text style={styles.blocoDetalheTexto}>
+                          Lat: {selectedOs.coordenadas.latitude.toFixed(4)} | Lng: {selectedOs.coordenadas.longitude.toFixed(4)} • Coqueiral/MG
+                        </Text>
                       </View>
                     )}
 
-                    {/* Enviar Mensagem para a Central */}
-                    <View style={styles.chatInputRow}>
-                      <TextInput
-                        style={styles.chatInput}
-                        placeholder="Enviar mensagem para a central..."
-                        placeholderTextColor="#94a3b8"
-                        value={novaMensagem}
-                        onChangeText={setNovaMensagem}
-                        testID="input-mensagem-cliente"
-                      />
-                      <TouchableOpacity
-                        style={styles.btnChatEnviar}
-                        onPress={handleEnviarMensagem}
-                        testID="btn-enviar-mensagem-cliente"
-                      >
-                        <Ionicons name="send" size={18} color="#ffffff" />
-                      </TouchableOpacity>
+                    {/* Fotos Registradas na Ordem de Serviço */}
+                    {selectedOs.fotos && selectedOs.fotos.length > 0 && (
+                      <View style={styles.blocoDetalhe}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+                          <Ionicons name="images" size={16} color="#0284c7" />
+                          <Text style={styles.blocoDetalheTitulo}>
+                            Fotos Registradas na OS ({selectedOs.fotos.length}):
+                          </Text>
+                        </View>
+                        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexDirection: 'row' }}>
+                          {selectedOs.fotos.map((f) => (
+                            <View key={f.id} style={styles.fotoThumbCard}>
+                              <Image
+                                source={{ uri: f.fotoLocalPath }}
+                                style={styles.fotoThumbImage}
+                                resizeMode="cover"
+                              />
+                              <Text style={styles.fotoThumbTipo}>
+                                {f.tipo === 'CLIENTE_ROTEADOR' ? 'Foto da ONU' : 'Foto do Reparo'}
+                              </Text>
+                              <Text style={styles.fotoThumbKb}>{f.tamanhoKb} KB</Text>
+                            </View>
+                          ))}
+                        </ScrollView>
+                      </View>
+                    )}
+
+                    {/* Se houver laudo de fechamento */}
+                    {selectedOs.parecerTecnico && (
+                      <View style={[styles.blocoDetalhe, { backgroundColor: '#f0fdf4', borderColor: '#bbf7d0' }]}>
+                        <Text style={[styles.blocoDetalheTitulo, { color: '#15803d' }]}>
+                          Resolução & Parecer Técnico:
+                        </Text>
+                        <Text style={[styles.blocoDetalheTexto, { color: '#166534' }]}>
+                          {selectedOs.parecerTecnico}
+                        </Text>
+                      </View>
+                    )}
+
+                    {/* Chat / Mensagens com a Central CJnet */}
+                    <View style={styles.chatSecao}>
+                      <Text style={styles.blocoDetalheTitulo}>
+                        Conversa com a Central CJnet ({mensagensOS.length})
+                      </Text>
+                      {mensagensOS.length === 0 ? (
+                        <Text style={styles.chatVazioText}>
+                          Ainda não há mensagens nesta ordem de serviço.
+                        </Text>
+                      ) : (
+                        <View style={styles.chatLista}>
+                          {mensagensOS.map((msg) => {
+                            const isMinha = msg.remetenteId === activeClienteId;
+                            return (
+                              <View
+                                key={msg.id}
+                                style={[
+                                  styles.chatBolha,
+                                  isMinha ? styles.chatBolhaCliente : styles.chatBolhaAdmin,
+                                ]}
+                              >
+                                <Text style={styles.chatAutor}>
+                                  {msg.remetenteNome} ({msg.papel})
+                                </Text>
+                                <Text style={styles.chatTexto}>{msg.texto}</Text>
+                                <Text style={styles.chatHora}>
+                                  {new Date(msg.createdAt).toLocaleTimeString('pt-BR', {
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                  })}
+                                </Text>
+                              </View>
+                            );
+                          })}
+                        </View>
+                      )}
+
+                      {/* Enviar Mensagem para a Central */}
+                      <View style={styles.chatInputRow}>
+                        <TextInput
+                          style={styles.chatInput}
+                          placeholder="Enviar mensagem para a central..."
+                          placeholderTextColor="#94a3b8"
+                          value={novaMensagem}
+                          onChangeText={setNovaMensagem}
+                          testID="input-mensagem-cliente"
+                        />
+                        <TouchableOpacity
+                          style={styles.btnChatEnviar}
+                          onPress={handleEnviarMensagem}
+                          testID="btn-enviar-mensagem-cliente"
+                        >
+                          <Ionicons name="send" size={18} color="#ffffff" />
+                        </TouchableOpacity>
+                      </View>
                     </View>
-                  </View>
-                </ScrollView>
-              </>
+                  </ScrollView>
+                </>
             )}
+              </View>
           </View>
-        </View>
       </Modal>
 
       {/* Modal de Câmera Nativa Expo v57 */}
@@ -987,6 +987,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 8,
     marginBottom: 8,
   },
   badgeCliente: {
@@ -1070,6 +1072,8 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   secaoTitulo: {
+    flex: 1,
+    flexShrink: 1,
     fontSize: 17,
     fontWeight: '700',
     color: '#0f172a',
@@ -1126,6 +1130,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 6,
   },
   protocoloTag: {
     backgroundColor: '#f1f5f9',
@@ -1208,6 +1214,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 8,
     marginTop: 12,
     paddingTop: 10,
     borderTopWidth: 1,
@@ -1216,6 +1224,7 @@ const styles = StyleSheet.create({
   cardData: {
     fontSize: 11,
     color: '#94a3b8',
+    flexShrink: 1,
   },
   cardAcao: {
     flexDirection: 'row',
@@ -1282,12 +1291,14 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   itemProblema: {
-    width: '48%',
+    flexBasis: '47%',
+    flexGrow: 1,
     borderWidth: 1,
     borderColor: '#e2e8f0',
     borderRadius: 8,
     padding: 10,
     alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: '#ffffff',
   },
   itemProblemaTitulo: {
@@ -1296,6 +1307,7 @@ const styles = StyleSheet.create({
     color: '#334155',
     marginTop: 4,
     textAlign: 'center',
+    width: '100%',
   },
   inputArea: {
     borderWidth: 1,
@@ -1324,6 +1336,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#ecfdf5',
   },
   btnAnexarFotoText: {
+    flex: 1,
+    flexShrink: 1,
     fontSize: 12,
     color: '#0284c7',
     fontWeight: '600',
@@ -1478,6 +1492,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(2, 132, 199, 0.3)',
     borderRadius: 10,
     paddingVertical: 9,
+    paddingHorizontal: 12,
     marginTop: 8,
     gap: 6,
   },
@@ -1485,6 +1500,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '700',
     color: '#0284c7',
+    flexShrink: 1,
+    textAlign: 'center',
   },
   previewFotoContainer: {
     flexDirection: 'row',
@@ -1524,6 +1541,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 4,
   },
   gpsCoordenadasClienteText: {
     fontSize: 12,
@@ -1534,20 +1554,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#e0f2fe',
-    paddingHorizontal: 8,
-    paddingVertical: 5,
-    borderRadius: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+    borderRadius: 8,
     gap: 4,
   },
   btnGpsClienteText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '700',
     color: '#0284c7',
   },
   gpsSubCliente: {
     fontSize: 10,
     color: '#64748b',
-    marginTop: 4,
+    marginTop: 6,
+    lineHeight: 14,
   },
   fotoThumbCard: {
     width: 110,
@@ -1626,14 +1647,13 @@ const styles = StyleSheet.create({
     borderColor: '#bae6fd',
     borderWidth: 1,
     borderRadius: 8,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    marginTop: 10,
+    paddingVertical: 7,
+    paddingHorizontal: 10,
     gap: 6,
   },
   btnAbrirMapaClienteText: {
     color: '#0284c7',
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '700',
   },
 });

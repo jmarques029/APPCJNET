@@ -398,6 +398,8 @@ const styles = StyleSheet.create({
   },
   demoButtonsRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
     gap: 8,
   },
   demoChip: {

@@ -258,8 +258,8 @@ export function HistoricoRelatoriosScreen({
                 {role === 'tecnico'
                   ? 'PAINEL DO TÉCNICO'
                   : role === 'admin'
-                  ? 'GESTÃO ADMINISTRATIVA'
-                  : `ÁREA DO CLIENTE • ${user?.name ? user.name.toUpperCase() : 'MEUS CHAMADOS'}`}
+                    ? 'GESTÃO ADMINISTRATIVA'
+                    : `ÁREA DO CLIENTE • ${user?.name ? user.name.toUpperCase() : 'MEUS CHAMADOS'}`}
               </Text>
             </View>
             <Text style={styles.headerTitle}>Histórico & Relatórios</Text>
@@ -267,8 +267,8 @@ export function HistoricoRelatoriosScreen({
               {role === 'tecnico'
                 ? 'Ordens de serviço sob sua responsabilidade técnica de campo'
                 : role === 'admin'
-                ? 'Painel geral de monitoramento e despacho de ordens da CJnet'
-                : 'Acompanhe as OSs abertas por você, o andamento em tempo real e o técnico atribuído'}
+                  ? 'Painel geral de monitoramento e despacho de ordens da CJnet'
+                  : 'Acompanhe as OSs abertas por você, o andamento em tempo real e o técnico atribuído'}
             </Text>
           </View>
         </View>
@@ -461,7 +461,7 @@ export function HistoricoRelatoriosScreen({
               <View style={styles.modalCard}>
                 {/* Header do Modal */}
                 <View style={styles.modalHeader}>
-                  <View>
+                  <View style={{ flex: 1, marginRight: 8 }}>
                     <Text style={styles.modalProtocoloLabel}>ORDEM DE SERVIÇO</Text>
                     <Text style={styles.modalProtocoloId}>#{selectedOs.idLocal}</Text>
                   </View>
@@ -587,7 +587,7 @@ export function HistoricoRelatoriosScreen({
                       <View style={styles.detalhesBox}>
                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                           <Ionicons name="location" size={16} color="#0284c7" />
-                          <Text style={{ fontSize: 13, color: '#0f172a', fontWeight: '600' }}>
+                          <Text style={{ flex: 1, flexShrink: 1, fontSize: 13, color: '#0f172a', fontWeight: '600' }}>
                             Lat: {selectedOs.coordenadas.latitude.toFixed(4)} | Lng: {selectedOs.coordenadas.longitude.toFixed(4)} • Coqueiral/MG
                           </Text>
                         </View>
@@ -725,6 +725,8 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   badgeTop: {
+    flex: 1,
+    flexShrink: 1,
     fontSize: 12,
     fontWeight: '700',
     color: '#0284c7',
@@ -858,10 +860,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
+    flexWrap: 'wrap',
+    gap: 8,
     marginBottom: 12,
   },
   protocoloBlock: {
     flexDirection: 'column',
+    flexShrink: 1,
   },
   protocoloLabel: {
     fontSize: 10,
@@ -940,6 +945,8 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   cardTecnicoText: {
+    flex: 1,
+    flexShrink: 1,
     fontSize: 12,
     fontWeight: '600',
     color: '#334155',
@@ -948,6 +955,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 8,
     borderTopWidth: 1,
     borderTopColor: '#f1f5f9',
     paddingTop: 10,
@@ -955,6 +964,7 @@ const styles = StyleSheet.create({
   osCardDataBlock: {
     flexDirection: 'row',
     alignItems: 'center',
+    flexShrink: 1,
   },
   osDataText: {
     fontSize: 12,
