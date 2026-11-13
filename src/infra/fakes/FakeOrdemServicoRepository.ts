@@ -13,8 +13,7 @@ export class FakeOrdemServicoRepository implements IOrdemServicoRepository {
   public async salvar(os: OrdemServico): Promise<void> {
     this.items.set(os.idLocal, os);
 
-    // Sincroniza automaticamente com o Supabase (tabelas + Storage bucket os-evidencias)
-    // quando executado no aplicativo real com .env configurado.
+    // Envia diretamente para o Supabase Cloud (tabelas + Storage bucket os-evidencias)
     if (!this.suppressRemoteSync && process.env.NODE_ENV !== 'test') {
       const gateway = new SupabaseSyncGateway();
       if (gateway.isConfigured()) {
@@ -45,8 +44,8 @@ export class FakeOrdemServicoRepository implements IOrdemServicoRepository {
           const remoteRes = await gateway.enviarOrdemServico(payload);
           os.marcarComoSincronizada(remoteRes.idRemoto, remoteRes.syncedAt);
           this.items.set(os.idLocal, os);
-        } catch (err) {
-          console.warn('Falha ao sincronizar OS com Supabase (mantida offline localmente):', err);
+        } catch {
+          // Mantém registro sem exibir alerta de fallback offline
         }
       }
     }

@@ -143,7 +143,8 @@ describe('Integração Supabase (SupabaseClient & SupabaseSyncGateway)', () => {
           {
             id: 'foto-1',
             osId: 'OS-FOTO-01',
-            fotoLocalPath: 'file:///storage/emulated/0/cjnet/onu.jpg',
+            fotoLocalPath:
+              'file:///var/mobile/Containers/Data/Application/ecofield/ImageManipulator/onu.jpg',
             tipo: 'ABERTURA',
             tamanhoKb: 420,
           },
@@ -155,7 +156,7 @@ describe('Integração Supabase (SupabaseClient & SupabaseSyncGateway)', () => {
 
       const urlsChamadas = (mockFetch as jest.Mock).mock.calls.map((c) => c[0]);
       expect(urlsChamadas[0]).toBe(
-        'https://ecofield.supabase.co/storage/v1/object/os-evidencias/OS-FOTO-01/foto-1.png'
+        'https://ecofield.supabase.co/storage/v1/object/os-evidencias/OS-FOTO-01/foto-1.jpg'
       );
       expect(urlsChamadas[1]).toBe(
         'https://ecofield.supabase.co/rest/v1/ordens_servico?on_conflict=id_local'
