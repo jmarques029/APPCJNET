@@ -160,14 +160,8 @@ ON CONFLICT (id) DO UPDATE SET
 
 DO $$
 BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_policies
-    WHERE schemaname = 'storage' AND tablename = 'objects' AND policyname = 'Leitura publica os-evidencias'
-  ) THEN
-    CREATE POLICY "Leitura publica os-evidencias"
-      ON storage.objects FOR SELECT
-      USING (bucket_id = 'os-evidencias');
-  END IF;
+  -- Remove a policy ampla de SELECT (buckets públicos já servem URLs públicas sem listar arquivos)
+  DROP POLICY IF EXISTS "Leitura publica os-evidencias" ON storage.objects;
 
   IF NOT EXISTS (
     SELECT 1 FROM pg_policies

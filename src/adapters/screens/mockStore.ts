@@ -202,10 +202,12 @@ export function initializeSharedStore(force = false): void {
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 5),
   });
 
+  sharedOsRepo.setSuppressRemoteSync(true);
   sharedOsRepo.salvar(os1);
   sharedOsRepo.salvar(os2);
   sharedOsRepo.salvar(os3);
   sharedOsRepo.salvar(osOutroCliente);
+  sharedOsRepo.setSuppressRemoteSync(false);
 
   // 5. Zonas de Cobertura de Fibra Óptica CJnet (Coqueiral/MG)
   const zonaCentro = new AreaCobertura({
