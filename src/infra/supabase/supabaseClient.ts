@@ -124,6 +124,44 @@ export class SupabaseClient {
   }
 
   /**
+   * Faz upload/atualização de um arquivo no bucket do Supabase Storage (/storage/v1/object/{bucket}/{path}).
+   */
+  public async uploadStorageObject(
+    filePath: string,
+    body: Blob | ArrayBuffer | Uint8Array | string,
+    contentType: string = 'image/jpeg',
+    bucket?: string
+  ): Promise<string> {
+    if (!this.isConfigured()) {
+      throw new Error(
+        'Supabase não configurado. Defina EXPO_PUBLIC_SUPABASE_URL e EXPO_PUBLIC_SUPABASE_ANON_KEY no arquivo .env.'
+      );
+    }
+
+    const targetBucket = bucket ?? this.config.storageBucket;
+    const cleanPath = filePath.replace(/^\/+/, '');
+    const endpoint = `${this.config.url}/storage/v1/object/${targetBucket}/${cleanPath}`;
+
+    const response = await this.fetchFn(endpoint, {
+      method: 'POST',
+      headers: {
+        apikey: this.config.anonKey,
+        Authorization: `Bearer ${this.config.anonKey}`,
+        'Content-Type': contentType,
+        'x-upsert': 'true',
+      },
+      body: body as any,
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Erro Supabase Storage [${response.status}]: ${errorText}`);
+    }
+
+    return this.getPublicStorageUrl(cleanPath, targetBucket);
+  }
+
+  /**
    * Gera a URL pública de um arquivo armazenado no bucket do Supabase Storage.
    */
   public getPublicStorageUrl(filePath: string, bucket?: string): string {
