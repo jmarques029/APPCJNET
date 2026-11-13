@@ -123,7 +123,30 @@ export class OfflineSyncManager {
         let syncedAt = new Date();
 
         if (this.remoteGateway) {
-          const remoteRes = await this.remoteGateway.enviarOrdemServico(payload);
+          const enrichedPayload = {
+            idLocal: osLocal.idLocal,
+            clienteId: osLocal.clienteId,
+            tecnicoId: osLocal.tecnicoId,
+            tipoProblema: osLocal.tipoProblema.value,
+            descricao: osLocal.descricao,
+            status: osLocal.status.value,
+            parecerTecnico: osLocal.parecerTecnico,
+            latitude: osLocal.coordenadas?.latitude ?? null,
+            longitude: osLocal.coordenadas?.longitude ?? null,
+            fotos: osLocal.fotos.map((f) => ({
+              id: f.id,
+              osId: f.osId,
+              fotoLocalPath: f.fotoLocalPath,
+              fotoRemotaUrl: f.fotoRemotaUrl,
+              tipo: f.tipo,
+              tamanhoKb: f.tamanhoKb,
+              enviada: f.enviada,
+              createdAt: f.createdAt.toISOString(),
+            })),
+            dataFechamento: osLocal.dataFechamento ? osLocal.dataFechamento.toISOString() : null,
+            ...payload,
+          };
+          const remoteRes = await this.remoteGateway.enviarOrdemServico(enrichedPayload);
           idRemoto = remoteRes.idRemoto;
           syncedAt = remoteRes.syncedAt;
         } else {
@@ -133,6 +156,13 @@ export class OfflineSyncManager {
 
         osLocal.marcarComoSincronizada(idRemoto, syncedAt);
         await this.osRepo.salvar(osLocal);
+        break;
+      }
+
+      case 'os_fotos': {
+        if (this.remoteGateway?.sincronizarFoto) {
+          await this.remoteGateway.sincronizarFoto(payload);
+        }
         break;
       }
 

@@ -9,6 +9,7 @@ import {
   SqliteSyncQueueRepository,
   SqliteOrdemServicoRepository,
   OfflineSyncManager,
+  SupabaseSyncGateway,
 } from '@/infra';
 import 'react-native-reanimated';
 
@@ -32,7 +33,8 @@ export default function RootLayout() {
         const db = await initDatabase();
         const sqRepo = new SqliteSyncQueueRepository(db);
         const osRepo = new SqliteOrdemServicoRepository(db);
-        const manager = new OfflineSyncManager(sqRepo, osRepo);
+        const supabaseGateway = new SupabaseSyncGateway();
+        const manager = new OfflineSyncManager(sqRepo, osRepo, supabaseGateway);
         setSyncQueueRepo(sqRepo);
         setSyncManager(manager);
       } catch (err) {
