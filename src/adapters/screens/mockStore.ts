@@ -22,6 +22,7 @@ import { FakeAreaCoberturaRepository } from '@/infra/fakes/FakeAreaCoberturaRepo
 import { FakePreCadastroRepository } from '@/infra/fakes/FakePreCadastroRepository';
 import { AreaCobertura } from '@/domain/entities/AreaCobertura';
 import { GeoCoordenadas } from '@/domain/value-objects/GeoCoordenadas';
+import { supabase } from '@/infra/supabase/supabaseClient';
 
 // Instâncias compartilhadas
 export const sharedPlanoRepo = new FakePlanoRepository();
@@ -295,6 +296,25 @@ export function enviarMensagemOS(
     createdAt: new Date(),
   };
   sharedMensagens.push(novaMsg);
+
+  if (process.env.NODE_ENV !== 'test' && supabase.isConfigured()) {
+    supabase
+      .upsert(
+        'mensagens_suporte',
+        {
+          id: novaMsg.id,
+          os_id: novaMsg.osId,
+          remetente_id: novaMsg.remetenteId,
+          remetente_nome: novaMsg.remetenteNome,
+          papel: novaMsg.papel,
+          texto: novaMsg.texto,
+          created_at: novaMsg.createdAt.toISOString(),
+        },
+        'id'
+      )
+      .catch((err) => console.warn('Erro ao sincronizar mensagem com Supabase:', err));
+  }
+
   return novaMsg;
 }
 

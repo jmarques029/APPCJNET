@@ -191,7 +191,7 @@ export function AtividadesFormScreen({
       } else {
         Alert.alert(
           'Chamado Aberto com Sucesso! 🎫',
-          `Protocolo: #${novaOS.idLocal}\n\nSua solicitação foi salva localmente e enviada para a fila de atendimento da CJnet em Coqueiral/MG.`,
+          `Protocolo: #${novaOS.idLocal}\n\nSua solicitação foi enviada e sincronizada em tempo real com o Supabase Cloud da CJnet em Coqueiral/MG.`,
           [
             {
               text: 'Ver no Histórico',
@@ -518,11 +518,11 @@ export function AtividadesFormScreen({
                 )}
               </TouchableOpacity>
 
-              {/* Mensagem de Confiabilidade Offline-First */}
+              {/* Mensagem de Conexão Online Supabase Cloud */}
               <View style={styles.offlineNotice}>
-                <Ionicons name="cloud-offline-outline" size={18} color="#64748b" />
+                <Ionicons name="cloud-done-outline" size={18} color="#059669" />
                 <Text style={styles.offlineNoticeText}>
-                  Modo Offline-First ativo: o chamado é gravado localmente no dispositivo e sincronizado automaticamente.
+                  Conectado ao Supabase Cloud: o chamado e as fotos são sincronizados em tempo real na nuvem da CJnet.
                 </Text>
               </View>
             </ScrollView>
@@ -752,18 +752,21 @@ export function AtividadesFormScreen({
   },
         offlineNotice: {
           flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#f1f5f9',
-        borderRadius: 12,
-        padding: 12,
-        marginTop: 18,
+          alignItems: 'center',
+          backgroundColor: '#ecfdf5',
+          borderWidth: 1,
+          borderColor: '#a7f3d0',
+          borderRadius: 12,
+          padding: 12,
+          marginTop: 18,
   },
         offlineNoticeText: {
           fontSize: 12,
-        color: '#64748b',
-        marginLeft: 8,
-        flex: 1,
-        lineHeight: 16,
+          color: '#065f46',
+          fontWeight: '600',
+          marginLeft: 8,
+          flex: 1,
+          lineHeight: 16,
   },
         btnCameraReal: {
           flexDirection: 'row',

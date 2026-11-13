@@ -12,9 +12,22 @@ export interface SupabaseConfig {
   storageBucket: string;
 }
 
+const DEFAULT_SUPABASE_URL = 'https://xexojvdyfojdlyyfnydb.supabase.co';
+const DEFAULT_SUPABASE_ANON_KEY =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhleG9qdmR5Zm9qZGx5eWZueWRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ1OTk1ODUsImV4cCI6MjExMDE3NTU4NX0.qqiuYG_At1sp9POPaeHkiqMxV8YUIqXkxQeKbZCSXSU';
+
 export function getSupabaseConfig(overrides?: Partial<SupabaseConfig>): SupabaseConfig {
-  const url = (overrides?.url ?? process.env.EXPO_PUBLIC_SUPABASE_URL ?? '').trim().replace(/\/+$/, '');
-  const anonKey = (overrides?.anonKey ?? process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? '').trim();
+  const rawUrl =
+    overrides && 'url' in overrides
+      ? overrides.url ?? ''
+      : process.env.EXPO_PUBLIC_SUPABASE_URL || DEFAULT_SUPABASE_URL;
+  const rawKey =
+    overrides && 'anonKey' in overrides
+      ? overrides.anonKey ?? ''
+      : process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || DEFAULT_SUPABASE_ANON_KEY;
+
+  const url = rawUrl.trim().replace(/\/+$/, '');
+  const anonKey = rawKey.trim();
   const storageBucket = (
     overrides?.storageBucket ??
     process.env.EXPO_PUBLIC_SUPABASE_STORAGE_BUCKET ??
