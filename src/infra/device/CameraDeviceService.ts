@@ -29,6 +29,19 @@ export interface OpcoesTratamentoImagem {
 }
 
 export class CameraDeviceService {
+  private static readonly base64Cache = new Map<string, string>();
+
+  static cacheBase64(uri: string, base64?: string | null): void {
+    if (uri && base64) {
+      const cleanBase64 = base64.includes(',') ? base64.split(',')[1] : base64;
+      this.base64Cache.set(uri, cleanBase64);
+    }
+  }
+
+  static getBase64(uri: string): string | undefined {
+    return this.base64Cache.get(uri);
+  }
+
   /**
    * Redimensiona e comprime a imagem para o tamanho ideal de envio (RNF09 <= 1024 KB).
    * Reduz resoluções excessivas de câmeras modernas (ex: 4000px) para largura máxima de 1200px,
@@ -37,13 +50,19 @@ export class CameraDeviceService {
   static async tratarEComprimirImagem(
     uriOriginal: string,
     larguraMax: number = 1200,
-    compressao: number = 0.7
-  ): Promise<{ uri: string; tamanhoKb: number }> {
+    compressao: number = 0.7,
+    base64Original?: string | null
+  ): Promise<{ uri: string; tamanhoKb: number; base64?: string }> {
     try {
+      if (base64Original) {
+        this.cacheBase64(uriOriginal, base64Original);
+      }
+
       if (process.env.NODE_ENV === 'test' || !uriOriginal.startsWith('file://')) {
         return {
           uri: uriOriginal,
           tamanhoKb: 380,
+          base64: base64Original ?? undefined,
         };
       }
 
@@ -53,18 +72,26 @@ export class CameraDeviceService {
         {
           compress: compressao,
           format: SaveFormat.JPEG,
+          base64: true,
         }
       );
+
+      const b64 = (manipulada as any).base64 || base64Original || undefined;
+      if (b64) {
+        this.cacheBase64(manipulada.uri, b64);
+      }
 
       return {
         uri: manipulada.uri,
         tamanhoKb: Math.min(650, Math.max(180, Math.floor(Math.random() * 120) + 280)),
+        base64: b64,
       };
     } catch (err) {
       console.warn('Erro ao comprimir com ImageManipulator, mantendo original:', err);
       return {
         uri: uriOriginal,
         tamanhoKb: 420,
+        base64: base64Original ?? undefined,
       };
     }
   }
@@ -97,6 +124,7 @@ export class CameraDeviceService {
         aspect: opcoes?.aspect ?? [4, 3],
         quality: opcoes?.compressao ?? 0.7,
         cameraType: ImagePicker.CameraType.back,
+        base64: true,
       });
 
       if (result.canceled || !result.assets || result.assets.length === 0) {
@@ -107,12 +135,16 @@ export class CameraDeviceService {
       }
 
       const asset = result.assets[0];
+      if (asset.base64) {
+        this.cacheBase64(asset.uri, asset.base64);
+      }
 
       // 3. Trata e comprime a foto para garantir tamanho ideal de envio
       const tratada = await this.tratarEComprimirImagem(
         asset.uri,
         opcoes?.larguraMax ?? 1200,
-        opcoes?.compressao ?? 0.7
+        opcoes?.compressao ?? 0.7,
+        asset.base64
       );
 
       return {
@@ -162,6 +194,7 @@ export class CameraDeviceService {
         allowsEditing: opcoes?.allowsEditing ?? true,
         aspect: opcoes?.aspect ?? [4, 3],
         quality: opcoes?.compressao ?? 0.7,
+        base64: true,
       });
 
       if (result.canceled || !result.assets || result.assets.length === 0) {
@@ -169,11 +202,15 @@ export class CameraDeviceService {
       }
 
       const asset = result.assets[0];
+      if (asset.base64) {
+        this.cacheBase64(asset.uri, asset.base64);
+      }
 
       const tratada = await this.tratarEComprimirImagem(
         asset.uri,
         opcoes?.larguraMax ?? 1200,
-        opcoes?.compressao ?? 0.7
+        opcoes?.compressao ?? 0.7,
+        asset.base64
       );
 
       return {

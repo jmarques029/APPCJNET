@@ -441,7 +441,11 @@ export function TecnicoTabScreen({
                         <Text style={styles.blocoProblemaTitulo}>Foto Anexada pelo Cliente:</Text>
                         <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 6, gap: 10 }}>
                           <Image
-                            source={{ uri: osParaFechar.fotos[0].fotoLocalPath }}
+                            source={{
+                              uri:
+                                osParaFechar.fotos[0].fotoRemotaUrl ||
+                                osParaFechar.fotos[0].fotoLocalPath,
+                            }}
                             style={{ width: 64, height: 64, borderRadius: 8, backgroundColor: '#0f172a' }}
                           />
                           <View style={{ flex: 1 }}>

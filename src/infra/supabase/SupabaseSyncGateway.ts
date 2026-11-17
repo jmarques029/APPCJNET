@@ -133,6 +133,9 @@ export class SupabaseSyncGateway implements IRemoteSyncGateway {
       return {
         idRemoto: saved?.id || `SUPABASE-${idLocal}`,
         syncedAt: saved?.synced_at ? new Date(saved.synced_at) : syncedAt,
+        fotosSincronizadas: fotosSincronizadas
+          .filter((f) => Boolean(f.fotoRemotaUrl))
+          .map((f) => ({ id: f.id, fotoRemotaUrl: f.fotoRemotaUrl })),
       };
     }
 

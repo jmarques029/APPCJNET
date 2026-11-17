@@ -604,7 +604,11 @@ export function HistoricoRelatoriosScreen({
                       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexDirection: 'row', marginBottom: 16 }}>
                         {selectedOs.fotos.map((f) => (
                           <View key={f.id} style={styles.fotoThumbHistorico}>
-                            <Image source={{ uri: f.fotoLocalPath }} style={styles.fotoThumbHistoricoImg} resizeMode="cover" />
+                            <Image
+                              source={{ uri: f.fotoRemotaUrl || f.fotoLocalPath }}
+                              style={styles.fotoThumbHistoricoImg}
+                              resizeMode="cover"
+                            />
                             <Text style={styles.fotoThumbHistoricoLabel}>
                               {f.tipo === 'CLIENTE_ROTEADOR' ? 'Foto da ONU' : 'Foto da Resolução'}
                             </Text>

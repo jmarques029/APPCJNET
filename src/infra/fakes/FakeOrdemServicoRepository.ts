@@ -43,6 +43,14 @@ export class FakeOrdemServicoRepository implements IOrdemServicoRepository {
 
           const remoteRes = await gateway.enviarOrdemServico(payload);
           os.marcarComoSincronizada(remoteRes.idRemoto, remoteRes.syncedAt);
+          if (remoteRes.fotosSincronizadas) {
+            for (const fSync of remoteRes.fotosSincronizadas) {
+              const fotoLocal = os.fotos.find((f) => f.id === fSync.id);
+              if (fotoLocal && fSync.fotoRemotaUrl) {
+                fotoLocal.marcarComoEnviada(fSync.fotoRemotaUrl);
+              }
+            }
+          }
           this.items.set(os.idLocal, os);
         } catch {
           // Mantém registro sem exibir alerta de fallback offline

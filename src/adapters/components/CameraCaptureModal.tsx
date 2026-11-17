@@ -52,11 +52,15 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
     try {
       if (cameraRef.current && typeof cameraRef.current.takePictureAsync === 'function') {
         const photo = await cameraRef.current.takePictureAsync({
-          quality: 0.8,
+          quality: 0.7,
           skipProcessing: false,
+          base64: true,
         });
 
         if (photo?.uri) {
+          if (photo.base64) {
+            CameraDeviceService.cacheBase64(photo.uri, photo.base64);
+          }
           // Calcula tamanho estimado proporcional ou dentro do limite <= 1 MB (RNF09)
           const tamanho = Math.min(
             980,

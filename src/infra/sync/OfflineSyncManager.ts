@@ -17,6 +17,7 @@ import type { IOrdemServicoRepository } from '@/domain/repositories/IOrdemServic
 export interface RemoteSyncResponse {
   idRemoto: string;
   syncedAt: Date;
+  fotosSincronizadas?: { id: string; fotoRemotaUrl: string }[];
 }
 
 export interface IRemoteSyncGateway {

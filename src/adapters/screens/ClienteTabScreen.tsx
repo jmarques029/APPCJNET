@@ -850,7 +850,7 @@ export function ClienteTabScreen({
                           {selectedOs.fotos.map((f) => (
                             <View key={f.id} style={styles.fotoThumbCard}>
                               <Image
-                                source={{ uri: f.fotoLocalPath }}
+                                source={{ uri: f.fotoRemotaUrl || f.fotoLocalPath }}
                                 style={styles.fotoThumbImage}
                                 resizeMode="cover"
                               />
